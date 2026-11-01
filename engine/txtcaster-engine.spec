@@ -166,6 +166,8 @@ a = Analysis(
     hookspath=[],
     runtime_hooks=[],
     excludes=["tkinter", "test"],
+    # inflect decorates its engine with typeguard, which reads the source at import time.
+    module_collection_mode={"inflect": "pyz+py"},
     noarchive=False,
 )
 

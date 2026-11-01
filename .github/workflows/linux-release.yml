@@ -28,7 +28,7 @@ jobs:
           RELEASE_BUILD_ROOT: ${{ runner.temp }}/rb
         run: |
           scripts/release/build_linux_container.sh engine lite
-          sudo apt-get update && sudo apt-get install -y ./"$(ls ${{ runner.temp }}/rb/target/release/bundle/deb/*.deb)" xvfb
+          sudo apt-get update && sudo apt-get install -y "$(ls ${{ runner.temp }}/rb/target/release/bundle/deb/*.deb)" xvfb
           test ! -e /usr/lib/txtCaster/txtcaster-engine
           /usr/lib/txtCaster/ffmpeg/ffmpeg -hide_banner -version | head -n 1
           python3 scripts/smoke_test.py engine/dist-lite/txtcaster-engine/txtcaster-engine --reader-only
