@@ -67,6 +67,8 @@ jobs:
             ENGINE_VARIANT=$variant ./scripts/build_engine.sh
             uv run --no-project python scripts/smoke_test.py "$dist/txtcaster-engine/txtcaster-engine.exe" $flag
             "$signer" engine-pack --dir "$dist/txtcaster-engine" --out-prefix "out-engine/txtcaster-engine-$version-windows-x86_64-$variant"
+            base="out-engine/txtcaster-engine-$version-windows-x86_64-$variant"
+            { sha256sum "$base".tar.zst.* | sed 's#out-engine/##; s/ \*/  /'; echo "whole  $(cat "$base".tar.zst.* | sha256sum | cut -d' ' -f1)"; stat -c '%n %s' "$base".tar.zst.* | sed 's#out-engine/##'; } > "$base.hashes.txt"
             rm -rf "$dist" engine/build "engine/.venv-build-$variant"
           done
       - name: Fetch the pinned LGPL FFmpeg
@@ -113,5 +115,7 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: windows-engine-pack-lists
-          path: out-engine/*.pack.json
+          path: |
+            out-engine/*.pack.json
+            out-engine/*.hashes.txt
           if-no-files-found: error

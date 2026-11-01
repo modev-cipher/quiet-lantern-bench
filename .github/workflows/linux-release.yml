@@ -28,11 +28,11 @@ jobs:
           RELEASE_BUILD_ROOT: ${{ runner.temp }}/rb
         run: |
           scripts/release/build_linux_container.sh engine lite
-          sudo apt-get update && sudo apt-get install -y "$(ls ${{ runner.temp }}/rb/target/release/bundle/deb/*.deb)" xvfb
+          sudo apt-get update && sudo apt-get install -y "$(ls ${{ runner.temp }}/rb/target/release/bundle/deb/*.deb)" xvfb dbus-daemon
           test ! -e /usr/lib/txtCaster/txtcaster-engine
           /usr/lib/txtCaster/ffmpeg/ffmpeg -hide_banner -version | head -n 1
           python3 scripts/smoke_test.py engine/dist-lite/txtcaster-engine/txtcaster-engine --reader-only
-          RUST_LOG=info timeout 25 xvfb-run -a txtcaster > run.log 2>&1 || [ $? = 124 ]
+          RUST_LOG=info dbus-run-session -- timeout 40 xvfb-run -a txtcaster > run.log 2>&1 || [ $? = 124 ]
           tail -n 20 run.log
           grep -E 'ffmpeg source=bundled' run.log
       - uses: actions/upload-artifact@v4
@@ -44,4 +44,47 @@ jobs:
             ${{ runner.temp }}/rb/target/release/bundle/deb/*.deb
             ${{ runner.temp }}/rb/target/release/bundle/rpm/*.rpm
             ${{ runner.temp }}/rb/target/release/bundle/appimage/*.AppImage
+          if-no-files-found: error
+  engines:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [cpu, cuda13]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Free runner disk
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /opt/hostedtoolcache /usr/local/.ghcup /usr/share/swift
+          df -h / | tail -1
+      - name: Build the engine on the 22.04 baseline
+        env:
+          RELEASE_BUILD_ROOT: ${{ runner.temp }}/rb
+        run: scripts/release/build_linux_container.sh engine ${{ matrix.variant }}
+      - name: Smoke and size
+        run: |
+          dist=engine/dist-${{ matrix.variant }}; [ -d "$dist" ] || dist=engine/dist
+          du -sh "$dist/txtcaster-engine"
+          python3 scripts/smoke_test.py "$dist/txtcaster-engine/txtcaster-engine"
+          ldd "$dist/txtcaster-engine/txtcaster-engine" | head -5
+          df -h / | tail -1
+      - name: Pack
+        env:
+          RELEASE_BUILD_ROOT: ${{ runner.temp }}/rb
+        run: |
+          scripts/release/build_linux_container.sh signer
+          signer=$(find "$RELEASE_BUILD_ROOT" -type f -name update_sign -perm -u+x | head -1)
+          dist=engine/dist-${{ matrix.variant }}; [ -d "$dist" ] || dist=engine/dist
+          mkdir -p out-engine
+          "$signer" engine-pack --dir "$dist/txtcaster-engine" --out-prefix "out-engine/txtcaster-engine-0.1.0-linux-x86_64-${{ matrix.variant }}"
+          ls -la out-engine | cut -c1-110
+          sha256sum out-engine/*.tar.zst.* > "out-engine/${{ matrix.variant }}.hashes.txt"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-engine-${{ matrix.variant }}
+          retention-days: 7
+          path: out-engine/*
           if-no-files-found: error

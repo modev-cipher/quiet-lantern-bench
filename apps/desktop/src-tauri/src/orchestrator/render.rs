@@ -1003,13 +1003,6 @@ impl Stage for RenderingStage {
 mod cast_identity_tests {
     use super::*;
 
-    #[test]
-    fn a_packet_lasts_24_ms_at_either_rate_the_encoder_picks() {
-        assert_eq!(mp3_packets_ms(148, 24_000), 3552);
-        assert_eq!(mp3_packets_ms(148, 48_000), 3552);
-        assert_eq!(mp3_packets_ms(1, 44_100), 26);
-    }
-
     fn chapter(id: &str, idx: i64) -> book::Chapter {
         book::Chapter {
             id: id.to_string(),
@@ -1893,6 +1886,13 @@ mod cast_identity_tests {
 #[cfg(test)]
 mod drift_tests {
     use super::*;
+
+    #[test]
+    fn a_packet_lasts_24_ms_at_either_rate_the_encoder_picks() {
+        assert_eq!(mp3_packets_ms(148, 24_000), 3552);
+        assert_eq!(mp3_packets_ms(148, 48_000), 3552);
+        assert_eq!(mp3_packets_ms(1, 44_100), 26);
+    }
 
     const MEASURED_NOMINAL_MS: [i64; 12] = [
         180434, 194994, 202789, 217447, 158219, 173866, 203023, 209676, 237253, 178444, 184231,

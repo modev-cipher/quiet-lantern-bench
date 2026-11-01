@@ -204,20 +204,31 @@ async fn chunked_impl(
         head.push_str(&format!("{key}: {value}\r\n"));
     }
     head.push_str("connection: close\r\ntransfer-encoding: chunked\r\n\r\n");
-    tls.write_all(head.as_bytes()).await.expect("write head");
-    for chunk in body.chunks(chunk_bytes.max(1)) {
-        tls.write_all(format!("{:x}\r\n", chunk.len()).as_bytes())
-            .await
-            .expect("write chunk size");
-        tls.write_all(chunk).await.expect("write chunk");
-        tls.write_all(b"\r\n")
-            .await
-            .expect("write chunk terminator");
+    let sent = async {
+        tls.write_all(head.as_bytes()).await?;
+        for chunk in body.chunks(chunk_bytes.max(1)) {
+            tls.write_all(format!("{:x}\r\n", chunk.len()).as_bytes())
+                .await?;
+            tls.write_all(chunk).await?;
+            tls.write_all(b"\r\n").await?;
+        }
+        if terminate {
+            tls.write_all(b"0\r\n\r\n").await?;
+        }
+        tls.flush().await
     }
-    if terminate {
-        tls.write_all(b"0\r\n\r\n").await.expect("write last chunk");
+    .await;
+    if let Err(error) = sent {
+        assert!(
+            matches!(
+                error.kind(),
+                std::io::ErrorKind::ConnectionAborted
+                    | std::io::ErrorKind::ConnectionReset
+                    | std::io::ErrorKind::BrokenPipe
+            ),
+            "send chunked body: {error}"
+        );
     }
-    tls.flush().await.expect("flush chunked body");
     let mut raw = Vec::new();
     let _ = tls.read_to_end(&mut raw).await;
     raw

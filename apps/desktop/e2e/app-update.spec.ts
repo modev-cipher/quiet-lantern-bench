@@ -9,10 +9,13 @@ import { installTauriMock, type UpdateScenario } from "./tauriMock";
 // Copy comes from the catalog of the locale under test (I18N_E2E_LOCALE=ar boots
 // Arabic), so the same spec pins EN and AR. `parts` splits a template on its
 // placeholders; each literal part must appear in the rendered text.
-const S: Record<string, string> =
-  process.env.I18N_E2E_LOCALE === "ar"
-    ? { ...arShell, ...arSettings }
-    : { ...enShell, ...enSettings };
+const S = Object.fromEntries(
+  Object.entries(
+    process.env.I18N_E2E_LOCALE === "ar"
+      ? { ...arShell, ...arSettings }
+      : { ...enShell, ...enSettings },
+  ).filter(([, message]) => typeof message === "string"),
+) as Record<string, string>;
 const parts = (key: string) =>
   S[key]
     .split(/\{[^}]+\}/)

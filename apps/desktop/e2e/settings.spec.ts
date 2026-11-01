@@ -163,6 +163,25 @@ test("storage breakdown displays granular categories and handles purge cache and
   await expect(page.getByTestId("storage-breakdown-exports")).toBeVisible();
   await expect(page.getByTestId("storage-breakdown-models")).toBeVisible();
 
+  // The rows keep the card's inset, and both engine actions sit together at the far edge.
+  const engineRow = page.getByTestId("storage-breakdown-engine");
+  await expect(engineRow).toHaveCSS("padding-inline-start", "20px");
+  await expect(page.getByTestId("storage-breakdown-models")).toHaveCSS(
+    "padding-inline-start",
+    "20px",
+  );
+  const setupBox = await page.getByTestId("engine-setup-button").boundingBox();
+  const uninstallBox = await page
+    .getByTestId("uninstall-engine-button")
+    .boundingBox();
+  const gap =
+    Math.max(setupBox!.x, uninstallBox!.x) -
+    Math.min(
+      setupBox!.x + setupBox!.width,
+      uninstallBox!.x + uninstallBox!.width,
+    );
+  expect(gap).toBeLessThan(12);
+
   // Cache purge
   const purgeBtn = page.getByTestId("purge-cache-button");
   await expect(purgeBtn).toBeEnabled();

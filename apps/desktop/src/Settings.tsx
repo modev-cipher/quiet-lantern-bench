@@ -257,6 +257,13 @@ const DIRECTION_KEYS: Record<DirectionPreference, MessageKey> = {
   rtl: "settings.directionRtl",
 };
 
+const MODEL_TASK_KEYS: Record<string, MessageKey> = {
+  llm: "models.group.llm",
+  tts: "models.group.tts",
+  align: "models.group.align",
+  layout: "models.group.layout",
+};
+
 const THEME_KEYS: Record<ThemePreference, MessageKey> = {
   system: "settings.themeSystem",
   light: "settings.themeLight",
@@ -1006,8 +1013,8 @@ function Settings({
           <CacheLimitRow settings={storage} onSaved={setStorage} />
 
           {breakdown && (
-            <div className="mt-6 border-t border-ink-800/60 pt-5">
-              <div className="mb-3 flex items-center justify-between">
+            <div>
+              <div className="flex items-center justify-between border-t border-ink-800/60 px-5 pt-5 pb-3">
                 <h3 className="text-caption font-semibold tracking-wide text-ink-300 uppercase">
                   {t("settings.storageBreakdown")}
                 </h3>
@@ -1022,7 +1029,7 @@ function Settings({
                 return (
                   <div
                     data-testid="storage-breakdown-engine"
-                    className="flex items-center justify-between gap-4 border-b border-ink-800/40 py-3"
+                    className="settings-row flex items-center justify-between gap-4"
                   >
                     <div className="min-w-0">
                       <p className="text-body font-medium text-ink-100">{t("settings.engineStorage")}</p>
@@ -1032,6 +1039,7 @@ function Settings({
                           : t("settings.engineStorageNotInstalled")}
                       </p>
                     </div>
+                    <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
                     <button
                       type="button"
                       data-testid="engine-setup-button"
@@ -1057,11 +1065,12 @@ function Settings({
                         data-testid="uninstall-engine-button"
                         disabled={isUninstallingEngine}
                         onClick={() => setIsUninstallEngineModalOpen(true)}
-                        className="shrink-0 rounded-lg border border-red-900/50 bg-red-950/20 px-3 py-1.5 text-secondary font-medium text-red-300 transition-colors hover:bg-red-950/40 disabled:opacity-50"
+                        className="shrink-0 rounded-lg border border-wash-red-ink/30 px-3 py-1.5 text-secondary font-medium text-wash-red-ink transition-colors hover:bg-wash-red disabled:opacity-50"
                       >
                         {isUninstallingEngine ? t("settings.uninstallingEngine") : t("settings.uninstallEngine")}
                       </button>
                     )}
+                    </div>
                   </div>
                 );
               })()}
@@ -1069,7 +1078,7 @@ function Settings({
               {/* Cache row */}
               <div
                 data-testid="storage-breakdown-cache"
-                className="flex items-center justify-between gap-4 border-b border-ink-800/40 py-3"
+                className="settings-row flex items-center justify-between gap-4"
               >
                 <div className="min-w-0">
                   <p className="text-body font-medium text-ink-100">{t("settings.cacheStorage")}</p>
@@ -1098,13 +1107,13 @@ function Settings({
               {/* Books & Exports */}
               <div
                 data-testid="storage-breakdown-books"
-                className="flex items-center justify-between gap-4 border-b border-ink-800/40 py-3"
+                className="settings-row flex items-center justify-between gap-4"
               >
                 <div className="min-w-0">
                   <p className="text-body font-medium text-ink-100">{t("settings.booksStorage")}</p>
                   <p className="text-secondary text-ink-500">
                     {t("settings.booksStorageValue", {
-                      count: String(breakdown.books.count),
+                      count: breakdown.books.count,
                       size: formatBytes(breakdown.books.diskBytes),
                     })}
                   </p>
@@ -1113,13 +1122,13 @@ function Settings({
 
               <div
                 data-testid="storage-breakdown-exports"
-                className="flex items-center justify-between gap-4 border-b border-ink-800/40 py-3"
+                className="settings-row flex items-center justify-between gap-4"
               >
                 <div className="min-w-0">
                   <p className="text-body font-medium text-ink-100">{t("settings.exportsStorage")}</p>
                   <p className="text-secondary text-ink-500">
                     {t("settings.exportsStorageValue", {
-                      count: String(breakdown.exports.count),
+                      count: breakdown.exports.count,
                       size: formatBytes(breakdown.exports.diskBytes),
                     })}
                   </p>
@@ -1127,7 +1136,7 @@ function Settings({
               </div>
 
               {/* Models list */}
-              <div data-testid="storage-breakdown-models" className="py-3">
+              <div data-testid="storage-breakdown-models" className="border-t border-ink-800/60 px-5 py-3.5">
                 <p className="mb-2 text-body font-medium text-ink-100">{t("settings.installedModels")}</p>
                 {breakdown.models.length === 0 ? (
                   <p className="text-secondary text-ink-500">{t("settings.noModelsInstalled")}</p>
@@ -1139,8 +1148,11 @@ function Settings({
                         className="flex items-center justify-between rounded-lg border border-ink-800/40 bg-ink-950/40 px-3 py-2"
                       >
                         <div className="min-w-0">
-                          <p className="truncate text-secondary font-medium text-ink-200">{m.name || m.modelId}</p>
-                          <p className="text-caption text-ink-500">{formatBytes(m.diskBytes)} · {m.task}</p>
+                          <p className="truncate text-body font-medium text-ink-100">{m.name || m.modelId}</p>
+                          <p className="text-secondary text-ink-500">
+                            {formatBytes(m.diskBytes)}
+                            {MODEL_TASK_KEYS[m.task] ? ` · ${t(MODEL_TASK_KEYS[m.task])}` : ""}
+                          </p>
                         </div>
                         <button
                           type="button"
@@ -1294,13 +1306,13 @@ function DangerZoneCard({ onOpenPurgeModal }: { onOpenPurgeModal: () => void }) 
   return (
     <div
       data-testid="danger-zone"
-      className="rounded-xl border border-red-900/60 bg-red-950/15 p-6"
+      className="rounded-xl border border-wash-red-ink/30 bg-wash-red/30 p-6"
     >
       <div className="mb-3 flex items-center gap-2.5">
-        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-900/40 text-red-300">
+        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-wash-red text-wash-red-ink">
           <AlertIcon className="h-5 w-5" />
         </span>
-        <h2 className="text-body font-semibold tracking-wide text-red-300 uppercase">
+        <h2 className="text-body font-semibold tracking-wide text-wash-red-ink uppercase">
           {t("settings.dangerZone")}
         </h2>
       </div>
@@ -1317,7 +1329,7 @@ function DangerZoneCard({ onOpenPurgeModal }: { onOpenPurgeModal: () => void }) 
           type="button"
           data-testid="open-danger-purge"
           onClick={onOpenPurgeModal}
-          className="shrink-0 rounded-lg border border-red-700/60 bg-red-950/40 px-3.5 py-2 text-secondary font-medium text-red-300 transition-colors hover:bg-red-900/50 hover:text-red-100"
+          className="shrink-0 rounded-lg border border-wash-red-ink/30 px-3.5 py-2 text-secondary font-medium text-wash-red-ink transition-colors hover:bg-wash-red"
         >
           {t("settings.uninstallApp")}
         </button>

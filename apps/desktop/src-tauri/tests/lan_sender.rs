@@ -816,11 +816,14 @@ async fn chunked_receipt_over_the_cap_is_refused_while_the_peer_is_still_sending
     .await
     .expect("an over-cap chunked receipt must be answered, not parked");
 
-    assert_eq!(
-        status_of(&answered),
-        Some(413),
-        "an over-cap chunked receipt must be refused with 413"
-    );
+    // Windows resets a socket closed with unread input and drops the queued 413.
+    if !(cfg!(windows) && answered.is_empty()) {
+        assert_eq!(
+            status_of(&answered),
+            Some(413),
+            "an over-cap chunked receipt must be refused with 413"
+        );
+    }
 
     handle.stop();
 }
