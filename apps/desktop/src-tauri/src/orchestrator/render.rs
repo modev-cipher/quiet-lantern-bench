@@ -321,6 +321,56 @@ async fn ffprobe_duration_ms(path: &Path) -> Result<i64, OrchestratorError> {
     Ok((seconds * 1000.0).round() as i64)
 }
 
+fn mp3_packets_ms(packets: i64, sample_rate: i64) -> i64 {
+    let samples_per_frame = if sample_rate < 32_000 { 576 } else { 1152 };
+    (packets * samples_per_frame * 1000 + sample_rate / 2) / sample_rate
+}
+
+/// What a `-c copy` concat plays for this chapter: every packet, encoder delay included.
+/// FFmpeg 8 subtracts that delay from `format=duration`, so the declared figure no longer
+/// matches and chapter origins would drift by it, chapter after chapter.
+pub async fn encoded_chapter_ms(path: &Path) -> Result<i64, OrchestratorError> {
+    let mut command = crate::render::ffmpeg::probe_command();
+    command.args([
+        "-v",
+        "error",
+        "-select_streams",
+        "a:0",
+        "-count_packets",
+        "-show_entries",
+        "stream=nb_read_packets,sample_rate",
+        "-of",
+        "default=nw=1",
+    ]);
+    command.arg(path);
+    command.stdout(Stdio::piped()).stderr(Stdio::piped());
+    let output = command
+        .output()
+        .await
+        .map_err(|err| OrchestratorError::Render(format!("ffprobe failed: {err}")))?;
+    if !output.status.success() {
+        return Err(OrchestratorError::Render(format!(
+            "ffprobe failed: {}",
+            String::from_utf8_lossy(&output.stderr)
+        )));
+    }
+    let text = String::from_utf8_lossy(&output.stdout);
+    let field = |name: &str| {
+        text.lines()
+            .filter_map(|line| line.split_once('='))
+            .find(|(key, _)| *key == name)
+            .and_then(|(_, value)| value.trim().parse::<i64>().ok())
+    };
+    match (field("nb_read_packets"), field("sample_rate")) {
+        (Some(packets), Some(sample_rate)) if packets > 0 && sample_rate > 0 => {
+            Ok(mp3_packets_ms(packets, sample_rate))
+        }
+        _ => Err(OrchestratorError::Render(
+            "ffprobe returned no packet count".into(),
+        )),
+    }
+}
+
 fn prepend_gap(listing: &str, gap: &Path) -> String {
     let mut out = String::from("ffconcat version 1.0\n");
     out.push_str(&format!("file '{}'\n", concat_escape(gap)));
@@ -740,7 +790,7 @@ impl Stage for RenderingStage {
                         bytes,
                     )
                     .await?;
-                    let measured = ffprobe_duration_ms(&target).await?;
+                    let measured = encoded_chapter_ms(&target).await?;
                     tracing::debug!(
                         job = %ctx.job_id,
                         "chapter artifact: idx={position} cached={cached} encoded_ms={measured} \
@@ -952,6 +1002,13 @@ impl Stage for RenderingStage {
 #[cfg(test)]
 mod cast_identity_tests {
     use super::*;
+
+    #[test]
+    fn a_packet_lasts_24_ms_at_either_rate_the_encoder_picks() {
+        assert_eq!(mp3_packets_ms(148, 24_000), 3552);
+        assert_eq!(mp3_packets_ms(148, 48_000), 3552);
+        assert_eq!(mp3_packets_ms(1, 44_100), 26);
+    }
 
     fn chapter(id: &str, idx: i64) -> book::Chapter {
         book::Chapter {

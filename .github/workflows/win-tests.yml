@@ -26,27 +26,20 @@ jobs:
         shell: bash
         working-directory: apps/desktop/src-tauri
         run: |
-          # The test exe links Tauri's dialogs but carries no app manifest, so comctl32 v5 loads
-          # and it dies with STATUS_ENTRYPOINT_NOT_FOUND. The shipped app embeds its manifest.
-          exe=$(cargo test --lib --no-run --message-format=json | python -c "import json,sys;[print(m['executable']) for m in map(json.loads,sys.stdin) if m.get('executable') and m.get('profile',{}).get('test')]" | tail -n 1)
-          cat > "$exe.manifest" <<'XML'
-          <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-          <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0"><dependency><dependentAssembly>
-          <assemblyIdentity type="win32" name="Microsoft.Windows.Common-Controls" version="6.0.0.0" processorArchitecture="*" publicKeyToken="6595b64144ccf1df" language="*"/>
-          </dependentAssembly></dependency></assembly>
-          XML
-          "$exe" --test-threads=4
+          source ../../../ci/test_exe.sh
+          run_tests --lib -- --test-threads=4
       - name: Native integration suites
         if: always()
         shell: bash
         working-directory: apps/desktop/src-tauri
         run: |
+          source ../../../ci/test_exe.sh
           failed=""
           for t in tests/*.rs; do
             n=$(basename "$t" .rs)
             case "$n" in book_agent*) continue ;; esac
             echo "::group::$n"
-            if cargo test --test "$n"; then echo "$n ok" >> "$GITHUB_STEP_SUMMARY"; else failed="$failed $n"; echo "$n FAILED" >> "$GITHUB_STEP_SUMMARY"; fi
+            if run_tests --test "$n" --; then echo "$n ok" >> "$GITHUB_STEP_SUMMARY"; else failed="$failed $n"; echo "$n FAILED" >> "$GITHUB_STEP_SUMMARY"; fi
             echo "::endgroup::"
           done
           [ -z "$failed" ] || { echo "::error::failed:$failed"; exit 1; }

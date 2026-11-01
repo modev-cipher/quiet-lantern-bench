@@ -1,6 +1,7 @@
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+use txtcaster_lib::orchestrator::render::encoded_chapter_ms;
 use txtcaster_lib::render::mp3::{
     chapter_encode_args, measure_filter, measured_filter, parse_loudnorm_json, silence_wav,
     CHAPTER_GAP_MS, SAMPLE_RATE, SEGMENT_GAP_MS,
@@ -57,19 +58,6 @@ fn ffprobe_field(args: &[&str], path: &Path) -> String {
         String::from_utf8_lossy(&out.stderr)
     );
     String::from_utf8_lossy(&out.stdout).trim().to_string()
-}
-
-fn declared_ms(path: &Path) -> i64 {
-    let raw = ffprobe_field(
-        &[
-            "-show_entries",
-            "format=duration",
-            "-of",
-            "default=nw=1:nk=1",
-        ],
-        path,
-    );
-    (raw.parse::<f64>().expect("duration") * 1000.0).round() as i64
 }
 
 fn packet_ms(path: &Path) -> i64 {
@@ -287,13 +275,17 @@ fn the_declared_chapter_duration_is_the_frame_count_a_concat_player_hears() {
     let dir = tempfile::tempdir().expect("tempdir");
     let book = build_book(dir.path());
 
-    let declared: Vec<i64> = book.chapters.iter().map(|p| declared_ms(p)).collect();
+    let runtime = tokio::runtime::Runtime::new().expect("runtime");
+    let declared: Vec<i64> = book
+        .chapters
+        .iter()
+        .map(|p| runtime.block_on(encoded_chapter_ms(p)).expect("encoded_ms"))
+        .collect();
     let packets: Vec<i64> = book.chapters.iter().map(|p| packet_ms(p)).collect();
     assert_eq!(
         declared, packets,
-        "encoded_ms is the declared duration, and it is trusted as a chapter origin because it \
-         equals the frame count a player of the -c copy concat actually decodes. If an ffmpeg or \
-         libmp3lame build breaks that equality, every chapter marker moves by whatever the \
+        "encoded_ms is trusted as a chapter origin because it equals the frame count a player of \
+         the -c copy concat actually decodes. If an ffmpeg or libmp3lame build breaks that equality, every chapter marker moves by whatever the \
          difference is, silently. Re-measure with scripts/probe_encoded_ms.py and update \
          PIPELINE_SPEC 8.1 before changing this test."
     );
