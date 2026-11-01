@@ -294,6 +294,36 @@ test("the A22 align advisory appears for a timestamp-less OpenAI TTS voice with 
   await shotBothThemes(page, "align-advisory");
 });
 
+test("on the reader engine, the word timing link offers the full engine", async ({
+  page,
+}) => {
+  await openModal(page, {
+    ...CLOUD,
+    ttsVoices: [
+      {
+        voiceProfileId: "vp-oai",
+        name: "Alloy (OpenAI)",
+        voiceId: "alloy",
+        connectionId: "c-oai",
+        connectionName: "OpenAI TTS",
+        provider: "openai_tts",
+        model: "tts-1",
+        loopback: false,
+      },
+    ],
+    alignAdvisory: true,
+  });
+  await page.evaluate(() => {
+    (
+      window as unknown as { __mockEngine: { variant: string } }
+    ).__mockEngine.variant = "lite";
+  });
+  await page.getByTestId("voice-engine-cloud").click();
+  await page.getByTestId("cast-cascade-model-tts").selectOption("vp-oai");
+  await page.getByTestId("cast-align-advisory-models").click();
+  await expect(page.getByTestId("engine-setup-sheet")).toBeVisible();
+});
+
 test("fetching models fills the suggestion list and applies the tier default", async ({
   page,
 }) => {

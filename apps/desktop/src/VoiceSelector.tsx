@@ -14,6 +14,7 @@ import type {
   VoiceProfileSummary,
 } from "./jobFormModel";
 import type { ProviderOption } from "./castModelSelectionModel";
+import { ensureEngine } from "./engineSetupStore";
 import SegmentedSwitch from "./ui/SegmentedSwitch";
 
 const FIT_STYLES: Record<FitBadgeKind, string> = {
@@ -366,7 +367,13 @@ export function VoiceSelector({
                   <button
                     type="button"
                     data-testid="cast-align-advisory-models"
-                    onClick={onOpenModels}
+                    onClick={() =>
+                      void ensureEngine("localAi", onOpenModels).then(
+                        (ready) => {
+                          if (ready) onOpenModels();
+                        },
+                      )
+                    }
                     className="font-medium text-ember-400 underline underline-offset-2 transition-colors hover:text-ember-300"
                   >
                     {t("voice.installAlignment")}

@@ -503,7 +503,9 @@ fn no_terminal_state_write_bypasses_the_settle_path() {
         1,
         "settle_terminal callers changed: {settle_callers:?}"
     );
-    assert!(settle_callers[0].replace('\\', "/").contains("orchestrator/worker.rs"));
+    assert!(settle_callers[0]
+        .replace('\\', "/")
+        .contains("orchestrator/worker.rs"));
 
     // (b) The storage fns whose SQL can write the state column are
     // exactly the audited allow-list.

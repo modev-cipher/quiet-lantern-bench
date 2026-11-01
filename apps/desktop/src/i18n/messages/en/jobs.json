@@ -103,11 +103,9 @@
   "job.stage.render": "Render",
   "cast.closeDialog": "Close dialog",
   "cast.dialogLabel": "Create audio from {title}",
-  "cast.bookMeta": "{pages} pages · {chapters} chapters",
   "cast.runsOn": "Runs on",
   "cast.noCloudScript": "No cloud teaching providers connected yet.",
   "cast.talkSub": "Live voice chat, no cast needed",
-  "cast.selectedPages": "{pages} pages",
   "cast.rangeHint": "Shift-click to select a range",
   "cast.style": "Style",
   "cast.estimatedTime": "Estimated time",
@@ -120,7 +118,10 @@
   "cast.step.scopeTitle": "What to cast",
   "cast.step.soundTitle": "How it sounds",
   "cast.step.reviewTitle": "Review and cast",
-  "cast.step.scopeAll": "All {total} chapters",
+  "cast.step.scopeAll": {
+    "one": "{count} chapter",
+    "other": "All {count} chapters"
+  },
   "cast.step.scopeSome": "{selected} of {total} chapters",
   "cast.step.scopeNone": "Nothing selected",
   "cast.step.scopePages": "Pages {start}–{end}",

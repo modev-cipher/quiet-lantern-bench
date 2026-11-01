@@ -1345,7 +1345,11 @@ async fn synthesize_preview(
     text: &str,
     voice_payload: serde_json::Value,
 ) -> Result<String, String> {
-    engine_gate(app, supervisor, engine_install::capability::EngineNeed::LocalAi)?;
+    engine_gate(
+        app,
+        supervisor,
+        engine_install::capability::EngineNeed::LocalAi,
+    )?;
     let (port, token) = supervisor
         .connection()
         .ok_or("engine is not ready".to_string())?;

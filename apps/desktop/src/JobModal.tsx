@@ -1476,7 +1476,7 @@ function JobModal({
       : chapters == null || selected.size === 0
         ? t("cast.step.scopeNone")
         : allSelected
-          ? t("cast.step.scopeAll", { total: chapters.length })
+          ? t("cast.step.scopeAll", { count: chapters.length })
           : t("cast.step.scopeSome", {
               selected: selected.size,
               total: chapters.length,
@@ -1553,10 +1553,9 @@ function JobModal({
               )}
               {book.pageCount != null && (
                 <span className="tabular-nums">
-                  {t("cast.bookMeta", {
-                    pages: book.pageCount,
-                    chapters: book.chapterCount,
-                  })}
+                  {t("library.pageCount", { count: book.pageCount })}
+                  {" · "}
+                  {t("library.chapterCount", { count: book.chapterCount })}
                 </span>
               )}
             </p>
@@ -1751,7 +1750,7 @@ function JobModal({
                       </span>
                       <span className="text-secondary text-ink-500 tabular-nums">
                         ·{" "}
-                        {t("cast.selectedPages", { pages: selectedPageCount })}
+                        {t("library.pageCount", { count: selectedPageCount })}
                       </span>
                     </label>
                     {chapters == null ? (
