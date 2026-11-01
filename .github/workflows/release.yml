@@ -97,6 +97,21 @@ jobs:
           if-no-files-found: error
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: release-windows-engine
-          path: out-engine/*
+          name: release-windows-engine-cpu
+          path: out-engine/*-cpu.*
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-windows-engine-lite
+          path: out-engine/*-lite.*
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-windows-engine-cuda13
+          path: out-engine/*-cuda13.*
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: windows-engine-pack-lists
+          path: out-engine/*.pack.json
           if-no-files-found: error

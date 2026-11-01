@@ -1,0 +1,117 @@
+name: win-validate
+on:
+  workflow_dispatch:
+    inputs:
+      release_run:
+        description: Release run id holding the installer and engines
+        required: true
+permissions:
+  contents: read
+  actions: read
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 120
+    env:
+      WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: --remote-debugging-port=9222
+      TXTCASTER_ENGINE_MANIFEST_URL: http://127.0.0.1:8765/engine.json
+      RUST_LOG: info
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          sparse-checkout: ci
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-windows
+          path: inst
+          run-id: ${{ inputs.release_run }}
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-windows-engine-*
+          merge-multiple: true
+          path: www
+          run-id: ${{ inputs.release_run }}
+          github-token: ${{ github.token }}
+      - name: Prepare
+        shell: bash
+        run: |
+          cp ci/engine.json www/engine.json
+          python ci/make_pdf.py "$PWD/book.pdf"
+          (cd ci && npm init -y >/dev/null && npm i --no-audit --no-fund playwright-core@1.56.1 >/dev/null)
+          ls -la www inst | cut -c1-90
+      - name: Serve engines on loopback
+        shell: pwsh
+        run: Start-Process python -ArgumentList '-I','-m','http.server','8765','--bind','127.0.0.1','--directory',"$PWD\www" -WindowStyle Hidden
+      - name: Silent install
+        shell: pwsh
+        run: |
+          $i = Get-ChildItem inst\*.exe | Select-Object -First 1
+          Start-Process $i.FullName -ArgumentList '/S' -Wait
+          Get-ChildItem "$env:LOCALAPPDATA\txtCaster" | Select-Object Name,Length | Format-Table | Out-String -Width 120
+          if (Test-Path "$env:LOCALAPPDATA\txtCaster\txtcaster-engine") { throw "installer carries the engine" }
+          if (Test-Path "$env:LOCALAPPDATA\txtCaster\update_sign.exe") { throw "installer carries the signer" }
+          & "$env:LOCALAPPDATA\txtCaster\ffmpeg\ffmpeg.exe" -hide_banner -version | Select-Object -First 1
+      - name: Launch from a hostile working directory
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force hostile\engine\txtcaster_engine | Out-Null
+          Set-Content hostile\engine\pyproject.toml ''
+          Set-Content hostile\engine\txtcaster_engine\__main__.py "open(r'$PWD\hostile\RAN','w')"
+          Start-Process "$env:LOCALAPPDATA\txtCaster\txtCaster.exe" -WorkingDirectory "$PWD\hostile"
+      - name: Drive engine install, import and cast
+        shell: bash
+        run: |
+          cp ci/drive.mjs ci/make_pdf.py . 2>/dev/null || true
+          node ci/drive.mjs "$PWD/shots" "$(cygpath -w "$PWD/book.pdf")" full 2>&1 | tee drive.log
+          test ! -e hostile/RAN
+      - name: Check the output with the bundled ffprobe
+        shell: pwsh
+        run: |
+          $o = Get-Content shots\outputs.json -Raw | ConvertFrom-Json
+          $o | ForEach-Object { $_ }
+          $f = @($o) | Where-Object { $_ -match '\.mp3$' } | Select-Object -First 1
+          if (-not $f) { $f = @($o.PSObject.Properties.Value) | Where-Object { $_ -match '\.mp3$' } | Select-Object -First 1 }
+          & "$env:LOCALAPPDATA\txtCaster\ffmpeg\ffprobe.exe" -hide_banner -show_entries format=duration:stream=codec_name "$f"
+          if ($LASTEXITCODE -ne 0) { throw "ffprobe failed" }
+      - name: Second instance leaves the first running
+        shell: pwsh
+        run: |
+          $before = (Get-Process txtCaster).Count
+          $p = Start-Process "$env:LOCALAPPDATA\txtCaster\txtCaster.exe" -PassThru
+          if (-not $p.WaitForExit(20000)) { throw "second instance kept running" }
+          "second instance exit=$($p.ExitCode) before=$before after=$((Get-Process txtCaster).Count)"
+          if ((Get-Process txtCaster).Count -ne $before) { throw "instance count changed" }
+      - name: Corrupt database shows the startup screen
+        shell: pwsh
+        run: |
+          Get-Process txtCaster | Stop-Process -Force
+          Get-Process txtcaster-engine -ErrorAction SilentlyContinue | Stop-Process -Force
+          Start-Sleep 3
+          $db = Get-ChildItem "$env:LOCALAPPDATA","$env:APPDATA" -Recurse -Filter db.sqlite -ErrorAction SilentlyContinue | Select-Object -First 1
+          "db at $($db.FullName)"
+          Remove-Item "$($db.FullName)-wal","$($db.FullName)-shm" -ErrorAction SilentlyContinue
+          Set-Content $db.FullName 'this is not a database'
+          Start-Process "$env:LOCALAPPDATA\txtCaster\txtCaster.exe"
+          node ci/drive.mjs "$PWD/shots" x failure 2>&1 | Tee-Object failure.log
+          if (-not (Select-String -Path failure.log -Pattern 'databaseDamaged')) { throw "no startup failure reported" }
+          Get-Process txtCaster | Stop-Process -Force
+      - name: Uninstall
+        shell: pwsh
+        run: |
+          Start-Process "$env:LOCALAPPDATA\txtCaster\uninstall.exe" -ArgumentList '/S' -Wait
+          Start-Sleep 10
+          Get-ChildItem "$env:LOCALAPPDATA\txtCaster" -ErrorAction SilentlyContinue | Select-Object Name
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: validate-evidence
+          retention-days: 7
+          path: |
+            shots/*
+            drive.log
+            failure.log
