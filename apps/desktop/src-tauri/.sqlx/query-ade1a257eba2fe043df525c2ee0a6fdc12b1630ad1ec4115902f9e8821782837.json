@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE render_job SET align_plan_json = ?, updated_at = ?\n                 WHERE id = ? AND align_plan_json = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "ade1a257eba2fe043df525c2ee0a6fdc12b1630ad1ec4115902f9e8821782837"
+}

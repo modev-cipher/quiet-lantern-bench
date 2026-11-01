@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO cache_ref (hash, job_id) VALUES (?, ?)\n             ON CONFLICT(hash, job_id) DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "6951dc17872abb9eda3b48361b4f43e1094cb7e213d90af9b3f18cbd07e8bcae"
+}

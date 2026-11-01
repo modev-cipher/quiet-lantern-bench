@@ -1,0 +1,116 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id as \"id!\", title, author, source_path, format, page_count, language,\n                  is_scanned as \"is_scanned: bool\", ingest_path, cover_path, content_hash,\n                  blocks_version, blocks_page_count, layout_analysed as \"layout_analysed!: bool\",\n                  reflowed as \"reflowed!: bool\", extracting_since, created_at\n           FROM book ORDER BY created_at DESC, id DESC",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "title",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "author",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "source_path",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "format",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "page_count",
+        "ordinal": 5,
+        "type_info": "Integer"
+      },
+      {
+        "name": "language",
+        "ordinal": 6,
+        "type_info": "Text"
+      },
+      {
+        "name": "is_scanned: bool",
+        "ordinal": 7,
+        "type_info": "Integer"
+      },
+      {
+        "name": "ingest_path",
+        "ordinal": 8,
+        "type_info": "Text"
+      },
+      {
+        "name": "cover_path",
+        "ordinal": 9,
+        "type_info": "Text"
+      },
+      {
+        "name": "content_hash",
+        "ordinal": 10,
+        "type_info": "Text"
+      },
+      {
+        "name": "blocks_version",
+        "ordinal": 11,
+        "type_info": "Text"
+      },
+      {
+        "name": "blocks_page_count",
+        "ordinal": 12,
+        "type_info": "Integer"
+      },
+      {
+        "name": "layout_analysed!: bool",
+        "ordinal": 13,
+        "type_info": "Integer"
+      },
+      {
+        "name": "reflowed!: bool",
+        "ordinal": 14,
+        "type_info": "Integer"
+      },
+      {
+        "name": "extracting_since",
+        "ordinal": 15,
+        "type_info": "Integer"
+      },
+      {
+        "name": "created_at",
+        "ordinal": 16,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      true,
+      true,
+      false,
+      true,
+      true,
+      false,
+      true,
+      true,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "a5de5b637999d8e8713871870b308c5eb453ee2a3cdadcc1cd9b49f185a310bc"
+}

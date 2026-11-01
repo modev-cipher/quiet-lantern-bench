@@ -1,0 +1,18 @@
+{
+  "receipt": {
+    "alignment": null,
+    "castId": "cst_c12",
+    "committedAt": 0,
+    "contentHash": "38f9269cd4366d5f65af672a5be9f882351f22145fb6d046a3d529e43e05edd4",
+    "durationSeconds": 12.5,
+    "files": [
+      {
+        "absolutePath": "<casts>/cst_c12/audio.opus",
+        "path": "audio.opus"
+      }
+    ],
+    "title": "Contract Pin Book",
+    "voiceId": null
+  },
+  "rule": "a re-served identical manifest is skipped when the receipt and on-disk audio hash match"
+}

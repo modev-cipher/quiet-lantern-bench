@@ -1,0 +1,44 @@
+{
+  "name": "assemblyai-socket-billing-close",
+  "provider": "assemblyai",
+  "doc_url": "https://www.assemblyai.com/docs/speech-to-text/universal-streaming",
+  "doc_accessed": "2026-08-22",
+  "channel_protocol_version": 1,
+  "steps": [
+    {
+      "expect_handshake": {
+        "connection": 1,
+        "target_contains": ["/v3/ws", "sample_rate=16000", "encoding=pcm_s16le"],
+        "target_absent": ["key=", "token=", "fixture-assemblyai-key"],
+        "headers_present": ["authorization"]
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"Begin\",\"id\":\"5f6a1e2b-recorded\",\"expires_at\":1787000000}"
+      }
+    },
+    {
+      "expect_binary": {
+        "min_bytes": 8,
+        "payload_base64": "6AMY/P9/AIA="
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"Turn\",\"turn_order\":0,\"end_of_turn\":true,\"turn_is_formatted\":false,\"end_of_turn_confidence\":0.94,\"transcript\":\"figure three\",\"words\":[{\"text\":\"figure\",\"start\":80,\"end\":460,\"confidence\":0.97,\"word_is_final\":true},{\"text\":\"three\",\"start\":520,\"end\":900,\"confidence\":0.95,\"word_is_final\":true}]}"
+      }
+    },
+    {
+      "expect_text": {
+        "contains": ["\"type\":\"Terminate\""],
+        "absent": ["fixture-assemblyai-key"]
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"Termination\",\"audio_duration_seconds\":1,\"session_duration_seconds\":4}"
+      }
+    }
+  ]
+}

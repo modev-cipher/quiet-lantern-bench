@@ -1,0 +1,91 @@
+[
+  {
+    "id": "gemini",
+    "displayName": "Google Gemini",
+    "capabilities": [
+      "Scripting",
+      "Voice Tutor"
+    ],
+    "card": {
+      "kind": "healthy"
+    },
+    "counts": {
+      "working": 1,
+      "checking": 0,
+      "unverified": 0,
+      "invalid": 0,
+      "rate_limited": 0,
+      "unreachable": 0,
+      "missing_bytes": 0,
+      "disabled": 0
+    },
+    "configuredKeys": 1,
+    "enabledKeys": 1,
+    "connections": [
+      {
+        "id": "c-1",
+        "name": "Gemini",
+        "providerType": "gemini",
+        "hostname": null,
+        "defaultModel": "gemini-3.7-flash",
+        "capabilities": [
+          "script_llm",
+          "vision_mllm",
+          "tts"
+        ],
+        "enabled": true,
+        "keyRequired": true,
+        "keyPresent": true,
+        "keyLast4": "ab12",
+        "baseUrl": null
+      }
+    ],
+    "disabledConnections": 0,
+    "pools": [
+      {
+        "baseUrl": "https://generativelanguage.googleapis.com",
+        "label": {
+          "kind": "checking",
+          "completed": 1,
+          "total": 3
+        },
+        "counts": {
+          "working": 1,
+          "checking": 0,
+          "unverified": 0,
+          "invalid": 0,
+          "rate_limited": 0,
+          "unreachable": 0,
+          "missing_bytes": 0,
+          "disabled": 0
+        },
+        "configured": 1,
+        "operational": 1,
+        "voiceTutorBuiltIn": true,
+        "slots": [
+          {
+            "account": "https://generativelanguage.googleapis.com",
+            "slot": 0,
+            "label": "primary",
+            "last4": "ab12",
+            "health": "working",
+            "dialEligible": true,
+            "retryAfterUnixMs": null,
+            "addedAt": 1000,
+            "lastUsed": 2000
+          }
+        ]
+      }
+    ],
+    "activeModels": [
+      "gemini-3.7-flash"
+    ],
+    "vaultLocked": false,
+    "retentionLinks": [
+      {
+        "kind": "gemini",
+        "url": "https://ai.google.dev/gemini-api/terms"
+      }
+    ]
+  }
+]

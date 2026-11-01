@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE chapter SET idx = ?, title = ?, page_start = ?, page_end = ?,\n                    is_pseudo = ?, word_count = ? WHERE id = ? AND book_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 8
+    },
+    "nullable": []
+  },
+  "hash": "f1bb6c49aeea7aca494d276f538c1e2553843344c63a13ba92882da523f26c72"
+}

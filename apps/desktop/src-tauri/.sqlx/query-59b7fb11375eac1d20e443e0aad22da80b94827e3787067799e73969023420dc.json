@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM alignment WHERE segment_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "59b7fb11375eac1d20e443e0aad22da80b94827e3787067799e73969023420dc"
+}

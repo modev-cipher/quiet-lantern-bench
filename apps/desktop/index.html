@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>txtCaster</title>
+    <script>
+      // Resolve the theme before first paint. Mirrors themeModel.ts: the
+      // localStorage key holds the preference; "system" follows the OS.
+      (function () {
+        var preference = null;
+        try {
+          preference = localStorage.getItem("txtcaster.themePreference");
+        } catch (error) {
+          preference = null;
+        }
+        if (preference !== "light" && preference !== "dark") {
+          preference = "system";
+        }
+        var dark =
+          preference === "dark" ||
+          (preference === "system" &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.dataset.theme = dark ? "dark" : "light";
+      })();
+    </script>
+    <script>
+      // Resolve the UI direction before first paint. Mirrors
+      // directionModel.ts: the localStorage key holds an explicit override;
+      // otherwise the primary language subtag decides.
+      (function () {
+        var preference = null;
+        try {
+          preference = localStorage.getItem("txtcaster.direction");
+        } catch (error) {
+          preference = null;
+        }
+        var direction = preference;
+        if (direction !== "ltr" && direction !== "rtl") {
+          var rtl = [
+            "ar",
+            "he",
+            "fa",
+            "ur",
+            "ps",
+            "sd",
+            "ug",
+            "yi",
+            "dv",
+            "ckb",
+          ];
+          var language = (navigator.language || "en")
+            .split(/[-_]/)[0]
+            .toLowerCase();
+          direction = rtl.indexOf(language) >= 0 ? "rtl" : "ltr";
+        }
+        document.documentElement.setAttribute("dir", direction);
+      })();
+    </script>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

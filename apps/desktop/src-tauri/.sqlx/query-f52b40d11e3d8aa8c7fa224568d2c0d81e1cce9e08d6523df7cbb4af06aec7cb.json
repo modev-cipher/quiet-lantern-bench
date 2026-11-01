@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM export WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "f52b40d11e3d8aa8c7fa224568d2c0d81e1cce9e08d6523df7cbb4af06aec7cb"
+}

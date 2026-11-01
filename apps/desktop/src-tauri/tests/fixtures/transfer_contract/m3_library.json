@@ -1,0 +1,10 @@
+{
+  "casts": [
+    {
+      "castId": "cst_c12",
+      "durationSeconds": 12.5,
+      "title": "Contract Pin Book",
+      "totalSize": 200000
+    }
+  ]
+}

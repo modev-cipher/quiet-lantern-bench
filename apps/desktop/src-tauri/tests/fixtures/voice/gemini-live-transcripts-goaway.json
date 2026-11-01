@@ -1,0 +1,64 @@
+{
+  "name": "gemini-live-transcripts-goaway",
+  "provider": "gemini",
+  "doc_url": "https://ai.google.dev/api/live",
+  "doc_accessed": "2026-08-20",
+  "channel_protocol_version": 1,
+  "steps": [
+    {
+      "expect_handshake": {
+        "connection": 1,
+        "target_absent": ["key=", "access_token", "fixture-gemini-key"],
+        "headers_present": ["x-goog-api-key"]
+      }
+    },
+    {
+      "expect_text": {
+        "contains": [
+          "\"setup\"",
+          "models/gemini-2.5-flash-native-audio-preview",
+          "\"responseModalities\"",
+          "\"outputAudioTranscription\":{}"
+        ],
+        "absent": ["fixture-gemini-key"]
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"setupComplete\":{}}"
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"serverContent\":{\"outputTranscription\":{\"text\":\"The figure shows \"}}}"
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"serverContent\":{\"outputTranscription\":{\"text\":\"a rising curve.\"}}}"
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"goAway\":{\"timeLeft\":\"10s\"}}"
+      }
+    },
+    {
+      "expect_handshake": {
+        "connection": 2,
+        "target_absent": ["key=", "access_token", "fixture-gemini-key"],
+        "headers_present": ["x-goog-api-key"]
+      }
+    },
+    {
+      "expect_text": {
+        "contains": [
+          "\"setup\"",
+          "models/gemini-2.5-flash-native-audio-preview"
+        ],
+        "absent": ["fixture-gemini-key"]
+      }
+    },
+    "server_close"
+  ]
+}

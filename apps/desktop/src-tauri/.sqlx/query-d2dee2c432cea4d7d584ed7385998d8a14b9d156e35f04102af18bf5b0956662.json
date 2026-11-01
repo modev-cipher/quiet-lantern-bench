@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM page_geometry\n         WHERE page_id IN (SELECT id FROM page WHERE book_id = ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "d2dee2c432cea4d7d584ed7385998d8a14b9d156e35f04102af18bf5b0956662"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO render_job (id, book_id, scope_json, mode, voice_profile_id, output_format,\n                                 model_overrides_json, resource_plan_json, vision_plan_json,\n                                 tts_plan_json, align_plan_json, state,\n                                 checkpoint_json, overnight, eta_seconds, report_json,\n                                 output_paths_json, tts_seed, verify, created_at, updated_at)\n         SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?\n         WHERE NOT EXISTS (\n           SELECT 1 FROM book\n           WHERE book.id = ? AND book.extracting_since IS NOT NULL\n             AND book.extracting_since >= ?\n         )",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 23
+    },
+    "nullable": []
+  },
+  "hash": "3b7dd5c88a3a066589dba820d82ee3e90b0b8f416bf660fb5d0abb78bafe8420"
+}

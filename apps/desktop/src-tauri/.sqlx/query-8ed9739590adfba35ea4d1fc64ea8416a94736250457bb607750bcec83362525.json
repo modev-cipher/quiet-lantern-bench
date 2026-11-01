@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO voice_session (id, book_id, job_id, provider_base_url, started_at, ended_at,\n                                    playback_pos_ms, summary_text, summary_turns, end_reason)\n         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 10
+    },
+    "nullable": []
+  },
+  "hash": "8ed9739590adfba35ea4d1fc64ea8416a94736250457bb607750bcec83362525"
+}

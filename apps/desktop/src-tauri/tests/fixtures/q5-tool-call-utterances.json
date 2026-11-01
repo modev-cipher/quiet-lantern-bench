@@ -1,0 +1,1075 @@
+{
+  "name": "q5-tool-call-utterances",
+  "purpose": "Q5 tool-call correctness fixture (docs/TASKS.md Q5; VOICE_AGENT §10): 100 scripted utterances, each with the acceptable (tool, args) answers. Ordinal chapter phrasings accept both the 0-based reading the schema mandates and the literal ordinal, since either proves correct tool selection with a defensible index reading; equivalent-effect alternates (replay_last_minute vs seek_relative -60) are accepted where the spoken intent is identical.",
+  "grading": "first tool call per utterance; name must match; args must equal (numbers within 0.51 for seconds, 0.01 for speed) unless any_args",
+  "utterances": [
+    {
+      "utterance": "pause",
+      "accept": [
+        {
+          "tool": "pause_playback",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "pause the audiobook",
+      "accept": [
+        {
+          "tool": "pause_playback",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "stop reading for a second",
+      "accept": [
+        {
+          "tool": "pause_playback",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "hold on, pause it",
+      "accept": [
+        {
+          "tool": "pause_playback",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "please pause playback",
+      "accept": [
+        {
+          "tool": "pause_playback",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "pause the narration",
+      "accept": [
+        {
+          "tool": "pause_playback",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "stop the audio for now",
+      "accept": [
+        {
+          "tool": "pause_playback",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "can you pause that",
+      "accept": [
+        {
+          "tool": "pause_playback",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "resume",
+      "accept": [
+        {
+          "tool": "resume_playback",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "keep reading",
+      "accept": [
+        {
+          "tool": "resume_playback",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "continue the audiobook",
+      "accept": [
+        {
+          "tool": "resume_playback",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "unpause it",
+      "accept": [
+        {
+          "tool": "resume_playback",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "play again from where we stopped",
+      "accept": [
+        {
+          "tool": "resume_playback",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "resume playback please",
+      "accept": [
+        {
+          "tool": "resume_playback",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "go on, continue reading",
+      "accept": [
+        {
+          "tool": "resume_playback",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "start the audio again",
+      "accept": [
+        {
+          "tool": "resume_playback",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "go back thirty seconds",
+      "accept": [
+        {
+          "tool": "seek_relative",
+          "args": {
+            "seconds": -30
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "skip forward ten seconds",
+      "accept": [
+        {
+          "tool": "seek_relative",
+          "args": {
+            "seconds": 10
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "rewind twenty seconds",
+      "accept": [
+        {
+          "tool": "seek_relative",
+          "args": {
+            "seconds": -20
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "jump ahead forty five seconds",
+      "accept": [
+        {
+          "tool": "seek_relative",
+          "args": {
+            "seconds": 45
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "go back two minutes",
+      "accept": [
+        {
+          "tool": "seek_relative",
+          "args": {
+            "seconds": -120
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "skip ahead one minute",
+      "accept": [
+        {
+          "tool": "seek_relative",
+          "args": {
+            "seconds": 60
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "back up fifteen seconds",
+      "accept": [
+        {
+          "tool": "seek_relative",
+          "args": {
+            "seconds": -15
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "move forward ninety seconds",
+      "accept": [
+        {
+          "tool": "seek_relative",
+          "args": {
+            "seconds": 90
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "rewind five seconds",
+      "accept": [
+        {
+          "tool": "seek_relative",
+          "args": {
+            "seconds": -5
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "go forward five minutes",
+      "accept": [
+        {
+          "tool": "seek_relative",
+          "args": {
+            "seconds": 300
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "take me back four minutes",
+      "accept": [
+        {
+          "tool": "seek_relative",
+          "args": {
+            "seconds": -240
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "skip the next thirty seconds",
+      "accept": [
+        {
+          "tool": "seek_relative",
+          "args": {
+            "seconds": 30
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "read at double speed",
+      "accept": [
+        {
+          "tool": "set_playback_speed",
+          "args": {
+            "speed": 2.0
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "slow down to half speed",
+      "accept": [
+        {
+          "tool": "set_playback_speed",
+          "args": {
+            "speed": 0.5
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "set the speed to one point five",
+      "accept": [
+        {
+          "tool": "set_playback_speed",
+          "args": {
+            "speed": 1.5
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "play at normal speed",
+      "accept": [
+        {
+          "tool": "set_playback_speed",
+          "args": {
+            "speed": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "speed it up to two and a half",
+      "accept": [
+        {
+          "tool": "set_playback_speed",
+          "args": {
+            "speed": 2.5
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "set playback speed to zero point seven five",
+      "accept": [
+        {
+          "tool": "set_playback_speed",
+          "args": {
+            "speed": 0.75
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "read at one point two five speed",
+      "accept": [
+        {
+          "tool": "set_playback_speed",
+          "args": {
+            "speed": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "triple the playback speed",
+      "accept": [
+        {
+          "tool": "set_playback_speed",
+          "args": {
+            "speed": 3.0
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "set speed to one point seven five",
+      "accept": [
+        {
+          "tool": "set_playback_speed",
+          "args": {
+            "speed": 1.75
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "play at zero point eight speed",
+      "accept": [
+        {
+          "tool": "set_playback_speed",
+          "args": {
+            "speed": 0.8
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "replay the previous paragraph",
+      "accept": [
+        {
+          "tool": "replay_previous_paragraph",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "read that paragraph again",
+      "accept": [
+        {
+          "tool": "replay_previous_paragraph",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "repeat the last paragraph",
+      "accept": [
+        {
+          "tool": "replay_previous_paragraph",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "go back to the start of the previous paragraph",
+      "accept": [
+        {
+          "tool": "replay_previous_paragraph",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "say the previous paragraph once more",
+      "accept": [
+        {
+          "tool": "replay_previous_paragraph",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "replay that last paragraph for me",
+      "accept": [
+        {
+          "tool": "replay_previous_paragraph",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "replay the previous page",
+      "accept": [
+        {
+          "tool": "replay_previous_page",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "go back to the previous page and read it",
+      "accept": [
+        {
+          "tool": "replay_previous_page",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "repeat the last page",
+      "accept": [
+        {
+          "tool": "replay_previous_page",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "read the previous page again",
+      "accept": [
+        {
+          "tool": "replay_previous_page",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "start over from the previous page",
+      "accept": [
+        {
+          "tool": "replay_previous_page",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "take me back one page and replay it",
+      "accept": [
+        {
+          "tool": "replay_previous_page",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "replay the last minute",
+      "accept": [
+        {
+          "tool": "replay_last_minute",
+          "args": {}
+        },
+        {
+          "tool": "seek_relative",
+          "args": {
+            "seconds": -60
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "go back one minute and play from there",
+      "accept": [
+        {
+          "tool": "replay_last_minute",
+          "args": {}
+        },
+        {
+          "tool": "seek_relative",
+          "args": {
+            "seconds": -60
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "repeat the last minute of audio",
+      "accept": [
+        {
+          "tool": "replay_last_minute",
+          "args": {}
+        },
+        {
+          "tool": "seek_relative",
+          "args": {
+            "seconds": -60
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "rewind by a minute",
+      "accept": [
+        {
+          "tool": "replay_last_minute",
+          "args": {}
+        },
+        {
+          "tool": "seek_relative",
+          "args": {
+            "seconds": -60
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "play the last minute again",
+      "accept": [
+        {
+          "tool": "replay_last_minute",
+          "args": {}
+        },
+        {
+          "tool": "seek_relative",
+          "args": {
+            "seconds": -60
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "back up a minute and continue",
+      "accept": [
+        {
+          "tool": "replay_last_minute",
+          "args": {}
+        },
+        {
+          "tool": "seek_relative",
+          "args": {
+            "seconds": -60
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "jump to chapter index 3",
+      "accept": [
+        {
+          "tool": "jump_to_chapter",
+          "args": {
+            "chapter": 3
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "go to chapter index 0",
+      "accept": [
+        {
+          "tool": "jump_to_chapter",
+          "args": {
+            "chapter": 0
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "jump to the chapter at index 7",
+      "accept": [
+        {
+          "tool": "jump_to_chapter",
+          "args": {
+            "chapter": 7
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "open chapter index 12",
+      "accept": [
+        {
+          "tool": "jump_to_chapter",
+          "args": {
+            "chapter": 12
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "go to the first chapter",
+      "accept": [
+        {
+          "tool": "jump_to_chapter",
+          "args": {
+            "chapter": 0
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "jump to the third chapter",
+      "accept": [
+        {
+          "tool": "jump_to_chapter",
+          "args": {
+            "chapter": 2
+          }
+        },
+        {
+          "tool": "jump_to_chapter",
+          "args": {
+            "chapter": 3
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "take me to the fifth chapter",
+      "accept": [
+        {
+          "tool": "jump_to_chapter",
+          "args": {
+            "chapter": 4
+          }
+        },
+        {
+          "tool": "jump_to_chapter",
+          "args": {
+            "chapter": 5
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "go to the second chapter",
+      "accept": [
+        {
+          "tool": "jump_to_chapter",
+          "args": {
+            "chapter": 1
+          }
+        },
+        {
+          "tool": "jump_to_chapter",
+          "args": {
+            "chapter": 2
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "jump to the tenth chapter",
+      "accept": [
+        {
+          "tool": "jump_to_chapter",
+          "args": {
+            "chapter": 9
+          }
+        },
+        {
+          "tool": "jump_to_chapter",
+          "args": {
+            "chapter": 10
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "start the last chapter over, chapter index 8",
+      "accept": [
+        {
+          "tool": "jump_to_chapter",
+          "args": {
+            "chapter": 8
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "go to page 120",
+      "accept": [
+        {
+          "tool": "jump_to_page",
+          "args": {
+            "page": 120
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "go to page 7",
+      "accept": [
+        {
+          "tool": "jump_to_page",
+          "args": {
+            "page": 7
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "go to page 42",
+      "accept": [
+        {
+          "tool": "jump_to_page",
+          "args": {
+            "page": 42
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "go to page 256",
+      "accept": [
+        {
+          "tool": "jump_to_page",
+          "args": {
+            "page": 256
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "go to page 1",
+      "accept": [
+        {
+          "tool": "jump_to_page",
+          "args": {
+            "page": 1
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "go to page 88",
+      "accept": [
+        {
+          "tool": "jump_to_page",
+          "args": {
+            "page": 88
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "go to page 300",
+      "accept": [
+        {
+          "tool": "jump_to_page",
+          "args": {
+            "page": 300
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "go to page 15",
+      "accept": [
+        {
+          "tool": "jump_to_page",
+          "args": {
+            "page": 15
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "go to page 199",
+      "accept": [
+        {
+          "tool": "jump_to_page",
+          "args": {
+            "page": 199
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "go to page 64",
+      "accept": [
+        {
+          "tool": "jump_to_page",
+          "args": {
+            "page": 64
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "summarize this section",
+      "accept": [
+        {
+          "tool": "summarize_section",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "give me a summary of what we just read",
+      "accept": [
+        {
+          "tool": "summarize_section",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "sum up the current section",
+      "accept": [
+        {
+          "tool": "summarize_section",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "recap this part of the book",
+      "accept": [
+        {
+          "tool": "summarize_section",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "briefly summarize the section we are in",
+      "accept": [
+        {
+          "tool": "summarize_section",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "what is the gist of this section",
+      "accept": [
+        {
+          "tool": "summarize_section",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "summarize what the author said here",
+      "accept": [
+        {
+          "tool": "summarize_section",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "give me the short version of this section",
+      "accept": [
+        {
+          "tool": "summarize_section",
+          "args": {}
+        }
+      ]
+    },
+    {
+      "utterance": "show me the text around the current position",
+      "accept": [
+        {
+          "tool": "get_context_around_position",
+          "any_args": true
+        }
+      ]
+    },
+    {
+      "utterance": "fetch the surrounding book text",
+      "accept": [
+        {
+          "tool": "get_context_around_position",
+          "any_args": true
+        }
+      ]
+    },
+    {
+      "utterance": "get the context around where we are",
+      "accept": [
+        {
+          "tool": "get_context_around_position",
+          "any_args": true
+        }
+      ]
+    },
+    {
+      "utterance": "pull up the text near the playback position",
+      "accept": [
+        {
+          "tool": "get_context_around_position",
+          "any_args": true
+        }
+      ]
+    },
+    {
+      "utterance": "what text is around the current spot",
+      "accept": [
+        {
+          "tool": "get_context_around_position",
+          "any_args": true
+        }
+      ]
+    },
+    {
+      "utterance": "load the passage around the current position",
+      "accept": [
+        {
+          "tool": "get_context_around_position",
+          "any_args": true
+        }
+      ]
+    },
+    {
+      "utterance": "fetch the book text around here",
+      "accept": [
+        {
+          "tool": "get_context_around_position",
+          "any_args": true
+        }
+      ]
+    },
+    {
+      "utterance": "bring up the context window for this position",
+      "accept": [
+        {
+          "tool": "get_context_around_position",
+          "any_args": true
+        }
+      ]
+    },
+    {
+      "utterance": "point the preview at figure fig-3",
+      "accept": [
+        {
+          "tool": "teacher_anchor",
+          "args": {
+            "kind": "figure",
+            "id": "fig-3"
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "spotlight equation eq-2 in the preview",
+      "accept": [
+        {
+          "tool": "teacher_anchor",
+          "args": {
+            "kind": "equation",
+            "id": "eq-2"
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "highlight table tbl-1 in the live preview",
+      "accept": [
+        {
+          "tool": "teacher_anchor",
+          "args": {
+            "kind": "table",
+            "id": "tbl-1"
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "anchor the preview on section sec-9",
+      "accept": [
+        {
+          "tool": "teacher_anchor",
+          "args": {
+            "kind": "section",
+            "id": "sec-9"
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "show figure fig-3 in the preview pane",
+      "accept": [
+        {
+          "tool": "teacher_anchor",
+          "args": {
+            "kind": "figure",
+            "id": "fig-3"
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "focus the preview on equation eq-2",
+      "accept": [
+        {
+          "tool": "teacher_anchor",
+          "args": {
+            "kind": "equation",
+            "id": "eq-2"
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "move the preview to table tbl-1",
+      "accept": [
+        {
+          "tool": "teacher_anchor",
+          "args": {
+            "kind": "table",
+            "id": "tbl-1"
+          }
+        }
+      ]
+    },
+    {
+      "utterance": "scroll the preview to section sec-9",
+      "accept": [
+        {
+          "tool": "teacher_anchor",
+          "args": {
+            "kind": "section",
+            "id": "sec-9"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE render_job SET vision_plan_json = ?, updated_at = ? WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "3690f0f1fb2c23d2c887fdb629a450d304b78401e23c95ba0368d2356d659cb6"
+}

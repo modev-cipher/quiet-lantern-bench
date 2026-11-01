@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE render_job SET checkpoint_json = ?, updated_at = ? WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "c38f43eb647f83e1765a12df33992cdfc478099d8be6ff0de6cb40d84803ac9a"
+}

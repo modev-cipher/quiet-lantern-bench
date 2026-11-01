@@ -1,0 +1,38 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT a.segment_id as \"segment_id!\", a.source,\n                  a.words_json as \"words_json: WordsJson\", a.wer\n           FROM alignment a\n           JOIN script_segment s ON s.id = a.segment_id\n           WHERE s.job_id = ?\n           ORDER BY s.idx",
+  "describe": {
+    "columns": [
+      {
+        "name": "segment_id!",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "source",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "words_json: WordsJson",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "wer",
+        "ordinal": 3,
+        "type_info": "Float"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "beb6974c8f97f9e18157558719259bf2932d9fc3116e883f6a4a17f8f3e17131"
+}

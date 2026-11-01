@@ -1,0 +1,140 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id as \"id!\", book_id, scope_json, mode, voice_profile_id, output_format,\n                  model_overrides_json, resource_plan_json, vision_plan_json, tts_plan_json,\n                  align_plan_json, state, checkpoint_json,\n                  overnight as \"overnight: bool\", eta_seconds, report_json, output_paths_json,\n                  tts_seed, verify as \"verify: bool\", created_at, updated_at\n           FROM render_job WHERE id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "book_id",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "scope_json",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "mode",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "voice_profile_id",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "output_format",
+        "ordinal": 5,
+        "type_info": "Text"
+      },
+      {
+        "name": "model_overrides_json",
+        "ordinal": 6,
+        "type_info": "Text"
+      },
+      {
+        "name": "resource_plan_json",
+        "ordinal": 7,
+        "type_info": "Text"
+      },
+      {
+        "name": "vision_plan_json",
+        "ordinal": 8,
+        "type_info": "Text"
+      },
+      {
+        "name": "tts_plan_json",
+        "ordinal": 9,
+        "type_info": "Text"
+      },
+      {
+        "name": "align_plan_json",
+        "ordinal": 10,
+        "type_info": "Text"
+      },
+      {
+        "name": "state",
+        "ordinal": 11,
+        "type_info": "Text"
+      },
+      {
+        "name": "checkpoint_json",
+        "ordinal": 12,
+        "type_info": "Text"
+      },
+      {
+        "name": "overnight: bool",
+        "ordinal": 13,
+        "type_info": "Integer"
+      },
+      {
+        "name": "eta_seconds",
+        "ordinal": 14,
+        "type_info": "Integer"
+      },
+      {
+        "name": "report_json",
+        "ordinal": 15,
+        "type_info": "Text"
+      },
+      {
+        "name": "output_paths_json",
+        "ordinal": 16,
+        "type_info": "Text"
+      },
+      {
+        "name": "tts_seed",
+        "ordinal": 17,
+        "type_info": "Integer"
+      },
+      {
+        "name": "verify: bool",
+        "ordinal": 18,
+        "type_info": "Integer"
+      },
+      {
+        "name": "created_at",
+        "ordinal": 19,
+        "type_info": "Integer"
+      },
+      {
+        "name": "updated_at",
+        "ordinal": 20,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "0f9752880eb01d46fe9da1061d6c0810e9f7c8145236a1f88db477f5bcf180d3"
+}

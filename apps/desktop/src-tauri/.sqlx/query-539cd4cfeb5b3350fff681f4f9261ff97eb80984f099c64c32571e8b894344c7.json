@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT extracting_since FROM book WHERE id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "extracting_since",
+        "ordinal": 0,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "539cd4cfeb5b3350fff681f4f9261ff97eb80984f099c64c32571e8b894344c7"
+}

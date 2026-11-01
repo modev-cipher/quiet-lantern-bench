@@ -1,0 +1,6 @@
+{
+  "actualHash": "96357428d747e0434c708b0ce96eae5f1e44a0e5c2c44305f97767abf55c5d5e",
+  "chunkIndex": 0,
+  "declaredHash": "06357428d747e0434c708b0ce96eae5f1e44a0e5c2c44305f97767abf55c5d5e",
+  "rule": "manifest shape validation cannot see this; the phone refetches the chunk and refuses the file at commit"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM render_job WHERE id = ? AND state IN ('DONE', 'CANCELLED', 'FAILED', 'PAUSED')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "412daa3ed284919e484e65d6cecd59461fbdaec4974c418000759dc57dbbf5ce"
+}

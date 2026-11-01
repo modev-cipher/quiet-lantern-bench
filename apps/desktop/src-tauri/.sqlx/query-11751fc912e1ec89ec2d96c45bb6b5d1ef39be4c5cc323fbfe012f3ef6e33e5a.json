@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT rtf_table_json FROM hw_benchmark WHERE id = 1",
+  "describe": {
+    "columns": [
+      {
+        "name": "rtf_table_json",
+        "ordinal": 0,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "11751fc912e1ec89ec2d96c45bb6b5d1ef39be4c5cc323fbfe012f3ef6e33e5a"
+}

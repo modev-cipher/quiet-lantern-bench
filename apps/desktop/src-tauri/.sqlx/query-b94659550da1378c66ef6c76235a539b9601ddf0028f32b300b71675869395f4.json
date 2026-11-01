@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT path as \"path!\" FROM export WHERE book_id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "path!",
+        "ordinal": 0,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "b94659550da1378c66ef6c76235a539b9601ddf0028f32b300b71675869395f4"
+}

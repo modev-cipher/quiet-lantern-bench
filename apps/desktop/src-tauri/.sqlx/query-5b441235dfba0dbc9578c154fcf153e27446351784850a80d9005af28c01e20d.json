@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO export (id, book_id, job_id, path, bytes, format, mode,\n                                 chapter_digest, created_at)\n           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)\n           ON CONFLICT(path) DO UPDATE SET\n              book_id = excluded.book_id,\n              job_id = excluded.job_id,\n              bytes = excluded.bytes,\n              format = excluded.format,\n              mode = excluded.mode,\n              chapter_digest = excluded.chapter_digest,\n              created_at = excluded.created_at\n           RETURNING id as \"id!\"",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!",
+        "ordinal": 0,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 9
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "5b441235dfba0dbc9578c154fcf153e27446351784850a80d9005af28c01e20d"
+}

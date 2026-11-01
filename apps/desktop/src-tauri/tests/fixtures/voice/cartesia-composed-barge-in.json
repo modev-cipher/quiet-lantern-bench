@@ -1,0 +1,75 @@
+{
+  "name": "cartesia-composed-barge-in",
+  "provider": "cartesia",
+  "doc_url": "https://docs.cartesia.ai/api-reference/tts/tts",
+  "doc_accessed": "2026-08-21",
+  "channel_protocol_version": 1,
+  "steps": [
+    {
+      "expect_handshake": {
+        "connection": 1,
+        "target_contains": ["/tts/websocket", "cartesia_version=2026-08-14"],
+        "target_absent": ["access_token", "x-api-key", "fixture-cartesia-key"],
+        "headers_present": ["x-api-key"]
+      }
+    },
+    {
+      "expect_text": {
+        "contains": [
+          "\"model_id\":\"sonic-2\"",
+          "\"transcript\":\"Figure three shows a phase diagram.\"",
+          "\"voice\":\"voice-abc\"",
+          "\"container\":\"raw\"",
+          "\"encoding\":\"pcm_s16le\"",
+          "\"sample_rate\":24000",
+          "\"context_id\":\"turn-1\"",
+          "\"add_timestamps\":true",
+          "\"continue\":false"
+        ],
+        "absent": ["fixture-cartesia-key"]
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"chunk\",\"context_id\":\"turn-1\",\"status_code\":206,\"data\":\"6AMY/A==\"}"
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"chunk\",\"context_id\":\"turn-1\",\"status_code\":206,\"data\":\"AQH+/w==\"}"
+      }
+    },
+    {
+      "expect_text": {
+        "contains": ["\"context_id\":\"turn-1\"", "\"cancel\":true"],
+        "absent": ["fixture-cartesia-key"]
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"chunk\",\"context_id\":\"turn-1\",\"status_code\":206,\"data\":\"KgA=\"}"
+      }
+    },
+    {
+      "expect_text": {
+        "contains": [
+          "\"transcript\":\"It plots pressure against temperature.\"",
+          "\"context_id\":\"turn-2\"",
+          "\"add_timestamps\":true",
+          "\"continue\":false"
+        ],
+        "absent": ["fixture-cartesia-key"]
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"chunk\",\"context_id\":\"turn-2\",\"status_code\":206,\"data\":\"/38AgA==\"}"
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"done\",\"context_id\":\"turn-2\",\"status_code\":200}"
+      }
+    }
+  ]
+}

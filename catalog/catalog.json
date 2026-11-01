@@ -1,0 +1,995 @@
+{
+  "catalog_version": "2026.10.2",
+  "models": [
+    {
+      "id": "phi4-mini-q4km",
+      "task": "llm",
+      "display_name": "Phi-4-mini 3.8B",
+      "family": "phi",
+      "quant": "Q4_K_M",
+      "format": "gguf",
+      "disk_bytes": 2491874272,
+      "full_gpu_vram_mb": 3584,
+      "min_free_ram_mb": 4096,
+      "hybrid_capable": true,
+      "ctx_max": 131072,
+      "quality_score": 74,
+      "speed_score": 85,
+      "capabilities": [
+        "teacher_mode",
+        "normalization"
+      ],
+      "languages": [
+        "en"
+      ],
+      "license": {
+        "spdx": "MIT",
+        "commercial_ok": true
+      },
+      "download": {
+        "files": [
+          {
+            "url": "https://huggingface.co/unsloth/Phi-4-mini-instruct-GGUF/resolve/78eb92a46fc37e6b524df991ed9aca9bc6aa7b80/Phi-4-mini-instruct-Q4_K_M.gguf",
+            "sha256": "88c00229914083cd112853aab84ed51b87bdf6b9ce42f532d8c85c7c63b1730a",
+            "dest_path": "Phi-4-mini-instruct-Q4_K_M.gguf",
+            "size_bytes": 2491874272
+          }
+        ]
+      },
+      "source": "curated",
+      "evidence": [
+        "https://www.mayhemcode.com/2026/06/best-local-llms-for-4gb-6gb-and-8gb.html"
+      ],
+      "perf": {
+        "tok_s_gpu": 75.0,
+        "tok_s_cpu": 12.0
+      },
+      "deprecated": true,
+      "replacement": "gemma4-e2b-q4km"
+    },
+    {
+      "id": "gemma4-e2b-q4km",
+      "task": "llm",
+      "display_name": "Gemma 4 E2B",
+      "family": "gemma",
+      "quant": "Q4_K_M",
+      "format": "gguf",
+      "disk_bytes": 4092392352,
+      "full_gpu_vram_mb": 2560,
+      "min_free_ram_mb": 3072,
+      "hybrid_capable": true,
+      "ctx_max": 131072,
+      "quality_score": 70,
+      "speed_score": 90,
+      "capabilities": [
+        "teacher_mode",
+        "normalization",
+        "figure_explanation"
+      ],
+      "languages": [
+        "en"
+      ],
+      "license": {
+        "spdx": "Apache-2.0",
+        "commercial_ok": true
+      },
+      "download": {
+        "files": [
+          {
+            "url": "https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF/resolve/0314792d7f1f7e229411f620751375812bb9faf2/gemma-4-E2B-it-Q4_K_M.gguf",
+            "sha256": "740185b21d22ceb83a11c3aa62ad5842ef32c70f6096d756bbee85a1e4ec34b8",
+            "dest_path": "gemma-4-E2B-it-Q4_K_M.gguf",
+            "size_bytes": 3106738272
+          },
+          {
+            "url": "https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF/resolve/0314792d7f1f7e229411f620751375812bb9faf2/mmproj-F16.gguf",
+            "sha256": "140be8d7849741f88c50757d529b84373ee8e27052cc2236855b537f4a8215fa",
+            "dest_path": "mmproj-F16.gguf",
+            "size_bytes": 985654080
+          }
+        ]
+      },
+      "source": "curated",
+      "evidence": [
+        "https://www.mayhemcode.com/2026/06/best-local-llms-for-4gb-6gb-and-8gb.html"
+      ],
+      "perf": {
+        "tok_s_gpu": 90.0,
+        "tok_s_cpu": 16.0
+      }
+    },
+    {
+      "id": "gemma4-e4b-q4km",
+      "task": "llm",
+      "display_name": "Gemma 4 E4B Instruct",
+      "family": "gemma",
+      "quant": "Q4_K_M",
+      "format": "gguf",
+      "disk_bytes": 5967544256,
+      "full_gpu_vram_mb": 5500,
+      "min_free_ram_mb": 6144,
+      "hybrid_capable": true,
+      "ctx_max": 131072,
+      "quality_score": 80,
+      "speed_score": 75,
+      "capabilities": [
+        "teacher_mode",
+        "normalization",
+        "figure_explanation"
+      ],
+      "languages": [
+        "en"
+      ],
+      "license": {
+        "spdx": "Apache-2.0",
+        "commercial_ok": true
+      },
+      "download": {
+        "files": [
+          {
+            "url": "https://huggingface.co/unsloth/gemma-4-E4B-it-GGUF/resolve/bfc15c382204943c3a8fff0c750b94ae2364d7a3/gemma-4-E4B-it-Q4_K_M.gguf",
+            "sha256": "85a896a047553e842f25297ee5b031d64ff30147d9c4af17b1e4b394cd1fab87",
+            "dest_path": "gemma-4-E4B-it-Q4_K_M.gguf",
+            "size_bytes": 4977171584
+          },
+          {
+            "url": "https://huggingface.co/unsloth/gemma-4-E4B-it-GGUF/resolve/bfc15c382204943c3a8fff0c750b94ae2364d7a3/mmproj-F16.gguf",
+            "sha256": "ddf46c21d7078e95338cfc22306b19b276a29a5ad089023449dd54d4b6170a51",
+            "dest_path": "mmproj-F16.gguf",
+            "size_bytes": 990372672
+          }
+        ]
+      },
+      "source": "curated",
+      "evidence": [
+        "https://www.mayhemcode.com/2026/06/best-local-llms-for-4gb-6gb-and-8gb.html"
+      ],
+      "perf": {
+        "tok_s_gpu": 55.0,
+        "tok_s_cpu": 8.0
+      }
+    },
+    {
+      "id": "qwen3.5-9b-instruct-q4km",
+      "task": "llm",
+      "display_name": "Qwen 3.5 9B Instruct",
+      "family": "qwen",
+      "quant": "Q4_K_M",
+      "format": "gguf",
+      "disk_bytes": 6598688544,
+      "full_gpu_vram_mb": 7200,
+      "min_free_ram_mb": 8192,
+      "hybrid_capable": true,
+      "ctx_max": 131072,
+      "quality_score": 92,
+      "speed_score": 70,
+      "capabilities": [
+        "teacher_mode",
+        "normalization",
+        "tool_use",
+        "figure_explanation"
+      ],
+      "languages": [
+        "en",
+        "zh"
+      ],
+      "license": {
+        "spdx": "Apache-2.0",
+        "commercial_ok": true
+      },
+      "download": {
+        "files": [
+          {
+            "url": "https://huggingface.co/unsloth/Qwen3.5-9B-GGUF/resolve/3885219b6810b007914f3a7950a8d1b469d598a5/Qwen3.5-9B-Q4_K_M.gguf",
+            "sha256": "03b74727a860a56338e042c4420bb3f04b2fec5734175f4cb9fa853daf52b7e8",
+            "dest_path": "Qwen3.5-9B-Q4_K_M.gguf",
+            "size_bytes": 5680522464
+          },
+          {
+            "url": "https://huggingface.co/unsloth/Qwen3.5-9B-GGUF/resolve/3885219b6810b007914f3a7950a8d1b469d598a5/mmproj-F16.gguf",
+            "sha256": "f70dc3509053962b0d0d3ee8a7eacebf5d60aa560cad78254ae8698516ae029f",
+            "dest_path": "mmproj-F16.gguf",
+            "size_bytes": 918166080
+          }
+        ]
+      },
+      "source": "curated",
+      "evidence": [
+        "https://www.mayhemcode.com/2026/06/best-local-llms-for-4gb-6gb-and-8gb.html"
+      ],
+      "perf": {
+        "tok_s_gpu": 40.0,
+        "tok_s_cpu": 4.5
+      }
+    },
+    {
+      "id": "qwen3.5-27b-q4km",
+      "task": "llm",
+      "display_name": "Qwen 3.5 27B Instruct",
+      "family": "qwen",
+      "quant": "Q4_K_M",
+      "format": "gguf",
+      "disk_bytes": 17668419744,
+      "full_gpu_vram_mb": 18500,
+      "min_free_ram_mb": 20480,
+      "hybrid_capable": true,
+      "ctx_max": 262144,
+      "quality_score": 97,
+      "speed_score": 40,
+      "capabilities": [
+        "teacher_mode",
+        "normalization",
+        "tool_use",
+        "figure_explanation"
+      ],
+      "languages": [
+        "en",
+        "zh"
+      ],
+      "license": {
+        "spdx": "Apache-2.0",
+        "commercial_ok": true
+      },
+      "download": {
+        "files": [
+          {
+            "url": "https://huggingface.co/unsloth/Qwen3.5-27B-GGUF/resolve/3221f178a6b842d04f1fb42f1c413534adcc0a6a/Qwen3.5-27B-Q4_K_M.gguf",
+            "sha256": "84b5f7f112156d63836a01a69dc3f11a6ba63b10a23b8ca7a7efaf52d5a2d806",
+            "dest_path": "Qwen3.5-27B-Q4_K_M.gguf",
+            "size_bytes": 16740812704
+          },
+          {
+            "url": "https://huggingface.co/unsloth/Qwen3.5-27B-GGUF/resolve/3221f178a6b842d04f1fb42f1c413534adcc0a6a/mmproj-F16.gguf",
+            "sha256": "458bc46d8f275866fde5d88c9c554d9d462a6e8e3a028090d9850e17ab6a1217",
+            "dest_path": "mmproj-F16.gguf",
+            "size_bytes": 927607040
+          }
+        ]
+      },
+      "source": "curated",
+      "evidence": [
+        "https://www.mayhemcode.com/2026/06/best-local-llms-for-4gb-6gb-and-8gb.html",
+        "https://huggingface.co/Qwen/Qwen3.5-27B"
+      ],
+      "perf": {
+        "tok_s_gpu": 15.0,
+        "tok_s_cpu": 1.5
+      }
+    },
+    {
+      "id": "qwen3.5-32b-class-q4km",
+      "task": "llm",
+      "display_name": "Qwen 3.5 27B Instruct",
+      "family": "qwen",
+      "quant": "Q4_K_M",
+      "format": "gguf",
+      "disk_bytes": 16740812704,
+      "full_gpu_vram_mb": 18500,
+      "min_free_ram_mb": 20480,
+      "hybrid_capable": true,
+      "ctx_max": 131072,
+      "quality_score": 97,
+      "speed_score": 40,
+      "capabilities": [
+        "teacher_mode",
+        "normalization",
+        "tool_use"
+      ],
+      "languages": [
+        "en",
+        "zh"
+      ],
+      "license": {
+        "spdx": "Apache-2.0",
+        "commercial_ok": true
+      },
+      "download": {
+        "files": [
+          {
+            "url": "https://huggingface.co/unsloth/Qwen3.5-27B-GGUF/resolve/3221f178a6b842d04f1fb42f1c413534adcc0a6a/Qwen3.5-27B-Q4_K_M.gguf",
+            "sha256": "84b5f7f112156d63836a01a69dc3f11a6ba63b10a23b8ca7a7efaf52d5a2d806",
+            "dest_path": "Qwen3.5-27B-Q4_K_M.gguf",
+            "size_bytes": 16740812704
+          }
+        ]
+      },
+      "source": "curated",
+      "evidence": [
+        "https://www.mayhemcode.com/2026/06/best-local-llms-for-4gb-6gb-and-8gb.html"
+      ],
+      "deprecated": true,
+      "replacement": "qwen3.5-27b-q4km",
+      "perf": {
+        "tok_s_gpu": 15.0,
+        "tok_s_cpu": 1.5
+      }
+    },
+    {
+      "id": "kokoro-82m",
+      "task": "tts",
+      "display_name": "Kokoro-82M v1.0",
+      "family": "kokoro",
+      "format": "pytorch",
+      "disk_bytes": 348674924,
+      "full_gpu_vram_mb": 2560,
+      "min_free_ram_mb": 2048,
+      "hybrid_capable": false,
+      "quality_score": 82,
+      "speed_score": 95,
+      "capabilities": [
+        "timestamps",
+        "multi_voice"
+      ],
+      "languages": [
+        "en",
+        "ja",
+        "zh"
+      ],
+      "license": {
+        "spdx": "Apache-2.0",
+        "commercial_ok": true
+      },
+      "download": {
+        "files": [
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/kokoro-v1_0.pth",
+            "sha256": "496dba118d1a58f5f3db2efc88dbdc216e0483fc89fe6e47ee1f2c53f18ad1e4",
+            "dest_path": "kokoro-v1_0.pth",
+            "size_bytes": 327212226
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/config.json",
+            "sha256": "5abb01e2403b072bf03d04fde160443e209d7a0dad49a423be15196b9b43c17f",
+            "dest_path": "config.json",
+            "size_bytes": 2351
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/af_alloy.pt",
+            "sha256": "6d877149dd8b348fbad12e5845b7e43d975390e9f3b68a811d1d86168bef5aa3",
+            "dest_path": "voices/af_alloy.pt",
+            "size_bytes": 523425
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/af_aoede.pt",
+            "sha256": "c03bd1a4c3716c2d8eaa3d50022f62d5c31cfbd6e15933a00b17fefe13841cc4",
+            "dest_path": "voices/af_aoede.pt",
+            "size_bytes": 523425
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/af_bella.pt",
+            "sha256": "8cb64e02fcc8de0327a8e13817e49c76c945ecf0052ceac97d3081480e8e48d6",
+            "dest_path": "voices/af_bella.pt",
+            "size_bytes": 523425
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/af_heart.pt",
+            "sha256": "0ab5709b8ffab19bfd849cd11d98f75b60af7733253ad0d67b12382a102cb4ff",
+            "dest_path": "voices/af_heart.pt",
+            "size_bytes": 523425
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/af_jessica.pt",
+            "sha256": "cdfdccb8cc975aa34ee6b89642963b0064237675de0e41a30ae64cc958dd4e87",
+            "dest_path": "voices/af_jessica.pt",
+            "size_bytes": 523435
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/af_kore.pt",
+            "sha256": "8bfbc512321c3db49dff984ac675fa5ac7eaed5a96cc31104d3a9080e179d69d",
+            "dest_path": "voices/af_kore.pt",
+            "size_bytes": 523420
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/af_nicole.pt",
+            "sha256": "c5561808bcf5250fe8c5f5de32caf2d94f27e57e95befdb098c5c85991d4c5da",
+            "dest_path": "voices/af_nicole.pt",
+            "size_bytes": 523430
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/af_nova.pt",
+            "sha256": "e0233676ddc21908c37a1f102f6b88a59e4e5c1bd764983616eb9eda629dbcd2",
+            "dest_path": "voices/af_nova.pt",
+            "size_bytes": 523420
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/af_river.pt",
+            "sha256": "e149459bd9c084416b74756b9bd3418256a8b839088abb07d463730c369dab8f",
+            "dest_path": "voices/af_river.pt",
+            "size_bytes": 523425
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/af_sarah.pt",
+            "sha256": "49bd364ea3be9eb3e9685e8f9a15448c4883112a7c0ff7ab139fa4088b08cef9",
+            "dest_path": "voices/af_sarah.pt",
+            "size_bytes": 523425
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/af_sky.pt",
+            "sha256": "c799548aed06e0cb0d655a85a01b48e7f10484d71663f9a3045a5b9362e8512c",
+            "dest_path": "voices/af_sky.pt",
+            "size_bytes": 523351
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/am_adam.pt",
+            "sha256": "ced7e284aba12472891be1da3ab34db84cc05cc02b5889535796dbf2d8b0cb34",
+            "dest_path": "voices/am_adam.pt",
+            "size_bytes": 523420
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/am_echo.pt",
+            "sha256": "8bcfdc852bc985fb45c396c561e571ffb9183930071f962f1b50df5c97b161e8",
+            "dest_path": "voices/am_echo.pt",
+            "size_bytes": 523420
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/am_eric.pt",
+            "sha256": "ada66f0eefff34ec921b1d7474d7ac8bec00cd863c170f1c534916e9b8212aae",
+            "dest_path": "voices/am_eric.pt",
+            "size_bytes": 523420
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/am_fenrir.pt",
+            "sha256": "98e507eca1db08230ae3b6232d59c10aec9630022d19accac4f5d12fcec3c37a",
+            "dest_path": "voices/am_fenrir.pt",
+            "size_bytes": 523430
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/am_liam.pt",
+            "sha256": "c82550757ddb31308b97f30040dda8c2d609a9e2de6135848d0a948368138518",
+            "dest_path": "voices/am_liam.pt",
+            "size_bytes": 523420
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/am_michael.pt",
+            "sha256": "9a443b79a4b22489a5b0ab7c651a0bcd1a30bef675c28333f06971abbd47bd37",
+            "dest_path": "voices/am_michael.pt",
+            "size_bytes": 523435
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/am_onyx.pt",
+            "sha256": "e8452be16cd0f6da7b4579eaf7b1e4506e92524882053d86d72b96b9a7fed584",
+            "dest_path": "voices/am_onyx.pt",
+            "size_bytes": 523420
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/am_puck.pt",
+            "sha256": "dd1d8973f4ce4b7d8ae407c77a435f485dabc052081b80ea75c4f30b84f36223",
+            "dest_path": "voices/am_puck.pt",
+            "size_bytes": 523420
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/am_santa.pt",
+            "sha256": "7f2f7582fa2b1f160e90aafe6d0b442a685e773608b6667e545d743b073e97a7",
+            "dest_path": "voices/am_santa.pt",
+            "size_bytes": 523425
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/bf_alice.pt",
+            "sha256": "d292651b6af6c0d81705c2580dcb4463fccc0ff7b8d618a471dbb4e45655b3f3",
+            "dest_path": "voices/bf_alice.pt",
+            "size_bytes": 523425
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/bf_emma.pt",
+            "sha256": "d0a423deabf4a52b4f49318c51742c54e21bb89bbbe9a12141e7758ddb5da701",
+            "dest_path": "voices/bf_emma.pt",
+            "size_bytes": 523420
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/bf_isabella.pt",
+            "sha256": "cdd4c37003805104d1d08fb1e05855c8fb2c68de24ca6e71f264a30aaa59eefd",
+            "dest_path": "voices/bf_isabella.pt",
+            "size_bytes": 523440
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/bf_lily.pt",
+            "sha256": "6e09c2e481e2d53004d7e5ae7d3a325369e130a6f45c35a6002de75084be9285",
+            "dest_path": "voices/bf_lily.pt",
+            "size_bytes": 523420
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/bm_daniel.pt",
+            "sha256": "fc3fce4e9c12ed4dbc8fa9680cfe51ee190a96444ce7c3ad647549a30823fc5d",
+            "dest_path": "voices/bm_daniel.pt",
+            "size_bytes": 523430
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/bm_fable.pt",
+            "sha256": "d44935f3135257a9064df99f007fc1342ff1aa767552b4a4fa4c3b2e6e59079c",
+            "dest_path": "voices/bm_fable.pt",
+            "size_bytes": 523425
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/bm_george.pt",
+            "sha256": "f1bc812213dc59774769e5c80004b13eeb79bd78130b11b2d7f934542dab811b",
+            "dest_path": "voices/bm_george.pt",
+            "size_bytes": 523430
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/bm_lewis.pt",
+            "sha256": "b5204750dcba01029d2ac9cec17aec3b20a6d64073c579d694a23cb40effbd0e",
+            "dest_path": "voices/bm_lewis.pt",
+            "size_bytes": 523425
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/jf_alpha.pt",
+            "sha256": "1bf4c9dc69e45ee46183b071f4db766349aac5592acbcfeaf051018048a5d787",
+            "dest_path": "voices/jf_alpha.pt",
+            "size_bytes": 523425
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/jf_gongitsune.pt",
+            "sha256": "1b171917f18f351e65f2bf9657700cd6bfec4e65589c297525b9cf3c20105770",
+            "dest_path": "voices/jf_gongitsune.pt",
+            "size_bytes": 523351
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/jf_nezumi.pt",
+            "sha256": "d83f007a7f01783b77014561a7d493d327a0210e143440e91c9b697590d27661",
+            "dest_path": "voices/jf_nezumi.pt",
+            "size_bytes": 523420
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/jf_tebukuro.pt",
+            "sha256": "0d6917904438aec85f73a6fa1f7ac2be6481aae47c697834936930a91796c576",
+            "dest_path": "voices/jf_tebukuro.pt",
+            "size_bytes": 523435
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/jm_kumo.pt",
+            "sha256": "98340afd68b1cee84fe0cd95528cfa6d4b39e416aa75a9df64049d52c8b55896",
+            "dest_path": "voices/jm_kumo.pt",
+            "size_bytes": 523425
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/zf_xiaobei.pt",
+            "sha256": "9b76be63dab4f4f96962030acc0126a9aee9728608fbbe115e2b58a2bd504df6",
+            "dest_path": "voices/zf_xiaobei.pt",
+            "size_bytes": 523435
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/zf_xiaoni.pt",
+            "sha256": "95b49f169bf1640f4f43c25e13daa39f7b98d15d00823e83ef5c14b3ced59e49",
+            "dest_path": "voices/zf_xiaoni.pt",
+            "size_bytes": 523430
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/zf_xiaoxiao.pt",
+            "sha256": "cfaf6f2ded1ee56f1ff94fcd2b0e6cdf32e5b794bdc05b44e7439d44aef5887c",
+            "dest_path": "voices/zf_xiaoxiao.pt",
+            "size_bytes": 523440
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/zf_xiaoyi.pt",
+            "sha256": "b5235dbaeef85a4c613bf78af9a88ff63c25bac5f26ba77e36186d8b7ebf05e2",
+            "dest_path": "voices/zf_xiaoyi.pt",
+            "size_bytes": 523430
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/zm_yunjian.pt",
+            "sha256": "76cbf8bad35901d011d9628a2fdceb7b4f1f127e7a3269cb393b3941eb7fc417",
+            "dest_path": "voices/zm_yunjian.pt",
+            "size_bytes": 523435
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/zm_yunxi.pt",
+            "sha256": "dbe6e1ce7c3dbaf2f5667432947b638b1c6831ccbe154c4610dbcc44f431e27b",
+            "dest_path": "voices/zm_yunxi.pt",
+            "size_bytes": 523425
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/zm_yunxia.pt",
+            "sha256": "bb2b03b08e84d64e1214440ce3b624987fac177f2eeb5bab8571799a3d980acd",
+            "dest_path": "voices/zm_yunxia.pt",
+            "size_bytes": 523430
+          },
+          {
+            "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/zm_yunyang.pt",
+            "sha256": "5238ac22e0c7f8b6cdd2eddd6e444b8a700b73c4674d9a047d59a94ff96379a2",
+            "dest_path": "voices/zm_yunyang.pt",
+            "size_bytes": 523435
+          }
+        ]
+      },
+      "source": "curated",
+      "evidence": [
+        "https://localaimaster.com/blog/best-local-tts-models"
+      ],
+      "perf": {
+        "rtf_gpu": 0.03,
+        "rtf_cpu": 1.0
+      }
+    },
+    {
+      "id": "chatterbox-0.5b",
+      "task": "tts",
+      "display_name": "Chatterbox",
+      "family": "chatterbox",
+      "format": "pytorch",
+      "disk_bytes": 3191966992,
+      "full_gpu_vram_mb": 5120,
+      "min_free_ram_mb": 6144,
+      "hybrid_capable": false,
+      "quality_score": 90,
+      "speed_score": 70,
+      "capabilities": [
+        "voice_cloning"
+      ],
+      "languages": [
+        "en"
+      ],
+      "license": {
+        "spdx": "MIT",
+        "commercial_ok": true
+      },
+      "download": {
+        "files": [
+          {
+            "url": "https://huggingface.co/ResembleAI/chatterbox/resolve/5bb1f6ee58e50c3b8d408bc82a6d3740c2db6e18/ve.safetensors",
+            "sha256": "f0921cab452fa278bc25cd23ffd59d36f816d7dc5181dd1bef9751a7fb61f63c",
+            "dest_path": "ve.safetensors",
+            "size_bytes": 5695784
+          },
+          {
+            "url": "https://huggingface.co/ResembleAI/chatterbox/resolve/5bb1f6ee58e50c3b8d408bc82a6d3740c2db6e18/t3_cfg.safetensors",
+            "sha256": "914cb1696f47527fe8852ca8f1fe1fa63cb34f76f9c715e84e067b744dd0da81",
+            "dest_path": "t3_cfg.safetensors",
+            "size_bytes": 2129653744
+          },
+          {
+            "url": "https://huggingface.co/ResembleAI/chatterbox/resolve/5bb1f6ee58e50c3b8d408bc82a6d3740c2db6e18/s3gen.safetensors",
+            "sha256": "2b78103c654207393955e4900aac14a12de8ef25f4b09424f1ef91941f161d4e",
+            "dest_path": "s3gen.safetensors",
+            "size_bytes": 1056484620
+          },
+          {
+            "url": "https://huggingface.co/ResembleAI/chatterbox/resolve/5bb1f6ee58e50c3b8d408bc82a6d3740c2db6e18/tokenizer.json",
+            "sha256": "d71e3a44eabb1784df9a68e9f95b251ecbf1a7af6a9f50835856b2ca9d8c14a5",
+            "dest_path": "tokenizer.json",
+            "size_bytes": 25470
+          },
+          {
+            "url": "https://huggingface.co/ResembleAI/chatterbox/resolve/5bb1f6ee58e50c3b8d408bc82a6d3740c2db6e18/conds.pt",
+            "sha256": "6552d70568833628ba019c6b03459e77fe71ca197d5c560cef9411bee9d87f4e",
+            "dest_path": "conds.pt",
+            "size_bytes": 107374
+          }
+        ]
+      },
+      "source": "curated",
+      "evidence": [
+        "https://findskill.ai/blog/best-open-source-tts-2026/"
+      ],
+      "perf": {
+        "rtf_gpu": 0.2,
+        "rtf_cpu": 4.0
+      }
+    },
+    {
+      "id": "whisperx-small-int8",
+      "task": "align",
+      "display_name": "whisperX small (int8)",
+      "family": "whisperx",
+      "quant": "int8",
+      "format": "ct2",
+      "disk_bytes": 486212372,
+      "full_gpu_vram_mb": 1024,
+      "min_free_ram_mb": 2048,
+      "hybrid_capable": false,
+      "quality_score": 80,
+      "speed_score": 90,
+      "capabilities": [
+        "word_timestamps"
+      ],
+      "languages": [
+        "en"
+      ],
+      "license": {
+        "spdx": "MIT",
+        "commercial_ok": true
+      },
+      "download": {
+        "files": [
+          {
+            "url": "https://huggingface.co/Systran/faster-whisper-small/resolve/536b0662742c02347bc0e980a01041f333bce120/model.bin",
+            "sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+            "dest_path": "model.bin",
+            "size_bytes": 483546902
+          },
+          {
+            "url": "https://huggingface.co/Systran/faster-whisper-small/resolve/536b0662742c02347bc0e980a01041f333bce120/config.json",
+            "sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+            "dest_path": "config.json",
+            "size_bytes": 2370
+          },
+          {
+            "url": "https://huggingface.co/Systran/faster-whisper-small/resolve/536b0662742c02347bc0e980a01041f333bce120/tokenizer.json",
+            "sha256": "fb7b63191e9bb045082c79fd742a3106a12c99513ab30df4a0d47fa6cb6fd0ab",
+            "dest_path": "tokenizer.json",
+            "size_bytes": 2203239
+          },
+          {
+            "url": "https://huggingface.co/Systran/faster-whisper-small/resolve/536b0662742c02347bc0e980a01041f333bce120/vocabulary.txt",
+            "sha256": "34ce3fe1c5041027b3f8d42912270993f986dbc4bb34cf27f951e34a1e453913",
+            "dest_path": "vocabulary.txt",
+            "size_bytes": 459861
+          }
+        ]
+      },
+      "source": "curated",
+      "evidence": [
+        "https://github.com/m-bain/whisperX"
+      ],
+      "perf": {
+        "rtf_gpu": 0.02,
+        "rtf_cpu": 0.07
+      }
+    },
+    {
+      "id": "whisperx-large-v3",
+      "task": "align",
+      "display_name": "whisperX large-v3",
+      "family": "whisperx",
+      "format": "ct2",
+      "disk_bytes": 3090835702,
+      "full_gpu_vram_mb": 8192,
+      "min_free_ram_mb": 10240,
+      "hybrid_capable": false,
+      "quality_score": 95,
+      "speed_score": 50,
+      "capabilities": [
+        "word_timestamps"
+      ],
+      "languages": [
+        "en"
+      ],
+      "license": {
+        "spdx": "MIT",
+        "commercial_ok": true
+      },
+      "download": {
+        "files": [
+          {
+            "url": "https://huggingface.co/Systran/faster-whisper-large-v3/resolve/edaa852ec7e145841d8ffdb056a99866b5f0a478/model.bin",
+            "sha256": "69f74147e3334731bc3a76048724833325d2ec74642fb52620eda87352e3d4f1",
+            "dest_path": "model.bin",
+            "size_bytes": 3087284237
+          },
+          {
+            "url": "https://huggingface.co/Systran/faster-whisper-large-v3/resolve/edaa852ec7e145841d8ffdb056a99866b5f0a478/config.json",
+            "sha256": "a9306624f5ec14270a014b647e5c316b6e03a662c369758d1b90697a7b0655b9",
+            "dest_path": "config.json",
+            "size_bytes": 2394
+          },
+          {
+            "url": "https://huggingface.co/Systran/faster-whisper-large-v3/resolve/edaa852ec7e145841d8ffdb056a99866b5f0a478/preprocessor_config.json",
+            "sha256": "7ccc62c6f2765af1f3b46c00c9b5894426835a05021c8b9c01eecb6dfb542711",
+            "dest_path": "preprocessor_config.json",
+            "size_bytes": 340
+          },
+          {
+            "url": "https://huggingface.co/Systran/faster-whisper-large-v3/resolve/edaa852ec7e145841d8ffdb056a99866b5f0a478/tokenizer.json",
+            "sha256": "6d8cbd7cd0d8d5815e478dac67b85a26bbe77c1f5e0c6d76d1ce2abc0e5f21ca",
+            "dest_path": "tokenizer.json",
+            "size_bytes": 2480617
+          },
+          {
+            "url": "https://huggingface.co/Systran/faster-whisper-large-v3/resolve/edaa852ec7e145841d8ffdb056a99866b5f0a478/vocabulary.json",
+            "sha256": "c69260f2ab26d659b7c398f9a2b2b48ed0df16c3b47d7326782fd9cba71690c1",
+            "dest_path": "vocabulary.json",
+            "size_bytes": 1068114
+          }
+        ]
+      },
+      "source": "curated",
+      "evidence": [
+        "https://github.com/m-bain/whisperX"
+      ],
+      "perf": {
+        "rtf_gpu": 0.1,
+        "rtf_cpu": 1.0
+      }
+    },
+    {
+      "id": "wav2vec2-base-960h",
+      "task": "align",
+      "display_name": "wav2vec2 base (960h)",
+      "family": "wav2vec2",
+      "format": "pytorch",
+      "disk_bytes": 377610353,
+      "full_gpu_vram_mb": 1024,
+      "min_free_ram_mb": 2048,
+      "hybrid_capable": false,
+      "quality_score": 85,
+      "speed_score": 95,
+      "capabilities": [
+        "word_timestamps"
+      ],
+      "languages": [
+        "en"
+      ],
+      "license": {
+        "spdx": "Apache-2.0",
+        "commercial_ok": true
+      },
+      "download": {
+        "files": [
+          {
+            "url": "https://huggingface.co/facebook/wav2vec2-base-960h/resolve/22aad52d435eb6dbaf354bdad9b0da84ce7d6156/config.json",
+            "sha256": "d3ec255c063d9f95057b553b19c20135b259875834a4fe9deb218a6be25b4cf3",
+            "dest_path": "config.json",
+            "size_bytes": 1596
+          },
+          {
+            "url": "https://huggingface.co/facebook/wav2vec2-base-960h/resolve/22aad52d435eb6dbaf354bdad9b0da84ce7d6156/feature_extractor_config.json",
+            "sha256": "d3de0c797bf9b65f90bc65c30cb7b303ebeda341f6fc80af33628c4b26b95632",
+            "dest_path": "feature_extractor_config.json",
+            "size_bytes": 158
+          },
+          {
+            "url": "https://huggingface.co/facebook/wav2vec2-base-960h/resolve/22aad52d435eb6dbaf354bdad9b0da84ce7d6156/model.safetensors",
+            "sha256": "8aa76ab2243c81747a1f832954586bc566090c83a0ac167df6f31f0fa917d74a",
+            "dest_path": "model.safetensors",
+            "size_bytes": 377607901
+          },
+          {
+            "url": "https://huggingface.co/facebook/wav2vec2-base-960h/resolve/22aad52d435eb6dbaf354bdad9b0da84ce7d6156/preprocessor_config.json",
+            "sha256": "b225d617c025463b9e157e06afea8b90dc7078fc70b013c533328423e0486b4a",
+            "dest_path": "preprocessor_config.json",
+            "size_bytes": 159
+          },
+          {
+            "url": "https://huggingface.co/facebook/wav2vec2-base-960h/resolve/22aad52d435eb6dbaf354bdad9b0da84ce7d6156/special_tokens_map.json",
+            "sha256": "bb7068de1150661a10b55f9e4b12a0e77af8bf91f5e45e1b58afaf1d0e17f675",
+            "dest_path": "special_tokens_map.json",
+            "size_bytes": 85
+          },
+          {
+            "url": "https://huggingface.co/facebook/wav2vec2-base-960h/resolve/22aad52d435eb6dbaf354bdad9b0da84ce7d6156/tokenizer_config.json",
+            "sha256": "dc790594f5bc351a4311c6624f40acd95850d4aaf2a5cb3c656c9b610720b608",
+            "dest_path": "tokenizer_config.json",
+            "size_bytes": 163
+          },
+          {
+            "url": "https://huggingface.co/facebook/wav2vec2-base-960h/resolve/22aad52d435eb6dbaf354bdad9b0da84ce7d6156/vocab.json",
+            "sha256": "19727f8944fe6459fc3f240ae2c198395b740f6a029bd23e06656266b83bcf64",
+            "dest_path": "vocab.json",
+            "size_bytes": 291
+          }
+        ]
+      },
+      "source": "curated",
+      "evidence": [
+        "https://huggingface.co/facebook/wav2vec2-base-960h"
+      ],
+      "perf": {
+        "rtf_gpu": 0.01,
+        "rtf_cpu": 0.05
+      }
+    },
+    {
+      "id": "docling-layout",
+      "task": "layout",
+      "display_name": "Docling layout suite",
+      "family": "docling",
+      "format": "pytorch",
+      "disk_bytes": 576402941,
+      "min_free_ram_mb": 2048,
+      "hybrid_capable": false,
+      "quality_score": 90,
+      "speed_score": 70,
+      "capabilities": [
+        "layout",
+        "tables",
+        "ocr",
+        "reading_order"
+      ],
+      "languages": [
+        "en"
+      ],
+      "license": {
+        "spdx": "Apache-2.0 AND CDLA-Permissive-2.0",
+        "commercial_ok": true
+      },
+      "download": {
+        "files": [
+          {
+            "url": "https://huggingface.co/docling-project/docling-layout-heron/resolve/8f39ad3c0b4c58e9c2d2c84a38465abf757272d8/model.safetensors",
+            "sha256": "00333a43451945aaf89db8ca9c0a17e75d1537c17db60fdb91aa95f4c7929e0c",
+            "dest_path": "docling-project--docling-layout-heron/model.safetensors",
+            "size_bytes": 171658996
+          },
+          {
+            "url": "https://huggingface.co/docling-project/docling-layout-heron/resolve/8f39ad3c0b4c58e9c2d2c84a38465abf757272d8/config.json",
+            "sha256": "fdea30805ce2f5666b147fca941dcdd27ad468e27d6ed21902207d3da056a97d",
+            "dest_path": "docling-project--docling-layout-heron/config.json",
+            "size_bytes": 3268
+          },
+          {
+            "url": "https://huggingface.co/docling-project/docling-layout-heron/resolve/8f39ad3c0b4c58e9c2d2c84a38465abf757272d8/preprocessor_config.json",
+            "sha256": "cd38cd59999e7a95d68e487fbe5132df3d4e5c32a0836add57e6126ba0c4eaf1",
+            "dest_path": "docling-project--docling-layout-heron/preprocessor_config.json",
+            "size_bytes": 444
+          },
+          {
+            "url": "https://huggingface.co/docling-project/docling-models/resolve/2199320848bb9a8a519d22e4b528185a4f9a6f64/model_artifacts/tableformer/fast/tableformer_fast.safetensors",
+            "sha256": "3119563aab5a7c96fda4d621119b63fd8806272b86c30936d15507616422f718",
+            "dest_path": "docling-project--docling-models/model_artifacts/tableformer/fast/tableformer_fast.safetensors",
+            "size_bytes": 145453276
+          },
+          {
+            "url": "https://huggingface.co/docling-project/docling-models/resolve/2199320848bb9a8a519d22e4b528185a4f9a6f64/model_artifacts/tableformer/fast/tm_config.json",
+            "sha256": "dca6762508dddfae6d57d6cb4ef822c6000119dff0f3b6489db7413118c2622a",
+            "dest_path": "docling-project--docling-models/model_artifacts/tableformer/fast/tm_config.json",
+            "size_bytes": 7060
+          },
+          {
+            "url": "https://huggingface.co/docling-project/docling-models/resolve/2199320848bb9a8a519d22e4b528185a4f9a6f64/model_artifacts/tableformer/accurate/tableformer_accurate.safetensors",
+            "sha256": "2a7d6c924b3cd12fb99a09280ca9c33a89c5d60b93253617d2e088c1a40374d9",
+            "dest_path": "docling-project--docling-models/model_artifacts/tableformer/accurate/tableformer_accurate.safetensors",
+            "size_bytes": 212758388
+          },
+          {
+            "url": "https://huggingface.co/docling-project/docling-models/resolve/2199320848bb9a8a519d22e4b528185a4f9a6f64/model_artifacts/tableformer/accurate/tm_config.json",
+            "sha256": "984e122ceb8ccf84d84c9d2882f6f2302a44b4f1e577babd6289892c36f3cffd",
+            "dest_path": "docling-project--docling-models/model_artifacts/tableformer/accurate/tm_config.json",
+            "size_bytes": 7060
+          },
+          {
+            "url": "https://www.modelscope.cn/models/RapidAI/RapidOCR/resolve/v3.9.0/torch/PP-OCRv4/det/en_PP-OCRv3_det_mobile.pth",
+            "sha256": "62aba369c8245f131bb08348a7d9c3135234d5c139ec92b34c8ac7b9ba7c2846",
+            "dest_path": "RapidOcr/torch/PP-OCRv4/det/en_PP-OCRv3_det_mobile.pth",
+            "size_bytes": 2540826
+          },
+          {
+            "url": "https://www.modelscope.cn/models/RapidAI/RapidOCR/resolve/v3.9.0/torch/PP-OCRv4/cls/ch_ptocr_mobile_v2.0_cls_mobile.pth",
+            "sha256": "bfe13860824b3365c0c7f7ccfcddc8ff11645c60051739ff18bc9913f60c98e1",
+            "dest_path": "RapidOcr/torch/PP-OCRv4/cls/ch_ptocr_mobile_v2.0_cls_mobile.pth",
+            "size_bytes": 588638
+          },
+          {
+            "url": "https://www.modelscope.cn/models/RapidAI/RapidOCR/resolve/v3.9.0/torch/PP-OCRv4/rec/en_PP-OCRv4_rec_mobile.pth",
+            "sha256": "f9723c94847de59df9b059faaed041fbb35f014ea973da40290b1e97004e1d4e",
+            "dest_path": "RapidOcr/torch/PP-OCRv4/rec/en_PP-OCRv4_rec_mobile.pth",
+            "size_bytes": 23761948
+          },
+          {
+            "url": "https://www.modelscope.cn/models/RapidAI/RapidOCR/resolve/v3.9.0/paddle/PP-OCRv4/rec/en_PP-OCRv4_rec_mobile/en_dict.txt",
+            "sha256": "5662df9d2d03f0e8ca0d3b0649d6acbab904b6a14b3d3521463c71c37c668ce3",
+            "dest_path": "RapidOcr/paddle/PP-OCRv4/rec/en_PP-OCRv4_rec_mobile/en_dict.txt",
+            "size_bytes": 190
+          },
+          {
+            "url": "https://www.modelscope.cn/models/RapidAI/RapidOCR/resolve/v3.9.0/resources/fonts/FZYTK.TTF",
+            "sha256": "4065a23df6823c8e2b69a0e76d02f02a6470b8774a5e91086609701ad95cc33f",
+            "dest_path": "RapidOcr/resources/fonts/FZYTK.TTF",
+            "size_bytes": 3241748
+          },
+          {
+            "url": "https://huggingface.co/docling-project/DocumentFigureClassifier-v2.5/resolve/f859dfbff5c9916cd996942d4b0db7fa25808220/model.safetensors",
+            "sha256": "6bf1e44d6bce316dcade6eb9929d8f8d23b6e8d9d29062b3b4011cff87c7c3cd",
+            "dest_path": "docling-project--DocumentFigureClassifier-v2.5/model.safetensors",
+            "size_bytes": 16378200
+          },
+          {
+            "url": "https://huggingface.co/docling-project/DocumentFigureClassifier-v2.5/resolve/f859dfbff5c9916cd996942d4b0db7fa25808220/config.json",
+            "sha256": "dbed0349fb8b12fad95d8ff7f43b062c40971e06d9d957b25e90d91dfd3bd77e",
+            "dest_path": "docling-project--DocumentFigureClassifier-v2.5/config.json",
+            "size_bytes": 2522
+          },
+          {
+            "url": "https://huggingface.co/docling-project/DocumentFigureClassifier-v2.5/resolve/f859dfbff5c9916cd996942d4b0db7fa25808220/preprocessor_config.json",
+            "sha256": "118dc069572036346fbacc3e15586089d3f8a9aaf9036c0c54b4666236a28032",
+            "dest_path": "docling-project--DocumentFigureClassifier-v2.5/preprocessor_config.json",
+            "size_bytes": 377
+          }
+        ]
+      },
+      "source": "curated",
+      "evidence": [
+        "https://github.com/docling-project/docling",
+        "https://github.com/RapidAI/RapidOCR"
+      ]
+    }
+  ]
+}

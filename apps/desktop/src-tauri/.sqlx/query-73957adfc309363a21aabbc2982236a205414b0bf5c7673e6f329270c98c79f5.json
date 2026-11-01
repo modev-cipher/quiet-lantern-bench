@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO cache_entry (hash, kind, bytes, last_used_at)\n         VALUES (?, ?, ?, ?)\n         ON CONFLICT(hash) DO UPDATE SET kind = excluded.kind,\n                                         bytes = excluded.bytes,\n                                         last_used_at = excluded.last_used_at",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "73957adfc309363a21aabbc2982236a205414b0bf5c7673e6f329270c98c79f5"
+}

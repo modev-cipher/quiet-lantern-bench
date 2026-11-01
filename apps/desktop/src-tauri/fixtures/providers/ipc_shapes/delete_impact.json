@@ -1,0 +1,4 @@
+{
+  "referencingJobs": ["job-1", "job-2"],
+  "referencingVoiceProfiles": ["Aria (cloud)"]
+}

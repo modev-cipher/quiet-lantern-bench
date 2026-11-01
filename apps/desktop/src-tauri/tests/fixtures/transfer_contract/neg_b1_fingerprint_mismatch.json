@@ -1,0 +1,6 @@
+{
+  "actualFingerprint": "a8100ae6aa1940d0b663bb31cd466142ebbdbd5187131b92d93818987832eb89",
+  "certDerHex": "ff",
+  "pinnedFingerprint": "ab12ab12ab12ab12ab12ab12ab12ab12ab12ab12ab12ab12ab12ab12ab12ab12",
+  "rule": "fingerprint = sha256(full DER) lowercase hex; mismatch aborts the TLS handshake"
+}

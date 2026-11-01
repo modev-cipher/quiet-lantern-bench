@@ -1,0 +1,38 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT segment_id as \"segment_id!\", source,\n                  words_json as \"words_json: WordsJson\", wer\n           FROM alignment WHERE segment_id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "segment_id!",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "source",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "words_json: WordsJson",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "wer",
+        "ordinal": 3,
+        "type_info": "Float"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "2fc9fa426945c9960db024fe94b00ada93fcc1ba0041526e72256cf59e9ccadc"
+}

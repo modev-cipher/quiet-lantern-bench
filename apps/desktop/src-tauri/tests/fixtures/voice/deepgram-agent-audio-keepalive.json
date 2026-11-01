@@ -1,0 +1,33 @@
+{
+  "name": "deepgram-agent-audio-keepalive",
+  "provider": "deepgram",
+  "doc_url": "https://developers.deepgram.com/docs/agent-keep-alive",
+  "doc_accessed": "2026-08-21",
+  "channel_protocol_version": 1,
+  "steps": [
+    {
+      "expect_text": {
+        "contains": ["\"type\":\"Settings\""],
+        "absent": ["fixture-deepgram-agent-key"]
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"Welcome\",\"request_id\":\"fixture-req-dgva-ka\"}"
+      }
+    },
+    { "send_text": { "text": "{\"type\":\"SettingsApplied\"}" } },
+    {
+      "expect_binary": {
+        "min_bytes": 14,
+        "payload_base64": "6AMY/AEB/v8AAP9/AIA="
+      }
+    },
+    {
+      "expect_text": {
+        "contains": ["\"type\":\"KeepAlive\""],
+        "absent": ["fixture-deepgram-agent-key", "fixture-byo-llm-key"]
+      }
+    }
+  ]
+}

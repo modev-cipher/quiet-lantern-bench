@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE render_job SET resource_plan_json = ?, updated_at = ?\n                 WHERE id = ? AND resource_plan_json = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "0f9ada476005668bceb1404f12cd6e0e7405d63488d345a94fe100230c8aa9cd"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO page (id, book_id, page_no, width_pt, height_pt, render_hash, text_json, needs_upgrade)\n             VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 8
+    },
+    "nullable": []
+  },
+  "hash": "92fce5186988186daa2f291d7d6324448bce56bbacbacc1df1f7dc68c52feb86"
+}

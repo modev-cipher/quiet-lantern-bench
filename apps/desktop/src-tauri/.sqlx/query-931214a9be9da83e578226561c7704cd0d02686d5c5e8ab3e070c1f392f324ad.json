@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE voice_transcript SET summarized = 1 WHERE session_id = ? AND turn_idx <= ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "931214a9be9da83e578226561c7704cd0d02686d5c5e8ab3e070c1f392f324ad"
+}

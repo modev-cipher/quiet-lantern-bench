@@ -1,0 +1,54 @@
+{
+  "name": "deepgram-agent-barge-in",
+  "provider": "deepgram",
+  "doc_url": "https://developers.deepgram.com/reference/voice-agent/voice-agent",
+  "doc_accessed": "2026-08-21",
+  "channel_protocol_version": 1,
+  "steps": [
+    {
+      "expect_text": {
+        "contains": ["\"type\":\"Settings\""],
+        "absent": ["fixture-deepgram-agent-key"]
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"Welcome\",\"request_id\":\"fixture-req-dgva-barge\"}"
+      }
+    },
+    { "send_text": { "text": "{\"type\":\"SettingsApplied\"}" } },
+    {
+      "expect_binary": {
+        "min_bytes": 4,
+        "payload_base64": "CgD2/w=="
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"AgentStartedSpeaking\",\"total_latency\":0.4,\"tts_latency\":0.19,\"ttt_latency\":0.21}"
+      }
+    },
+    { "send_binary": { "base64": "rghS9/9/AIA=" } },
+    {
+      "expect_binary": {
+        "min_bytes": 4,
+        "payload_base64": "FADs/w=="
+      }
+    },
+    { "send_text": { "text": "{\"type\":\"UserStartedSpeaking\"}" } },
+    { "send_binary": { "base64": "Chr25Q==" } },
+    {
+      "expect_binary": {
+        "min_bytes": 4,
+        "payload_base64": "HgDi/w=="
+      }
+    },
+    { "send_text": { "text": "{\"type\":\"AgentAudioDone\"}" } },
+    {
+      "send_text": {
+        "text": "{\"type\":\"AgentStartedSpeaking\",\"total_latency\":0.35,\"tts_latency\":0.17,\"ttt_latency\":0.18}"
+      }
+    },
+    { "send_binary": { "base64": "uCJI3XsA" } }
+  ]
+}

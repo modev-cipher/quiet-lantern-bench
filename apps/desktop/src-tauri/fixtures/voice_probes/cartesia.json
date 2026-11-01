@@ -1,0 +1,38 @@
+{
+  "provider": "cartesia",
+  "doc_url": "https://docs.cartesia.ai/api-reference/voices/list",
+  "checked": "2026-08-20",
+  "probe": {
+    "method": "GET",
+    "url": "https://api.cartesia.ai/voices?limit=1",
+    "auth_headers": ["authorization", "cartesia-version"]
+  },
+  "cartesia_version": "2026-08-14",
+  "responses": {
+    "active": {
+      "status": 200,
+      "body": "{\"data\":[{\"id\":\"a0e99841-438c-4a64-b679-ae501e7d6091\",\"name\":\"Sample Voice\"}],\"has_more\":true}",
+      "expect": "active"
+    },
+    "unauthorized_401": {
+      "status": 401,
+      "body": "{\"error\":\"Invalid API key\"}",
+      "expect": "invalid"
+    },
+    "forbidden_403": {
+      "status": 403,
+      "body": "{\"error\":\"Forbidden\"}",
+      "expect": "invalid"
+    },
+    "payment_required_402": {
+      "status": 402,
+      "body": "{\"error\":\"Payment required: credits exhausted\"}",
+      "expect": "out_of_quota"
+    },
+    "out_of_quota_429": {
+      "status": 429,
+      "body": "{\"error\":\"Too many requests\"}",
+      "expect": "out_of_quota"
+    }
+  }
+}

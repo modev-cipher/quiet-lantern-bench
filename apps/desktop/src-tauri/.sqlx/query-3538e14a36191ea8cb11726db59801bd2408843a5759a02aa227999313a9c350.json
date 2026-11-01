@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM voice_session WHERE book_id IS ? AND id IS NOT ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "3538e14a36191ea8cb11726db59801bd2408843a5759a02aa227999313a9c350"
+}

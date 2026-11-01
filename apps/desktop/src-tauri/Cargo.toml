@@ -1,0 +1,97 @@
+[package]
+name = "txtcaster"
+default-run = "txtcaster"
+version = "1.0.0"
+description = "Local-first offline book-to-audio/video converter"
+authors = ["meedoomostafa"]
+edition = "2021"
+publish = false
+license-file = "../../../LICENSE"
+
+[lib]
+name = "txtcaster_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+async-trait = "0.1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+time = { version = "0.3", features = ["std", "local-offset"] }
+tauri = { version = "2", features = ["protocol-asset"] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "process", "time", "io-util", "sync", "fs", "signal"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "stream", "rustls-tls"] }
+rand = "0.9"
+sha2 = "0.10"
+ring = "0.17"
+semver = "1"
+hex = "0.4"
+tar = "0.4.46"
+zstd = { version = "0.14", features = ["zstdmt"] }
+futures-util = "0.3"
+fs4 = "0.13"
+sqlx = { version = "0.8", default-features = false, features = ["sqlite", "runtime-tokio", "macros", "migrate"] }
+uuid = { version = "1", features = ["v7"] }
+tempfile = "3"
+regex = "1"
+httpdate = "1"
+tauri-plugin-dialog = "2.7.1"
+tauri-plugin-single-instance = "2"
+sys-locale = "0.3"
+keepawake = "0.6"
+hyper = { version = "1", features = ["http1", "server"] }
+hyper-util = { version = "0.1", features = ["tokio"] }
+http-body-util = "0.1"
+tower = { version = "0.5", features = ["util"] }
+tower-http = { version = "0.6", features = ["fs"] }
+unicode-normalization = "0.1"
+cpal = "0.18"
+hound = "3"
+rtrb = "0.3.4"
+rubato = "4.0.0"
+keyring = { version = "3", features = ["apple-native", "windows-native", "sync-secret-service", "vendored"] }
+zeroize = "1"
+argon2 = "0.5"
+chacha20poly1305 = "0.10"
+tokio-tungstenite = { version = "0.30", features = ["rustls-tls-webpki-roots"] }
+base64 = "0.22"
+rmp-serde = "1"
+rustls = { version = "0.23", default-features = false, features = ["ring", "logging", "std"] }
+tokio-rustls = { version = "0.26", default-features = false, features = ["ring", "logging"] }
+rcgen = { version = "0.13", default-features = false, features = ["crypto", "ring"] }
+qrcode = { version = "0.14", default-features = false, features = ["svg"] }
+if-addrs = "0.13"
+socket2 = "0.6"
+tantivy = { version = "0.26", optional = true }
+
+[features]
+# The owner's signing tool. Gated so the bundler leaves it out of every installer.
+release-tools = []
+# Book Agent retrieval (charter B-0). Off in ordinary builds until the slice
+# closes; no production surface advertises it. Enabling pulls in tantivy only.
+book-agent = ["dep:tantivy"]
+
+[[bin]]
+name = "update_sign"
+path = "src/bin/update_sign.rs"
+required-features = ["release-tools"]
+
+[[bin]]
+name = "book-agent-bench"
+path = "src/bin/book_agent_bench.rs"
+required-features = ["book-agent"]
+
+[dev-dependencies]
+tokio = { version = "1", features = ["net", "test-util"] }
+tauri = { version = "2", features = ["test"] }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Graphics_Dwm", "Win32_Storage_FileSystem", "Win32_System_Diagnostics_ToolHelp", "Win32_System_JobObjects", "Win32_System_SystemInformation", "Win32_System_Threading"] }

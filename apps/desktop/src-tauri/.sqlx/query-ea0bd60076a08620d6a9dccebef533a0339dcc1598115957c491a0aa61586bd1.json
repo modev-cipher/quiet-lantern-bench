@@ -1,0 +1,32 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT page_id as \"page_id!\", geometry_version, geometry_json\n           FROM page_geometry WHERE page_id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "page_id!",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "geometry_version",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "geometry_json",
+        "ordinal": 2,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "ea0bd60076a08620d6a9dccebef533a0339dcc1598115957c491a0aa61586bd1"
+}

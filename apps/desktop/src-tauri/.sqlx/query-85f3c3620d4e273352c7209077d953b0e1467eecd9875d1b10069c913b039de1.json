@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO page_geometry (page_id, geometry_version, geometry_json)\n         VALUES (?, ?, ?)\n         ON CONFLICT(page_id) DO UPDATE SET\n            geometry_version = excluded.geometry_version,\n            geometry_json = excluded.geometry_json",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "85f3c3620d4e273352c7209077d953b0e1467eecd9875d1b10069c913b039de1"
+}

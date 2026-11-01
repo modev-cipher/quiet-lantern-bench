@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM chapter_render WHERE job_id = ? AND chapter_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "8c3deb02f98fd3aa341c3ab8158c141962dc4665da9463bea16068551cbce5f2"
+}

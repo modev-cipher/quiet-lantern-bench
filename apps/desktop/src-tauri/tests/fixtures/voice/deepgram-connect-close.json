@@ -1,0 +1,29 @@
+{
+  "name": "deepgram-connect-close",
+  "provider": "deepgram",
+  "doc_url": "https://developers.deepgram.com/reference/speech-to-text-api/listen-streaming",
+  "doc_accessed": "2026-08-21",
+  "channel_protocol_version": 1,
+  "steps": [
+    {
+      "expect_handshake": {
+        "connection": 1,
+        "target_contains": [
+          "/v1/listen",
+          "model=nova-3",
+          "encoding=linear16",
+          "sample_rate=16000"
+        ],
+        "target_absent": ["key=", "access_token", "fixture-deepgram-key"],
+        "headers_present": ["authorization"]
+      }
+    },
+    {
+      "expect_text": {
+        "contains": ["\"type\":\"CloseStream\""],
+        "absent": ["fixture-deepgram-key"]
+      }
+    },
+    "server_close"
+  ]
+}

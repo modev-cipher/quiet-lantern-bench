@@ -1,0 +1,45 @@
+# Model weights — never commit
+*.gguf
+*.onnx
+*.safetensors
+*.pth
+*.pth.tar
+*.pt
+*.ckpt
+*.bin
+
+# Generated artifacts / cache
+cache/
+models/
+dist/
+.mypy_cache/
+build/
+target/
+apps/desktop/src-tauri/ffmpeg/
+apps/desktop/src-tauri/ffmpeg-lib/
+logs/
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+.venv-build/
+.venv-build-*/
+engine/dist-*/
+test-results/
+# Phase 3 acceptance gate: JUnit reports and a locally-pointed artifact root
+phase3-*report*.xml
+.phase3-models/
+clone-audio/
+
+# Local env / secrets
+.env
+.env.*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Bundled Apache-2.0 pronunciation fallback (NOTICE); every other model is downloaded
+!engine/txtcaster_engine/tts/g2p/weights/*/model.safetensors

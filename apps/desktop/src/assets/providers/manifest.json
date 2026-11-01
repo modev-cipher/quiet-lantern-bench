@@ -1,0 +1,123 @@
+{
+  "sources": {
+    "simple-icons": {
+      "repo": "https://github.com/simple-icons/simple-icons",
+      "version": "16.29.0",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://github.com/simple-icons/simple-icons/blob/develop/LICENSE.md"
+    },
+    "lobehub-icons": {
+      "repo": "https://github.com/lobehub/lobe-icons",
+      "package": "@lobehub/icons-static-svg",
+      "version": "1.94.0",
+      "license": "MIT",
+      "licenseUrl": "https://github.com/lobehub/lobe-icons/blob/master/LICENSE"
+    }
+  },
+  "retrieved": "2026-08-29",
+  "trademarkNote": "All provider names, glyphs, and wordmarks are trademarks of their respective owners; shown for identification only. Connections use user-supplied credentials; no affiliation, certification, sponsorship, or first-party service is implied.",
+  "normalization": "Each asset is reduced to the source's geometry only: role=img, viewBox 0 0 24 24, title, and the path data (fill-rule preserved where the source declared it; together.ai's three disjoint subpaths merged into one path element). No color, style, or script content ships.",
+  "entries": [
+    {
+      "id": "gemini",
+      "scope": "family",
+      "asset": "gemini.svg",
+      "source": "simple-icons",
+      "slug": "googlegemini",
+      "official": false
+    },
+    {
+      "id": "anthropic",
+      "scope": "family",
+      "asset": "anthropic.svg",
+      "source": "simple-icons",
+      "slug": "anthropic",
+      "official": false
+    },
+    {
+      "id": "deepgram",
+      "scope": "family",
+      "asset": "deepgram.svg",
+      "source": "simple-icons",
+      "slug": "deepgram",
+      "official": false
+    },
+    {
+      "id": "ollama",
+      "scope": "preset",
+      "asset": "ollama.svg",
+      "source": "simple-icons",
+      "slug": "ollama",
+      "official": false
+    },
+    {
+      "id": "lmstudio",
+      "scope": "preset",
+      "asset": "lmstudio.svg",
+      "source": "simple-icons",
+      "slug": "lmstudio",
+      "official": false
+    },
+    {
+      "id": "openrouter",
+      "scope": "preset",
+      "asset": "openrouter.svg",
+      "source": "simple-icons",
+      "slug": "openrouter",
+      "official": false
+    },
+    {
+      "id": "groq",
+      "scope": "preset",
+      "asset": "groq.svg",
+      "source": "lobehub-icons",
+      "slug": "groq",
+      "official": false
+    },
+    {
+      "id": "together",
+      "scope": "preset",
+      "asset": "together.svg",
+      "source": "lobehub-icons",
+      "slug": "together",
+      "official": false
+    },
+    {
+      "id": "mistral",
+      "scope": "preset",
+      "asset": "mistral.svg",
+      "source": "simple-icons",
+      "slug": "mistralai",
+      "official": false
+    },
+    {
+      "id": "deepseek",
+      "scope": "preset",
+      "asset": "deepseek.svg",
+      "source": "simple-icons",
+      "slug": "deepseek",
+      "official": false
+    },
+    {
+      "id": "openai_compat",
+      "scope": "family",
+      "asset": null,
+      "textOnly": true,
+      "reason": "The family covers many compatible vendors (Ollama, OpenRouter, ...) - a single company mark would misidentify them. Per-connection preset marks carry the vendor identity instead. Text identity per asset-law rule 8."
+    },
+    {
+      "id": "openai",
+      "scope": "preset",
+      "asset": null,
+      "textOnly": true,
+      "reason": "OpenAI had its icon removed from simple-icons (present at v15.0.0, absent by v16), and openai.com/brand requires the logo be used exactly as provided, unmodified - our monochrome ink tint would violate that. Fails closed to text per asset-law rule 8."
+    },
+    {
+      "id": "cartesia",
+      "scope": "family",
+      "asset": null,
+      "textOnly": true,
+      "reason": "No published asset in any redistributable set (simple-icons and lobehub-icons both lack it at retrieval), and cartesia.ai/brand forbids recoloring the symbol without written permission. Fails closed to text per asset-law rule 8."
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "provider": "openai_compat",
+  "doc_url": "https://console.groq.com/docs/api-reference",
+  "doc_note": "protocol-shape reference for the OpenAI-compatible clause (VOICE_AGENT §3.2); GET {base}/models is the list-models call of that protocol family",
+  "checked": "2026-08-20",
+  "probe": {
+    "method": "GET",
+    "base_url_example": "https://api.example-llm.dev/v1",
+    "url": "https://api.example-llm.dev/v1/models",
+    "auth_headers": ["authorization"]
+  },
+  "responses": {
+    "active": {
+      "status": 200,
+      "body": "{\"object\":\"list\",\"data\":[{\"id\":\"gpt-4o-mini\",\"object\":\"model\",\"owned_by\":\"system\"}]}",
+      "expect": "active"
+    },
+    "unauthorized_401": {
+      "status": 401,
+      "body": "{\"error\":{\"message\":\"Incorrect API key provided: sk-****\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}",
+      "expect": "invalid"
+    },
+    "forbidden_403": {
+      "status": 403,
+      "body": "{\"error\":{\"message\":\"You do not have access to this resource.\",\"type\":\"invalid_request_error\",\"code\":null}}",
+      "expect": "invalid"
+    },
+    "out_of_quota_429": {
+      "status": 429,
+      "body": "{\"error\":{\"message\":\"You exceeded your current quota, please check your plan and billing details.\",\"type\":\"insufficient_quota\",\"code\":\"insufficient_quota\"}}",
+      "expect": "out_of_quota"
+    }
+  }
+}

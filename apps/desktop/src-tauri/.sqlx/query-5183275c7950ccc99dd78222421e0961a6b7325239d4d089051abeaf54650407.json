@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO page (id, book_id, page_no, width_pt, height_pt, render_hash,\n                               text_json, needs_upgrade)\n             VALUES (?, ?, ?, ?, ?, NULL, ?, ?)\n             ON CONFLICT(book_id, page_no) DO UPDATE SET\n                width_pt = excluded.width_pt,\n                height_pt = excluded.height_pt,\n                text_json = excluded.text_json,\n                needs_upgrade = excluded.needs_upgrade,\n                render_hash = NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 7
+    },
+    "nullable": []
+  },
+  "hash": "5183275c7950ccc99dd78222421e0961a6b7325239d4d089051abeaf54650407"
+}

@@ -1,0 +1,16 @@
+-- Key the cached micro-benchmark to the hardware it was measured on.
+--
+-- The row is a singleton keyed on id = 1, so nothing in the schema noticed a machine
+-- gaining, losing or swapping a GPU: the tok_s and compute_score figures were served
+-- forever from whatever hardware first produced them. HARDWARE_PROFILER §2 says the
+-- benchmark is "cached until hardware changes", and this column is what makes that true.
+--
+-- Nullable on purpose. An existing row predates the fingerprint and cannot be attributed
+-- to an inventory, so it reads as a mismatch and re-benchmarks exactly once after upgrade.
+-- Backfilling a value here would be inventing provenance.
+--
+-- rtf_table_json deliberately shares this row and is NOT invalidated with it: learned
+-- coefficients are keyed on device identity, so a swapped card changes the key and its old
+-- samples simply stop being read. Dropping them on a fingerprint change would also throw
+-- away the CPU samples, which are still valid.
+ALTER TABLE hw_benchmark ADD COLUMN fingerprint TEXT;

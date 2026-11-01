@@ -1,0 +1,42 @@
+{
+  "name": "gemini-live-text-turn",
+  "provider": "gemini",
+  "doc_url": "https://ai.google.dev/api/live",
+  "doc_accessed": "2026-08-21",
+  "channel_protocol_version": 1,
+  "steps": [
+    {
+      "expect_handshake": {
+        "connection": 1,
+        "target_absent": ["key=", "access_token", "fixture-gemini-key"],
+        "headers_present": ["x-goog-api-key"]
+      }
+    },
+    {
+      "expect_text": {
+        "contains": [
+          "\"setup\"",
+          "models/gemini-2.5-flash-native-audio-preview",
+          "\"responseModalities\""
+        ],
+        "absent": ["fixture-gemini-key"]
+      }
+    },
+    {
+      "send_binary": {
+        "base64": "eyJzZXR1cENvbXBsZXRlIjp7fX0="
+      }
+    },
+    {
+      "expect_text": {
+        "contains": [
+          "\"clientContent\"",
+          "\"turnComplete\":true",
+          "\"role\":\"user\"",
+          "what changed between figure two and figure three?"
+        ],
+        "absent": ["fixture-gemini-key", "\"setup\"", "\"realtimeInput\""]
+      }
+    }
+  ]
+}

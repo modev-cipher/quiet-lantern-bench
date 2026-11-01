@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE cache_entry SET last_used_at = ? WHERE hash = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "3a9567f4dcbf258cbaf48593cb218d0a41888c1595b499a329ec8fae67a08254"
+}

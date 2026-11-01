@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO alignment (segment_id, source, words_json, wer)\n         VALUES (?, ?, ?, ?)\n         ON CONFLICT(segment_id) DO UPDATE SET source = excluded.source,\n                                               words_json = excluded.words_json,\n                                               wer = excluded.wer",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "8b0fa28c95a33bf41060c0d3c85e60a4ea3c1634ae5022417c4df860893c6e97"
+}

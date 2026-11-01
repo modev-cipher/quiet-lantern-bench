@@ -1,0 +1,42 @@
+name: win-tests
+on: workflow_dispatch
+permissions:
+  contents: read
+env:
+  CARGO_PROFILE_DEV_DEBUG: '0'
+  CARGO_INCREMENTAL: '0'
+  SQLX_OFFLINE: "true"
+  CMAKE_ARGS: "-DGGML_NATIVE=off"
+jobs:
+  native:
+    runs-on: windows-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/desktop/src-tauri
+      - name: Fetch FFmpeg
+        shell: bash
+        run: ./scripts/fetch_ffmpeg_windows.sh apps/desktop/src-tauri/ffmpeg && echo "$PWD/apps/desktop/src-tauri/ffmpeg" >> "$GITHUB_PATH"
+      - name: Native library tests
+        shell: bash
+        working-directory: apps/desktop/src-tauri
+        run: cargo test --lib -- --test-threads=4
+      - name: Native integration suites
+        if: always()
+        shell: bash
+        working-directory: apps/desktop/src-tauri
+        run: |
+          failed=""
+          for t in tests/*.rs; do
+            n=$(basename "$t" .rs)
+            case "$n" in book_agent*) continue ;; esac
+            echo "::group::$n"
+            if cargo test --test "$n"; then echo "$n ok" >> "$GITHUB_STEP_SUMMARY"; else failed="$failed $n"; echo "$n FAILED" >> "$GITHUB_STEP_SUMMARY"; fi
+            echo "::endgroup::"
+          done
+          [ -z "$failed" ] || { echo "::error::failed:$failed"; exit 1; }

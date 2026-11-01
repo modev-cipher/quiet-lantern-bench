@@ -1,0 +1,50 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT session_id, turn_idx, role, text, created_at, summarized as \"summarized: bool\"\n           FROM voice_transcript WHERE session_id = ?\n           ORDER BY turn_idx",
+  "describe": {
+    "columns": [
+      {
+        "name": "session_id",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "turn_idx",
+        "ordinal": 1,
+        "type_info": "Integer"
+      },
+      {
+        "name": "role",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "text",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "created_at",
+        "ordinal": 4,
+        "type_info": "Integer"
+      },
+      {
+        "name": "summarized: bool",
+        "ordinal": 5,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "ad97ce9ecfc2e8000c33bad571ffa5700e6fc8eb159bbd308c645fb068f16328"
+}

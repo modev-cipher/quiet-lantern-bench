@@ -1,0 +1,82 @@
+{
+  "lan.title": "Send to phone",
+  "lan.sameNetwork": "Same network only",
+  "lan.close": "Close",
+  "lan.cancel": "Cancel",
+  "lan.pick": "Pick the audiobooks to send. Your phone downloads them over your own network — nothing leaves it.",
+  "lan.stale": "Re-render needed",
+  "lan.staleHint": "Re-render needed means the audio no longer matches the chapters — re-render the cast before sending it.",
+  "lan.empty": "No audiobooks are available to send yet. Create an audiobook first.",
+  "lan.scan": "Scan this with the txtCast app on your phone. Keep this window open.",
+  "lan.safety": "Safety code {code|ltr} — confirm it on the phone",
+  "lan.newQr": "New QR code",
+  "lan.consumed": "This code was already used to pair, so it can't be scanned again. Show a new QR code to pair another phone.",
+  "lan.locked": "Too many failed attempts to pair. Show a new QR code to keep going.",
+  "lan.firewall": "Phone can't connect? Your computer's firewall may be blocking local connections for txtCaster.",
+  "lan.stopConfirm": "Your phone will keep what it already received and can resume later.",
+  "lan.stop": "Stop sending",
+  "lan.keep": "Keep sending",
+  "lan.pairAnother": "Pair another phone",
+  "lan.starting": "Starting…",
+  "lan.showQr": "Show QR code",
+  "lan.waiting": "Waiting for your phone…",
+  "lan.paired": "Phone connected",
+  "lan.sending": "Sending…",
+  "lan.allSent": "All sent",
+  "lan.sent": "Sent ✓",
+  "lan.missing": "'{title|bdi}' is missing on disk — it was skipped.",
+  "lan.progress": "{percent|n}%",
+  "lan.done": {
+    "one": "Sent {count|n} audiobook to your phone.",
+    "other": "Sent {count|n} audiobooks to your phone."
+  },
+  "lan.noNetwork": "This computer isn't connected to a network. Join the same Wi-Fi as your phone and try again.",
+  "lan.portBlocked": "Couldn't open a connection for the phone. Another program may be blocking it — try again.",
+  "lan.failed": "Sending to your phone failed. {reason|bdi}",
+  "review.band.ok": "read back clean",
+  "review.band.failed": "reads back differently",
+  "review.band.missing": "nothing heard",
+  "review.band.unscoreable_ref": "no words to check",
+  "review.band.unchecked": "not checked",
+  "review.noScore": "no score",
+  "review.wer": "{percent|n}% different",
+  "review.off": "accuracy check off",
+  "review.none": "nothing to check",
+  "review.uncheckedSummary": "{count|n} of {total|n} not checked",
+  "review.scoredNoneSummary": "accuracy check scored nothing of {count|n}",
+  "review.summary": {
+    "one": "{count|n} of {total|n} need a listen",
+    "other": "{count|n} of {total|n} need a listen"
+  },
+  "review.scoredNoneNotice": {
+    "one": "The accuracy check finished without scoring any of {count|n} sentence, so it says nothing about whether this cast is right — treat it as not run, not as a pass. This usually means the checker itself could not run.",
+    "other": "The accuracy check finished without scoring any of {count|n} sentences, so it says nothing about whether this cast is right — treat it as not run, not as a pass. This usually means the checker itself could not run."
+  },
+  "review.uncheckedNotice": {
+    "one": "The accuracy check did not run on {count|n} sentence — they were never read back, so nothing here says whether they are right. Re-run the accuracy check to score them.",
+    "other": "The accuracy check did not run on {count|n} sentences — they were never read back, so nothing here says whether they are right. Re-run the accuracy check to score them."
+  },
+  "review.block.failed": "This cast failed, so there is nothing to re-record yet.",
+  "review.block.cancelled": "This cast was cancelled, so there is nothing to re-record yet.",
+  "review.block.paused": "Resume the cast first — editing needs a finished cast.",
+  "review.block.running": "This cast is still running. You can edit its sentences once it finishes.",
+  "review.staleExport": {
+    "one": "This cast's audio no longer matches its chapters. Re-render it to bring the audio and the chapter marks back in step.",
+    "other": "{count|n} exports from this cast no longer match its chapters. Re-render it to bring the audio and the chapter marks back in step."
+  },
+  "review.loadFailed": "Could not load the sentences. {reason|bdi}",
+  "review.rerecordFailed": "Re-recording this sentence failed. {reason|bdi}",
+  "review.empty": "Nothing to review — no sentence was flagged or edited.",
+  "review.edited": "edited",
+  "review.words": {
+    "one": "{count|n} word",
+    "other": "{count|n} words"
+  },
+  "review.cancel": "Cancel",
+  "review.revert": "Revert",
+  "review.edit": "Edit",
+  "review.editHint": "Edit this sentence and re-record it",
+  "review.checkOffHint": "This cast ran without the accuracy check, so only edited sentences are listed.",
+  "review.loading": "Loading sentences…",
+  "review.retry": "Retry"
+}

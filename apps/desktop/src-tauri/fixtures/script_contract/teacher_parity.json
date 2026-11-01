@@ -1,0 +1,125 @@
+{
+ "budgets": [
+  {
+   "ctx": 2048,
+   "chunk_budget_chars": 1892
+  },
+  {
+   "ctx": 4096,
+   "chunk_budget_chars": 5168
+  },
+  {
+   "ctx": 8192,
+   "chunk_budget_chars": 6000
+  },
+  {
+   "ctx": 32768,
+   "chunk_budget_chars": 6000
+  }
+ ],
+ "output_budgets": [
+  {
+   "source_chars": 1000,
+   "prompt_chars": 2000,
+   "ctx": 4096,
+   "tokens": 512
+  },
+  {
+   "source_chars": 100,
+   "prompt_chars": 500,
+   "ctx": 2048,
+   "tokens": 512
+  },
+  {
+   "source_chars": 50000,
+   "prompt_chars": 60000,
+   "ctx": 8192,
+   "tokens": 1
+  },
+  {
+   "source_chars": 10,
+   "prompt_chars": 100000,
+   "ctx": 4096,
+   "tokens": 1
+  }
+ ],
+ "prompts": [
+  {
+   "summary": "",
+   "source": "SOURCE TEXT",
+   "strict": false,
+   "marker_detail": "",
+   "has_figures": true,
+   "prompt": "You are a patient teacher recording an audio lecture. Re-explain the source material below as a clear spoken lecture: simplify the language, explain each key concept, and add one short contextual example per key concept. Keep poetry and quotations verbatim. Never introduce facts, numbers, names, or claims that are not present in the source. For text between [CODE] and [/CODE], briefly describe what the code does in one sentence; never read code aloud character by character. Each [FIGURE:id] block gives a figure's type, caption and description. Teach that figure in your own words as part of the lecture. Preserve every [FIGURE:id] marker exactly once, immediately before the sentence where you begin explaining it. Output ONLY a JSON array of objects, each with a \"text\" field containing one spoken paragraph: [{\"text\": \"...\"}]\n\nSOURCE:\nSOURCE TEXT\n\nJSON:"
+  },
+  {
+   "summary": "prior summary",
+   "source": "SOURCE TEXT",
+   "strict": false,
+   "marker_detail": "",
+   "has_figures": false,
+   "prompt": "You are a patient teacher recording an audio lecture. Re-explain the source material below as a clear spoken lecture: simplify the language, explain each key concept, and add one short contextual example per key concept. Keep poetry and quotations verbatim. Never introduce facts, numbers, names, or claims that are not present in the source. For text between [CODE] and [/CODE], briefly describe what the code does in one sentence; never read code aloud character by character. Output ONLY a JSON array of objects, each with a \"text\" field containing one spoken paragraph: [{\"text\": \"...\"}]\n\nCONTEXT SUMMARY (previous material):\nprior summary\n\nSOURCE:\nSOURCE TEXT\n\nJSON:"
+  },
+  {
+   "summary": "",
+   "source": "S",
+   "strict": true,
+   "marker_detail": "",
+   "has_figures": true,
+   "prompt": "You are a patient teacher recording an audio lecture. Re-explain the source material below as a clear spoken lecture: simplify the language, explain each key concept, and add one short contextual example per key concept. Keep poetry and quotations verbatim. Never introduce facts, numbers, names, or claims that are not present in the source. For text between [CODE] and [/CODE], briefly describe what the code does in one sentence; never read code aloud character by character. Each [FIGURE:id] block gives a figure's type, caption and description. Teach that figure in your own words as part of the lecture. Preserve every [FIGURE:id] marker exactly once, immediately before the sentence where you begin explaining it. Output ONLY a JSON array of objects, each with a \"text\" field containing one spoken paragraph: [{\"text\": \"...\"}]\n\nYour previous answer was not valid JSON. Respond with NOTHING except a valid JSON array of objects with a \"text\" string field. No prose, no code fences.\n\nSOURCE:\nS\n\nJSON:"
+  },
+  {
+   "summary": "sum",
+   "source": "S",
+   "strict": true,
+   "marker_detail": "[FIGURE:f1] appears more than once",
+   "has_figures": true,
+   "prompt": "You are a patient teacher recording an audio lecture. Re-explain the source material below as a clear spoken lecture: simplify the language, explain each key concept, and add one short contextual example per key concept. Keep poetry and quotations verbatim. Never introduce facts, numbers, names, or claims that are not present in the source. For text between [CODE] and [/CODE], briefly describe what the code does in one sentence; never read code aloud character by character. Each [FIGURE:id] block gives a figure's type, caption and description. Teach that figure in your own words as part of the lecture. Preserve every [FIGURE:id] marker exactly once, immediately before the sentence where you begin explaining it. Output ONLY a JSON array of objects, each with a \"text\" field containing one spoken paragraph: [{\"text\": \"...\"}]\n\nYour previous answer misused figure markers ([FIGURE:f1] appears more than once). Each marker from the source may appear AT MOST once, copied exactly; never invent new markers.\n\nCONTEXT SUMMARY (previous material):\nsum\n\nSOURCE:\nS\n\nJSON:"
+  }
+ ],
+ "parse": [
+  {
+   "raw": "[{\"text\": \"One.\"}, {\"text\": \"Two.\"}]",
+   "texts": [
+    "One.",
+    "Two."
+   ]
+  },
+  {
+   "raw": "```json\n[{\"text\": \"Fenced.\"}]\n```",
+   "texts": [
+    "Fenced."
+   ]
+  },
+  {
+   "raw": "noise before [{\"text\": \"Ok.\"}] noise after",
+   "texts": [
+    "Ok."
+   ]
+  },
+  {
+   "raw": "not json at all",
+   "texts": null
+  },
+  {
+   "raw": "[]",
+   "texts": null
+  },
+  {
+   "raw": "[{\"notext\": \"x\"}]",
+   "texts": null
+  },
+  {
+   "raw": "[{\"text\": \"  \"}]",
+   "texts": null
+  },
+  {
+   "raw": "[{\"text\": \"Kept.\"}, \"bare string\"]",
+   "texts": null
+  }
+ ],
+ "chunk_source": {
+  "source": "Plain prose paragraph about systems.\n\n[CODE]\nlet x = f(y); return x;\n[/CODE]\n\n[FIGURE:fig-1]\ntype: figure\ncaption: Cap\ndescription: Desc\n\n[CODE]\ncode labelled\n[/CODE]"
+ },
+ "summary_prompt": "Summarize the lecture so far in plain text, at most 300 words, keeping the key concepts and terminology so the next part of the lecture stays consistent.\n\nPrevious summary:\n(none)\n\nLatest lecture part:\nLECTURE\n\nSummary:"
+}

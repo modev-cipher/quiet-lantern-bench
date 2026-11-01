@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE book SET extracting_since = ?, extracting_owner = ?\n         WHERE id = ?\n           AND (extracting_since IS NULL OR extracting_since < ?)\n           AND NOT EXISTS (\n             SELECT 1 FROM render_job\n             WHERE render_job.book_id = book.id\n               AND render_job.state NOT IN ('DONE', 'CANCELLED', 'FAILED')\n           )",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "dc7bc97efc40610952b5192235c2a0b1ccc2b420c2b5e17fbeb4f28fee52dcca"
+}

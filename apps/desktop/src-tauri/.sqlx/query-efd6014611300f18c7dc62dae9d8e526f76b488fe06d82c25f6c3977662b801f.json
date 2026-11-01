@@ -1,0 +1,68 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id as \"id!\", book_id, job_id, path as \"path!\", bytes as \"bytes!\",\n                  format as \"format!\", mode as \"mode!\", chapter_digest,\n                  created_at as \"created_at!\"\n           FROM export ORDER BY created_at DESC",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "book_id",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "job_id",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "path!",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "bytes!",
+        "ordinal": 4,
+        "type_info": "Integer"
+      },
+      {
+        "name": "format!",
+        "ordinal": 5,
+        "type_info": "Text"
+      },
+      {
+        "name": "mode!",
+        "ordinal": 6,
+        "type_info": "Text"
+      },
+      {
+        "name": "chapter_digest",
+        "ordinal": 7,
+        "type_info": "Text"
+      },
+      {
+        "name": "created_at!",
+        "ordinal": 8,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "efd6014611300f18c7dc62dae9d8e526f76b488fe06d82c25f6c3977662b801f"
+}

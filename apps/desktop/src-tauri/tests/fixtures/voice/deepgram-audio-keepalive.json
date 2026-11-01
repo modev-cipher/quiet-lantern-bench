@@ -1,0 +1,27 @@
+{
+  "name": "deepgram-audio-keepalive",
+  "provider": "deepgram",
+  "doc_url": "https://developers.deepgram.com/docs/keep-alive",
+  "doc_accessed": "2026-08-21",
+  "channel_protocol_version": 1,
+  "steps": [
+    {
+      "expect_binary": {
+        "min_bytes": 14,
+        "payload_base64": "6AMY/AEB/v8AAP9/AIA="
+      }
+    },
+    {
+      "expect_text": {
+        "contains": ["\"type\":\"KeepAlive\""],
+        "absent": ["fixture-deepgram-key"]
+      }
+    },
+    {
+      "expect_text": {
+        "contains": ["\"type\":\"CloseStream\""]
+      }
+    },
+    "server_close"
+  ]
+}

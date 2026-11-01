@@ -1,0 +1,35 @@
+[
+  {
+    "id": "c-custom",
+    "name": "Work OpenRouter",
+    "providerType": "openai_compatible",
+    "hostname": "openrouter.ai",
+    "defaultModel": "some/model",
+    "capabilities": [
+      "script_llm",
+      "vision_mllm"
+    ],
+    "enabled": true,
+    "keyRequired": true,
+    "keyPresent": true,
+    "keyLast4": "ab12",
+    "baseUrl": "https://openrouter.ai/api/v1"
+  },
+  {
+    "id": "c-fixed",
+    "name": "Gemini",
+    "providerType": "gemini",
+    "hostname": null,
+    "defaultModel": "gemini-3.7-flash",
+    "capabilities": [
+      "script_llm",
+      "vision_mllm",
+      "tts"
+    ],
+    "enabled": false,
+    "keyRequired": true,
+    "keyPresent": false,
+    "keyLast4": null,
+    "baseUrl": null
+  }
+]

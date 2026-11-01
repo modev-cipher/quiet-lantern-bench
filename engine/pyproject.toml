@@ -1,0 +1,226 @@
+[project]
+name = "txtcaster-engine"
+version = "0.1.0"
+description = "txtCaster ML inference sidecar (FastAPI)"
+requires-python = ">=3.11,<3.12"
+license = { text = "Proprietary" }
+dependencies = [
+    "chatterbox-tts==0.1.7",
+    "docling>=2.110",
+    "en-core-web-sm",
+    "fastapi>=0.115",
+    "faster-whisper>=1.1",
+    "fugashi>=1.3",
+    "inflect>=7.5",
+    "jaconv>=0.3",
+    "kokoro==0.9.4",
+    "misaki[zh]==0.9.4",
+    "mojimoji>=0.0.12",
+    "pyopenjtalk>=0.3",
+    "unidic-lite>=1.0.8",
+    "llama-cpp-python==0.3.33",
+    "numpy>=1.26",
+    "pillow>=10.1",  # reflow adapter: FreeType metrics + page PNGs (load_default(size=) needs 10.1)
+    "pypdfium2>=5.12.1,<5.13",
+    "pysbd>=0.3.4",
+    "selectolax>=0.3",
+    "spacy>=3.8",
+    "uvicorn>=0.30",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.8",
+    "mypy>=1.13",
+    "pytest>=8.3",
+    "httpx2>=2.12",
+]
+build = [
+    "pyinstaller>=6.11,<7",
+]
+bench = [
+    # native reference backend for the bench and the native test suite (TXTCAST_PDF_BACKEND=native);
+    # copyleft, never shipped: not a default group, not in the wheel, not in the release bundle.
+    "pymupdf>=1.24",
+]
+cpu = [
+    "torch>=2.6,<3",
+    "torchaudio>=2.6,<3",
+    "torchvision>=0.21",
+]
+gpu = [
+    "torch>=2.6,<3",
+    "torchaudio>=2.6,<3",
+    "torchvision>=0.21",
+]
+
+[tool.uv]
+default-groups = ["dev", "cpu"]
+conflicts = [
+    [
+        { group = "cpu" },
+        { group = "gpu" },
+    ],
+]
+
+[[tool.uv.dependency-metadata]]
+name = "kokoro"
+version = "0.9.4"
+requires-dist = [
+    "huggingface-hub",
+    "loguru",
+    "misaki>=0.9.4",
+    "numpy",
+    "torch",
+    "transformers",
+]
+
+[[tool.uv.dependency-metadata]]
+name = "chatterbox-tts"
+version = "0.1.7"
+requires-dist = [
+    "conformer==0.3.2",
+    "diffusers==0.29.0",
+    "librosa>=0.11,<1",
+    "numpy>=1.26,<3",
+    "omegaconf",
+    "pyloudnorm",
+    "resemble-perth==1.0.1",
+    "s3tokenizer==0.3.0",
+    "safetensors>=0.5.3,<1",
+    "torch>=2.6,<3",
+    "torchaudio>=2.6,<3",
+    "transformers>=5.2,<6",
+]
+
+[[tool.uv.dependency-metadata]]
+name = "resemble-perth"
+version = "1.0.1"
+requires-dist = [
+    "setuptools<82",
+]
+
+[[tool.uv.dependency-metadata]]
+name = "s3tokenizer"
+version = "0.3.0"
+requires-dist = [
+    "einops",
+    "numpy",
+    "onnx",
+    "torch",
+    "torchaudio",
+    "tqdm",
+]
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cpu", group = "cpu" },
+    { index = "pytorch-cu130", group = "gpu" },
+]
+torchaudio = [
+    { index = "pytorch-cpu", group = "cpu" },
+    { index = "pytorch-cu130", group = "gpu" },
+]
+torchvision = [
+    { index = "pytorch-cpu", group = "cpu" },
+    { index = "pytorch-cu130", group = "gpu" },
+]
+en-core-web-sm = { url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["txtcaster_engine"]
+artifacts = ["txtcaster_engine/tts/g2p/weights/*/model.safetensors"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+extraPaths = [
+    ".venv/lib/python3.11/site-packages",
+    "tests/corpus/stress",
+]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+exclude = ["^dist(-[a-z0-9]+)?/", "^build/"]
+# the stress harness (tests/corpus/stress) imports `tools.*` and `check_reading` relative to its own directory
+mypy_path = "tests/corpus/stress"
+explicit_package_bases = true
+
+[[tool.mypy.overrides]]
+module = [
+    "txtcaster_engine.ingest.pdf",
+    "tests.reference.native_adapter",
+    "txtcaster_engine.ingest.blocks",
+    "txtcaster_engine.ingest.manifest",
+    "txtcaster_engine.ingest.render",
+    "txtcaster_engine.layout.convert",
+    "txtcaster_engine.layout.crops",
+    "txtcaster_engine.script.pipeline",
+    "txtcaster_engine.script.segment",
+    "tests.fixtures",
+    "tests.test_canonical_measure",
+    "tests.test_layout_crops",
+    "tests.test_page_geometry",
+    "tests.test_vision_real",
+    "tests.tools.build_occurrence_fixture",
+]
+disallow_untyped_calls = false
+
+[[tool.mypy.overrides]]
+module = [
+    "chatterbox",
+    "chatterbox.*",
+    "perth",
+    "psutil",
+    "pysbd",
+    "pysbd.*",
+    "soundfile",
+    "kokoro",
+    "kokoro.*",
+    "misaki",
+    "misaki.*",
+    "torch",
+    "torch.*",
+    "llama_cpp",
+    "llama_cpp.*",
+    "faster_whisper",
+    "faster_whisper.*",
+    "ctranslate2",
+    "ctranslate2.*",
+    "pymupdf",
+    "pymupdf.*",
+    "onnxruntime",
+    "onnxruntime.*",
+    "pypdfium2",
+    "pypdfium2.*",
+    "typst",  # stress corpus builders only (side venv)
+    "weasyprint",
+    "PIL",
+    "PIL.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

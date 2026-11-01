@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO figure_region (id, book_id, page_no, bbox_json, type, confidence, crop_hash, caption, explanation, caption_confidence)\n         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 10
+    },
+    "nullable": []
+  },
+  "hash": "d570b10e88894939abfdfe15032715988a62679ba50f10589cb2714d36d0cfbe"
+}

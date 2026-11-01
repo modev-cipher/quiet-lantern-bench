@@ -1,0 +1,17 @@
+{
+  "request": {
+    "authorization": "Bearer tok_f0e1d2c3b4a59687f0e1d2c3b4a59687",
+    "ifRange": "etag-38f9269cd4366d5f",
+    "range": "bytes=131072-199999"
+  },
+  "response": {
+    "headers": {
+      "connection": "close",
+      "content-length": "68928",
+      "content-range": "bytes 131072-199999/200000",
+      "content-type": "application/octet-stream",
+      "etag": "etag-38f9269cd4366d5f"
+    },
+    "status": 206
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT OR IGNORE INTO voice_profile (id, name, engine, kind, preset_voice_id, reference_wav_path, params_json, created_at)\n         VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 8
+    },
+    "nullable": []
+  },
+  "hash": "c6ae0360c376eaf32a679313de0a9755ee7aa76d1909b6f5e2d59d6878c47a21"
+}

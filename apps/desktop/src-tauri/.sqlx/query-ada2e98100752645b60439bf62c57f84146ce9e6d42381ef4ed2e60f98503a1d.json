@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO chapter_render (job_id, chapter_id, idx, hash, artifact, duration_ms,\n                                         encoded_ms)\n             VALUES (?, ?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 7
+    },
+    "nullable": []
+  },
+  "hash": "ada2e98100752645b60439bf62c57f84146ce9e6d42381ef4ed2e60f98503a1d"
+}

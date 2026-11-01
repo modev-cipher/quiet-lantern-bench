@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT COALESCE(SUM(bytes), 0) as \"total!: i64\"\n           FROM cache_entry\n           WHERE hash IN (SELECT r.hash FROM cache_ref r\n                          JOIN render_job j ON j.id = r.job_id\n                          WHERE instr(?, ',' || j.state || ',') = 0)",
+  "describe": {
+    "columns": [
+      {
+        "name": "total!: i64",
+        "ordinal": 0,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "d03118c403f5c1f16e1dc9c03f1a11b696eb5e241f7f1ac85bebd59e29f0341b"
+}

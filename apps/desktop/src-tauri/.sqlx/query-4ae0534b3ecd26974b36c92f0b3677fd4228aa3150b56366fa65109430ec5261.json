@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE script_segment\n            SET text = original_text,\n                original_text = NULL,\n                audio_hash = NULL,\n                duration_ms = NULL\n          WHERE id = ? AND original_text IS NOT NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "4ae0534b3ecd26974b36c92f0b3677fd4228aa3150b56366fa65109430ec5261"
+}

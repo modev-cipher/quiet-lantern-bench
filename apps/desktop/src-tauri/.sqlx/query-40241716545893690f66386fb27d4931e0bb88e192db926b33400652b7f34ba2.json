@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE book SET blocks_version = ?, blocks_page_count = ?, page_count = ?,\n                language = COALESCE(?, language),\n                layout_analysed = COALESCE(?, layout_analysed)\n         WHERE id = ?\n           AND (\n             ? IS NULL\n             OR (extracting_owner = ? AND extracting_since >= ?)\n           )",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 9
+    },
+    "nullable": []
+  },
+  "hash": "40241716545893690f66386fb27d4931e0bb88e192db926b33400652b7f34ba2"
+}

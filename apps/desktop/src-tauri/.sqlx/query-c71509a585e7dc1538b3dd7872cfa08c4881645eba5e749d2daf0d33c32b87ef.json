@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM learning_profile WHERE key = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "c71509a585e7dc1538b3dd7872cfa08c4881645eba5e749d2daf0d33c32b87ef"
+}

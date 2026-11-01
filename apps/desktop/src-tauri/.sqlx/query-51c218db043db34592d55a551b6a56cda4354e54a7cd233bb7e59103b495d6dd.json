@@ -1,0 +1,50 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT model_id as \"model_id!\", path, sha256, disk_bytes, source, installed_at\n           FROM model_install ORDER BY installed_at",
+  "describe": {
+    "columns": [
+      {
+        "name": "model_id!",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "path",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "sha256",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "disk_bytes",
+        "ordinal": 3,
+        "type_info": "Integer"
+      },
+      {
+        "name": "source",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "installed_at",
+        "ordinal": 5,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "51c218db043db34592d55a551b6a56cda4354e54a7cd233bb7e59103b495d6dd"
+}

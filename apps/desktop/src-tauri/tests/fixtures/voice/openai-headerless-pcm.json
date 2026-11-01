@@ -1,0 +1,19 @@
+{
+  "name": "openai-headerless-pcm",
+  "provider": "openai-tts",
+  "doc_url": "https://developers.openai.com/api/docs/guides/text-to-speech",
+  "doc_accessed": "2026-08-22",
+  "channel_protocol_version": 1,
+  "steps": [
+    {
+      "send_binary": {
+        "base64": "6AMY/P8="
+      }
+    },
+    {
+      "send_binary": {
+        "base64": "fwCAAgD9/w=="
+      }
+    }
+  ]
+}

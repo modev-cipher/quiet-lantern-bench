@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE render_job SET report_json = ?, output_paths_json = ?, updated_at = ? WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "3ca12d31d5b988c46cd6ba1a2b3dfdf988ed89a5a091e4e4003c3bb3ce9ea3c5"
+}

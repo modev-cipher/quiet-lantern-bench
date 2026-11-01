@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT extracting_owner FROM book WHERE id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "extracting_owner",
+        "ordinal": 0,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "c2ed2a646b8e5a60d08ba48d3dc9ec1b05bd91a0a145bd260664f8721c6677a3"
+}

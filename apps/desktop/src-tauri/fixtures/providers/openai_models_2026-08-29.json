@@ -1,0 +1,14 @@
+{
+  "_provenance": "OpenAI current model lineup as documented at https://developers.openai.com/api/docs/models, checked 2026-08-29. GPT-5.6 family: sol (flagship, alias gpt-5.6), terra (mid), luna (cost-sensitive tier, $0.20/$1.20 per MTok), cyber (specialized). Refresh this file deliberately when the lineup moves; the doctrine pin test re-rules the resolution.",
+  "data": [
+    { "id": "gpt-5.6" },
+    { "id": "gpt-5.6-sol" },
+    { "id": "gpt-5.6-terra" },
+    { "id": "gpt-5.6-luna" },
+    { "id": "gpt-5.6-cyber" },
+    { "id": "gpt-4o" },
+    { "id": "gpt-4o-mini" },
+    { "id": "tts-1" },
+    { "id": "tts-1-hd" }
+  ]
+}

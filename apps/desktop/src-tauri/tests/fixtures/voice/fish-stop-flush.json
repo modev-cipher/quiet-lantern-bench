@@ -1,0 +1,46 @@
+{
+  "name": "fish-stop-flush",
+  "provider": "fish-audio",
+  "doc_url": "https://docs.fish.audio/api-reference/endpoint/websocket/tts-live",
+  "doc_accessed": "2026-08-22",
+  "channel_protocol_version": 1,
+  "steps": [
+    {
+      "expect_handshake": {
+        "connection": 1,
+        "target_contains": ["/v1/tts/live"],
+        "target_absent": ["key=", "token=", "api_key", "fixture-fish-key"],
+        "headers_present": ["authorization", "model"]
+      }
+    },
+    {
+      "expect_binary": {
+        "min_bytes": 95,
+        "payload_base64": "gqVldmVudKVzdGFydKdyZXF1ZXN0haR0ZXh0oKZmb3JtYXSjcGNtrGNodW5rX2xlbmd0aM0BLKdsYXRlbmN5pm5vcm1hbKxyZWZlcmVuY2VfaWSrcmVmLWZpeHR1cmU="
+      }
+    },
+    {
+      "expect_binary": {
+        "min_bytes": 35,
+        "payload_base64": "gqVldmVudKR0ZXh0pHRleHSxQW5kIHRoZSBzdW1tYXJ5LiA="
+      }
+    },
+    {
+      "expect_binary": {
+        "min_bytes": 12,
+        "payload_base64": "gaVldmVudKRzdG9w"
+      }
+    },
+    {
+      "send_binary": {
+        "base64": "gqVldmVudKVhdWRpb6VhdWRpb8QI6AMY/P9/AIA="
+      }
+    },
+    {
+      "send_binary": {
+        "base64": "gqVldmVudKZmaW5pc2imcmVhc29upHN0b3A="
+      }
+    },
+    "server_close"
+  ]
+}

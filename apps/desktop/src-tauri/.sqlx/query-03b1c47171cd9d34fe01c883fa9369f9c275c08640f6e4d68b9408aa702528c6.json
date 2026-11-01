@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO voice_transcript (session_id, turn_idx, role, text, created_at, summarized)\n         VALUES (?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 6
+    },
+    "nullable": []
+  },
+  "hash": "03b1c47171cd9d34fe01c883fa9369f9c275c08640f6e4d68b9408aa702528c6"
+}

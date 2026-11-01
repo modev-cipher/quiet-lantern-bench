@@ -1,0 +1,18 @@
+{
+  "name": "cartesia-version-pin",
+  "provider": "cartesia",
+  "doc_url": "https://docs.cartesia.ai/api-reference/tts/tts",
+  "doc_accessed": "2026-08-22",
+  "channel_protocol_version": 1,
+  "steps": [
+    {
+      "expect_handshake": {
+        "connection": 1,
+        "target_contains": ["/tts/websocket", "cartesia_version=2026-08-14"],
+        "target_absent": ["access_token", "api_key", "x-api-key", "fixture-cartesia-key"],
+        "headers_present": ["x-api-key"]
+      }
+    },
+    "server_close"
+  ]
+}

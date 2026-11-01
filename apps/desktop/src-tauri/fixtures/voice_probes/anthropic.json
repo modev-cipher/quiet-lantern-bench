@@ -1,0 +1,33 @@
+{
+  "provider": "anthropic",
+  "doc_url": "https://platform.claude.com/docs/en/api/models-list",
+  "checked": "2026-08-28",
+  "probe": {
+    "method": "GET",
+    "url": "https://api.anthropic.com/v1/models?limit=1",
+    "auth_headers": ["x-api-key", "anthropic-version"]
+  },
+  "anthropic_version": "2023-06-01",
+  "responses": {
+    "active": {
+      "status": 200,
+      "body": "{\"data\":[{\"id\":\"claude-3-5-sonnet-20241022\",\"type\":\"model\",\"display_name\":\"Claude 3.5 Sonnet\"}],\"has_more\":true}",
+      "expect": "active"
+    },
+    "unauthorized_401": {
+      "status": 401,
+      "body": "{\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"}}",
+      "expect": "invalid"
+    },
+    "forbidden_403": {
+      "status": 403,
+      "body": "{\"type\":\"error\",\"error\":{\"type\":\"permission_error\",\"message\":\"Forbidden\"}}",
+      "expect": "invalid"
+    },
+    "out_of_quota_429": {
+      "status": 429,
+      "body": "{\"type\":\"error\",\"error\":{\"type\":\"rate_limit_error\",\"message\":\"Number of request tokens has exceeded your daily rate limit\"}}",
+      "expect": "out_of_quota"
+    }
+  }
+}

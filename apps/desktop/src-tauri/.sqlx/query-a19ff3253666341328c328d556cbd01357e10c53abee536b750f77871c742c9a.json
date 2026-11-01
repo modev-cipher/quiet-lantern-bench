@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO suppressed_block (id, job_id, page_no, role, reason, certainty, text, words)\n             VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 8
+    },
+    "nullable": []
+  },
+  "hash": "a19ff3253666341328c328d556cbd01357e10c53abee536b750f77871c742c9a"
+}

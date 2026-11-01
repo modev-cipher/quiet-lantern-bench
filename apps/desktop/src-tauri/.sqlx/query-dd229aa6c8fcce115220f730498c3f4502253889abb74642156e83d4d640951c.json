@@ -1,0 +1,62 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id as \"id!\", job_id, page_no, role, reason, certainty, text, words\n           FROM suppressed_block WHERE job_id = ?\n           ORDER BY CASE certainty WHEN 'uncertain' THEN 0 ELSE 1 END, page_no, id",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "job_id",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "page_no",
+        "ordinal": 2,
+        "type_info": "Integer"
+      },
+      {
+        "name": "role",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "reason",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "certainty",
+        "ordinal": 5,
+        "type_info": "Text"
+      },
+      {
+        "name": "text",
+        "ordinal": 6,
+        "type_info": "Text"
+      },
+      {
+        "name": "words",
+        "ordinal": 7,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "dd229aa6c8fcce115220f730498c3f4502253889abb74642156e83d4d640951c"
+}

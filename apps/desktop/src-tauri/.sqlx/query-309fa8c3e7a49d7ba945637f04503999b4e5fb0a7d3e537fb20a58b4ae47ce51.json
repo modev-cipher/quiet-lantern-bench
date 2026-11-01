@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO chapter (id, book_id, idx, title, page_start, page_end,\n                                      is_pseudo, word_count)\n                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 8
+    },
+    "nullable": []
+  },
+  "hash": "309fa8c3e7a49d7ba945637f04503999b4e5fb0a7d3e537fb20a58b4ae47ce51"
+}

@@ -1,0 +1,58 @@
+{
+  "name": "deepgram-agent-audio-out-transcripts",
+  "provider": "deepgram",
+  "doc_url": "https://developers.deepgram.com/reference/voice-agent/voice-agent",
+  "doc_accessed": "2026-08-21",
+  "channel_protocol_version": 1,
+  "steps": [
+    {
+      "expect_text": {
+        "contains": ["\"type\":\"Settings\""],
+        "absent": ["fixture-deepgram-agent-key"]
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"Welcome\",\"request_id\":\"fixture-req-dgva-tts\"}"
+      }
+    },
+    { "send_text": { "text": "{\"type\":\"SettingsApplied\"}" } },
+    {
+      "expect_binary": {
+        "min_bytes": 4,
+        "payload_base64": "CgD2/w=="
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"AgentStartedSpeaking\",\"total_latency\":0.42,\"tts_latency\":0.2,\"ttt_latency\":0.22}"
+      }
+    },
+    { "send_binary": { "base64": "VwSp+/9/AIAFDQ==" } },
+    {
+      "send_text": {
+        "text": "{\"type\":\"ConversationText\",\"role\":\"user\",\"content\":\"wait — which figure?\"}"
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"ConversationText\",\"role\":\"assistant\",\"content\":\"Figure 3, on this page.\"}"
+      }
+    },
+    {
+      "expect_binary": {
+        "min_bytes": 4,
+        "payload_base64": "FADs/w=="
+      }
+    },
+    { "send_binary": { "base64": "XBGk7rMV" } },
+    { "send_text": { "text": "{\"type\":\"AgentAudioDone\"}" } },
+    {
+      "expect_binary": {
+        "min_bytes": 4,
+        "payload_base64": "HgDi/w=="
+      }
+    },
+    { "send_binary": { "base64": "YR6f4QEB/v8=" } }
+  ]
+}

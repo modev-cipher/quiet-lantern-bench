@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE export SET bytes = ? WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "7da478c298f566d959dd745413076ec0c214f6f0b6e1e91e0f99d68eeaa1dec0"
+}

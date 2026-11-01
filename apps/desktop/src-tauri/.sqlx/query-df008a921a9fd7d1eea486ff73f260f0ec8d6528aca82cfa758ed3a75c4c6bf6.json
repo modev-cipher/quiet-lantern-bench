@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO script_segment (id, job_id, chapter_id, idx, page_no, kind, figure_id,\n                                         text, source_span_json, flags_json, audio_hash, duration_ms)\n             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 12
+    },
+    "nullable": []
+  },
+  "hash": "df008a921a9fd7d1eea486ff73f260f0ec8d6528aca82cfa758ed3a75c4c6bf6"
+}

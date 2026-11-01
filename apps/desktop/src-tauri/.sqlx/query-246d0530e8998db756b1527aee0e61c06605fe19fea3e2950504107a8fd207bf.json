@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE voice_session SET ended_at = ?, end_reason = ? WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "246d0530e8998db756b1527aee0e61c06605fe19fea3e2950504107a8fd207bf"
+}

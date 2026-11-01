@@ -1,0 +1,62 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id as \"id!\", name, engine, kind, preset_voice_id, reference_wav_path, params_json, created_at\n           FROM voice_profile WHERE id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "name",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "engine",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "kind",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "preset_voice_id",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "reference_wav_path",
+        "ordinal": 5,
+        "type_info": "Text"
+      },
+      {
+        "name": "params_json",
+        "ordinal": 6,
+        "type_info": "Text"
+      },
+      {
+        "name": "created_at",
+        "ordinal": 7,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "79402f814a1bc85c76b241fb05cad36f222fb2e98ddf87bdde6dd6f4c08c7377"
+}

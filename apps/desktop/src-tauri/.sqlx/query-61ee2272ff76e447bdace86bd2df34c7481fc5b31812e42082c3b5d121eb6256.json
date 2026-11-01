@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO hw_benchmark (id, profile_json, compute_score, tok_s_gpu, tok_s_cpu, rtf_table_json, fingerprint, measured_at)\n         VALUES (1, ?, ?, ?, ?, ?, ?, ?)\n         ON CONFLICT(id) DO UPDATE SET profile_json = excluded.profile_json,\n                                       compute_score = excluded.compute_score,\n                                       tok_s_gpu = excluded.tok_s_gpu,\n                                       tok_s_cpu = excluded.tok_s_cpu,\n                                       fingerprint = excluded.fingerprint,\n                                       measured_at = excluded.measured_at",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 7
+    },
+    "nullable": []
+  },
+  "hash": "61ee2272ff76e447bdace86bd2df34c7481fc5b31812e42082c3b5d121eb6256"
+}

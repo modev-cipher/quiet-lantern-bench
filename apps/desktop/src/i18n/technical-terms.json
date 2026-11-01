@@ -1,0 +1,143 @@
+{
+  "$comment": "Owner law (#25 Q3, Master Directive Lane 1): these terms stay English in every locale. Shared by the census script (exempt tokens) and the catalog lint (forbidden AR renderings).",
+  "terms": [
+    "API",
+    "Token",
+    "Tokens",
+    "Prompt",
+    "Latency",
+    "Cache",
+    "Vector",
+    "Model",
+    "Models",
+    "Pipeline",
+    "Runtime",
+    "Embedding",
+    "Embeddings",
+    "Architecture",
+    "GPU",
+    "CPU",
+    "VRAM",
+    "RAM",
+    "LLM",
+    "TTS",
+    "ASR",
+    "VLM",
+    "MP3",
+    "PDF",
+    "EPUB",
+    "WAV",
+    "GB",
+    "MB",
+    "KB",
+    "ms",
+    "URL",
+    "HTTP",
+    "HTTPS",
+    "LAN",
+    "Wi-Fi",
+    "AGPL-3.0",
+    "Proprietary",
+    "txtCaster",
+    "Pro",
+    "Pro+",
+    "Max"
+  ],
+  "arabicRenderingsForbidden": {
+    "API": [
+      "واجهة برمجة",
+      "إيه بي آي"
+    ],
+    "Token": [
+      "توكن",
+      "توكنات",
+      "رمز مميز",
+      "رموز مميزة"
+    ],
+    "Prompt": [
+      "برومبت",
+      "موجّه",
+      "موجه نصي"
+    ],
+    "Latency": [
+      "زمن الاستجابة",
+      "كمون",
+      "لاتنسي"
+    ],
+    "Cache": [
+      "كاش",
+      "ذاكرة التخزين المؤقت",
+      "ذاكرة مؤقتة",
+      "التخزين المؤقت"
+    ],
+    "Vector": [
+      "فيكتور",
+      "متجه",
+      "متجهات"
+    ],
+    "Model": [
+      "نموذج",
+      "نماذج",
+      "موديل"
+    ],
+    "Pipeline": [
+      "خط الأنابيب",
+      "بايبلاين",
+      "خط المعالجة"
+    ],
+    "Runtime": [
+      "وقت التشغيل",
+      "رن تايم",
+      "بيئة التشغيل"
+    ],
+    "Embedding": [
+      "تضمين",
+      "إمبدنج",
+      "تضمينات"
+    ],
+    "Architecture": [
+      "معمارية",
+      "بنية النظام",
+      "هيكلية"
+    ]
+  },
+  "stackNamesForbidden": [
+    "Tauri",
+    "Rust",
+    "pdfium",
+    "PDFium",
+    "GGUF",
+    "llama.cpp",
+    "PyTorch",
+    "Docling",
+    "Whisper",
+    "React",
+    "SQLite",
+    "sqlite",
+    "FFmpeg",
+    "ffmpeg",
+    "WebView",
+    "webview",
+    "Playwright",
+    "Vite",
+    "Tailwind",
+    "Gemini",
+    "Google",
+    "OpenAI",
+    "Deepgram",
+    "Cartesia",
+    "Chatterbox",
+    "Kokoro",
+    "ElevenLabs",
+    "Anthropic",
+    "Claude",
+    "OpenRouter",
+    "Mistral",
+    "Ollama",
+    "Qwen",
+    "Gemma",
+    "Llama",
+    "Silero"
+  ],
+  "$comment_stack": "I18N-2: provider and model names join the #31 list — they may appear only as VALUES through providerNames.ts/modelNames.ts, never in catalog copy. silero added 2026-09-27 (TECH_STACK ships silero-vad via ort; banned-token regex pins the runtime names)."
+}

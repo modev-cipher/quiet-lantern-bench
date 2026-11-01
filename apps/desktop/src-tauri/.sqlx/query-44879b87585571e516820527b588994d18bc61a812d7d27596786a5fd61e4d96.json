@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT COUNT(*) as \"count!: i64\" FROM render_job\n           WHERE book_id = ? AND state NOT IN ('DONE', 'CANCELLED', 'FAILED')",
+  "describe": {
+    "columns": [
+      {
+        "name": "count!: i64",
+        "ordinal": 0,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "44879b87585571e516820527b588994d18bc61a812d7d27596786a5fd61e4d96"
+}

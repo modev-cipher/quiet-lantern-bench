@@ -1,0 +1,40 @@
+{
+  "name": "deepgram-agent-connect",
+  "provider": "deepgram",
+  "doc_url": "https://developers.deepgram.com/reference/voice-agent/voice-agent",
+  "doc_accessed": "2026-08-21",
+  "channel_protocol_version": 1,
+  "steps": [
+    {
+      "expect_handshake": {
+        "connection": 1,
+        "target_contains": ["/v1/agent/converse"],
+        "target_absent": [
+          "key=",
+          "token=",
+          "fixture-deepgram-agent-key",
+          "fixture-byo-llm-key"
+        ],
+        "headers_present": ["authorization"]
+      }
+    },
+    {
+      "expect_text": {
+        "contains": [
+          "\"type\":\"Settings\"",
+          "\"model\":\"nova-3\"",
+          "\"model\":\"aura-2-thalia-en\"",
+          "\"url\":\"https://byo-llm.example.com/v1\"",
+          "\"authorization\":\"Bearer fixture-byo-llm-key-3e77\""
+        ],
+        "absent": ["fixture-deepgram-agent-key"]
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"Welcome\",\"request_id\":\"fixture-req-dgva\"}"
+      }
+    },
+    { "send_text": { "text": "{\"type\":\"SettingsApplied\"}" } }
+  ]
+}

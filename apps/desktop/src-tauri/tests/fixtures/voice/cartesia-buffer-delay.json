@@ -1,0 +1,43 @@
+{
+  "name": "cartesia-buffer-delay",
+  "provider": "cartesia",
+  "doc_url": "https://docs.cartesia.ai/api-reference/tts/tts",
+  "doc_accessed": "2026-08-22",
+  "channel_protocol_version": 1,
+  "steps": [
+    {
+      "expect_handshake": {
+        "connection": 1,
+        "target_contains": ["/tts/websocket", "cartesia_version=2026-08-14"],
+        "target_absent": ["access_token", "x-api-key", "fixture-cartesia-key"],
+        "headers_present": ["x-api-key"]
+      }
+    },
+    {
+      "expect_text": {
+        "contains": [
+          "\"transcript\":\"One complete turn, sent whole.\"",
+          "\"context_id\":\"ctx-bd\"",
+          "\"continue\":false"
+        ],
+        "absent": ["max_buffer_delay_ms", "\"flush\"", "fixture-cartesia-key"]
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"flush_done\",\"context_id\":\"ctx-bd\",\"status_code\":200,\"done\":false,\"flush_done\":true,\"flush_id\":1}"
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"chunk\",\"context_id\":\"ctx-bd\",\"status_code\":206,\"data\":\"AgD9/w==\"}"
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"done\",\"context_id\":\"ctx-bd\",\"status_code\":200}"
+      }
+    },
+    "server_close"
+  ]
+}

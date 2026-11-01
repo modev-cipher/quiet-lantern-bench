@@ -1,0 +1,297 @@
+{
+  "index": {
+    "jobId": "job-golden",
+    "bookId": "book-golden",
+    "origin": "measured",
+    "totalMs": 5708,
+    "chapters": [
+      {
+        "chapterId": "chap-0",
+        "idx": 0,
+        "title": "Chapter 1",
+        "pageStart": 1,
+        "pageEnd": 2,
+        "startMs": 0,
+        "endMs": 2200,
+        "segmentCount": 2
+      },
+      {
+        "chapterId": "chap-1",
+        "idx": 1,
+        "title": "Chapter 2",
+        "pageStart": 3,
+        "pageEnd": 4,
+        "startMs": 3452,
+        "endMs": 8252,
+        "segmentCount": 4
+      }
+    ]
+  },
+  "chapters": [
+    {
+      "anchorGeometry": "ensured",
+      "chapterId": "chap-0",
+      "startMs": 0,
+      "endMs": 2200,
+      "origin": "measured",
+      "segments": [
+        {
+          "segmentId": "seg-0000",
+          "idx": 0,
+          "pageNo": 1,
+          "kind": "text",
+          "figureId": null,
+          "text": "The first sentence reads aloud.",
+          "startMs": 0,
+          "endMs": 900,
+          "provenance": "fresh",
+          "words": [
+            {
+              "w": "The",
+              "startMs": 0,
+              "endMs": 180,
+              "rect": {
+                "x0": 72.0,
+                "y0": 100.0,
+                "x1": 98.0,
+                "y1": 112.0
+              }
+            },
+            {
+              "w": "first",
+              "startMs": 200,
+              "endMs": 430,
+              "rect": {
+                "x0": 102.0,
+                "y0": 100.0,
+                "x1": 134.0,
+                "y1": 112.0
+              }
+            },
+            {
+              "w": "sentence",
+              "startMs": 450,
+              "endMs": 880,
+              "rect": null
+            },
+            {
+              "w": "aloud",
+              "startMs": 890,
+              "endMs": 900,
+              "rect": {
+                "x0": 188.0,
+                "y0": 100.0,
+                "x1": 240.0,
+                "y1": 112.0
+              }
+            }
+          ],
+          "anchor": "word",
+          "rects": []
+        },
+        {
+          "segmentId": "seg-0001",
+          "idx": 1,
+          "pageNo": 2,
+          "kind": "text",
+          "figureId": null,
+          "text": "The second sentence follows it.",
+          "startMs": 1300,
+          "endMs": 2200,
+          "provenance": "stale",
+          "words": [],
+          "anchor": "block",
+          "rects": [
+            {
+              "x0": 70.0,
+              "y0": 126.0,
+              "x1": 296.0,
+              "y1": 146.0
+            }
+          ]
+        }
+      ],
+      "mode": "narrator"
+    },
+    {
+      "anchorGeometry": "unavailable",
+      "chapterId": "chap-1",
+      "startMs": 3452,
+      "endMs": 8252,
+      "origin": "measured",
+      "segments": [
+        {
+          "segmentId": "seg-0002",
+          "idx": 2,
+          "pageNo": 3,
+          "kind": "figure_cue",
+          "figureId": "figure-7",
+          "text": "A chart appears here.",
+          "startMs": 3452,
+          "endMs": 4352,
+          "provenance": "fresh",
+          "words": [
+            {
+              "w": "A",
+              "startMs": 3452,
+              "endMs": 3572,
+              "rect": null
+            },
+            {
+              "w": "chart",
+              "startMs": 3592,
+              "endMs": 3972,
+              "rect": null
+            }
+          ],
+          "anchor": "page",
+          "rects": []
+        },
+        {
+          "segmentId": "seg-0003",
+          "idx": 3,
+          "pageNo": 3,
+          "kind": "text",
+          "figureId": "figure-9",
+          "text": "The lecture resumes after it.",
+          "startMs": 4752,
+          "endMs": 5652,
+          "provenance": "missing",
+          "words": [],
+          "anchor": "page",
+          "rects": []
+        },
+        {
+          "segmentId": "seg-0004",
+          "idx": 4,
+          "pageNo": 4,
+          "kind": "text",
+          "figureId": "figure-11",
+          "text": "A diagram sits beside this sentence.",
+          "startMs": 6052,
+          "endMs": 6952,
+          "provenance": "missing",
+          "words": [],
+          "anchor": "block",
+          "rects": [
+            {
+              "x0": 70.0,
+              "y0": 96.0,
+              "x1": 244.0,
+              "y1": 116.0
+            }
+          ]
+        },
+        {
+          "segmentId": "seg-0005",
+          "idx": 5,
+          "pageNo": 4,
+          "kind": "text",
+          "figureId": null,
+          "text": "The lecture keeps going on the same page.",
+          "startMs": 7352,
+          "endMs": 8252,
+          "provenance": "missing",
+          "words": [],
+          "anchor": "block",
+          "rects": [
+            {
+              "x0": 70.0,
+              "y0": 126.0,
+              "x1": 296.0,
+              "y1": 146.0
+            }
+          ]
+        }
+      ],
+      "mode": "narrator"
+    }
+  ],
+  "pages": [
+    {
+      "pageNo": 1,
+      "widthPt": 612.0,
+      "heightPt": 792.0,
+      "imagePath": "<cache>/pa/page-hash-1"
+    },
+    {
+      "pageNo": 2,
+      "widthPt": 612.0,
+      "heightPt": 792.0,
+      "imagePath": null
+    },
+    {
+      "pageNo": 3,
+      "widthPt": 612.0,
+      "heightPt": 792.0,
+      "imagePath": null
+    },
+    {
+      "pageNo": 4,
+      "widthPt": 612.0,
+      "heightPt": 792.0,
+      "imagePath": "<cache>/pa/page-hash-4"
+    }
+  ],
+  "rendered": [
+    {
+      "pageNo": 1,
+      "widthPt": 612.0,
+      "heightPt": 792.0,
+      "imagePath": "<cache>/pa/page-hash-1"
+    },
+    {
+      "pageNo": 2,
+      "widthPt": 612.0,
+      "heightPt": 792.0,
+      "imagePath": "<cache>/pa/page-hash-2"
+    },
+    {
+      "pageNo": 3,
+      "widthPt": 612.0,
+      "heightPt": 792.0,
+      "imagePath": "<cache>/pa/page-hash-3"
+    },
+    {
+      "pageNo": 4,
+      "widthPt": 612.0,
+      "heightPt": 792.0,
+      "imagePath": "<cache>/pa/page-hash-4"
+    }
+  ],
+  "figures": [
+    {
+      "figureId": "figure-7",
+      "pageNo": 4,
+      "bbox": [
+        72.0,
+        120.5,
+        468.0,
+        396.25
+      ],
+      "cropHash": "crop-hash-7"
+    },
+    {
+      "figureId": "figure-9",
+      "pageNo": 2,
+      "bbox": [
+        90.0,
+        240.0,
+        522.0,
+        540.0
+      ],
+      "cropHash": "crop-hash-9"
+    },
+    {
+      "figureId": "figure-11",
+      "pageNo": 4,
+      "bbox": [
+        100.0,
+        300.0,
+        500.0,
+        600.0
+      ],
+      "cropHash": "crop-hash-11"
+    }
+  ]
+}

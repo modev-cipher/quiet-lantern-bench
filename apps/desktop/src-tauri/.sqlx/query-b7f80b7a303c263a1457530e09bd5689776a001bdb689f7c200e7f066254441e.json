@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE voice_session SET summary_text = ?, summary_turns = ? WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "b7f80b7a303c263a1457530e09bd5689776a001bdb689f7c200e7f066254441e"
+}

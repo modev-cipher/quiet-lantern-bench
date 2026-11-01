@@ -1,0 +1,38 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT hash as \"hash!\", kind, bytes, last_used_at\n           FROM cache_entry\n           WHERE hash NOT IN (SELECT r.hash FROM cache_ref r\n                              JOIN render_job j ON j.id = r.job_id\n                              WHERE instr(?, ',' || j.state || ',') = 0)\n           ORDER BY last_used_at ASC, hash ASC\n           LIMIT ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "hash!",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "kind",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "bytes",
+        "ordinal": 2,
+        "type_info": "Integer"
+      },
+      {
+        "name": "last_used_at",
+        "ordinal": 3,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "3b38355ee1a670c692803dd49de14e96c6fc6058c2b631038300e94b74b9ec0c"
+}

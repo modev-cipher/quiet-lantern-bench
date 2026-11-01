@@ -1,0 +1,72 @@
+{
+  "name": "deepgram-agent-tools-text-context",
+  "provider": "deepgram",
+  "doc_url": "https://developers.deepgram.com/reference/voice-agent/voice-agent",
+  "doc_accessed": "2026-08-21",
+  "channel_protocol_version": 1,
+  "steps": [
+    {
+      "expect_text": {
+        "contains": ["\"type\":\"Settings\""],
+        "absent": ["fixture-deepgram-agent-key"]
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"Welcome\",\"request_id\":\"fixture-req-dgva-tools\"}"
+      }
+    },
+    { "send_text": { "text": "{\"type\":\"SettingsApplied\"}" } },
+    {
+      "send_text": {
+        "text": "{\"type\":\"FunctionCallRequest\",\"functions\":[{\"id\":\"fc-call-1\",\"name\":\"get_context_around_position\",\"arguments\":\"{\\\"position_ms\\\":42000}\",\"client_side\":true},{\"id\":\"fc-srv-1\",\"name\":\"server_side_lookup\",\"arguments\":\"{}\",\"client_side\":false}]}"
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"ConversationText\",\"role\":\"assistant\",\"content\":\"marker: nothing else was bridged\"}"
+      }
+    },
+    {
+      "expect_text": {
+        "contains": [
+          "\"type\":\"FunctionCallResponse\"",
+          "\"id\":\"fc-call-1\"",
+          "\"name\":\"get_context_around_position\"",
+          "\"content\":"
+        ],
+        "absent": ["fc-srv-1"]
+      }
+    },
+    {
+      "expect_text": {
+        "contains": [
+          "\"type\":\"InjectUserMessage\"",
+          "\"content\":\"what does the third equation mean?\""
+        ]
+      }
+    },
+    {
+      "expect_text": {
+        "contains": [
+          "\"type\":\"UpdatePrompt\"",
+          "\"prompt\":",
+          "You are the reading tutor.",
+          "<<x>>chapter seven excerpt<</x>>",
+          "The reader is now at chapter 7."
+        ],
+        "absent": ["<<x>>excerpt<</x>>"]
+      }
+    },
+    { "send_text": { "text": "{\"type\":\"PromptUpdated\"}" } },
+    {
+      "expect_text": {
+        "contains": [
+          "\"type\":\"UpdatePrompt\"",
+          "<<x>>chapter seven excerpt<</x>>",
+          "Playback position: 90500 ms."
+        ]
+      }
+    }
+  ]
+}

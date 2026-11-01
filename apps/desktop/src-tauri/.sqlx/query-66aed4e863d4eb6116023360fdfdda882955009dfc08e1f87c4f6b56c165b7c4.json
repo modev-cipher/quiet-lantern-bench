@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM page WHERE book_id = ? AND page_no > ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "66aed4e863d4eb6116023360fdfdda882955009dfc08e1f87c4f6b56c165b7c4"
+}

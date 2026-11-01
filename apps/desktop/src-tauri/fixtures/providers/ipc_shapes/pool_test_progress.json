@@ -1,0 +1,8 @@
+{
+  "provider": "gemini",
+  "baseUrl": "https://generativelanguage.googleapis.com",
+  "completed": 1,
+  "total": 3,
+  "done": false,
+  "cancelled": false
+}

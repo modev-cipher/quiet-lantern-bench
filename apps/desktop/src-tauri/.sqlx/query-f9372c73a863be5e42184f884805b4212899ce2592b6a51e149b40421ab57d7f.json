@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM book WHERE id = ? AND (extracting_since IS NULL OR extracting_since < ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "f9372c73a863be5e42184f884805b4212899ce2592b6a51e149b40421ab57d7f"
+}

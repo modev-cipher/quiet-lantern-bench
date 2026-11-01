@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE render_job SET state = ?, updated_at = ? WHERE id = ? AND state = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "aedb776e1c86a80dfd8a50b1c19c5c545abc2df321a7e3e6440f2eb9937a9f6f"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO model_install (model_id, path, sha256, disk_bytes, source, installed_at)\n         VALUES (?, ?, ?, ?, ?, ?)\n         ON CONFLICT(model_id) DO UPDATE SET\n           path = excluded.path,\n           sha256 = excluded.sha256,\n           disk_bytes = excluded.disk_bytes,\n           source = excluded.source,\n           installed_at = excluded.installed_at",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 6
+    },
+    "nullable": []
+  },
+  "hash": "a9f5ba9e72ec6322c0d2fc36bca8f3f2645dae6413104666b33d33f53a9e286b"
+}

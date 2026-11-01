@@ -1,0 +1,102 @@
+# Release packaging (owner ruling #25 Q4: GitHub Actions is reserved strictly for
+# final WINDOWS release packaging). Builds the Windows installer with the public
+# update key pinned, and the separately downloaded Windows engine packages (the
+# installer does not carry an engine), and uploads them as workflow artifacts. Nothing here holds the
+# update signing key or writes a release: signing (latest.json, engine.json) and
+# the draft on torkiv-labs/txtcaster-releases happen on the owner's machine
+# (docs/notes/upd-1-auto-updater.md §5). Publishing the draft is the owner's act.
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag, e.g. v0.2.0 (must equal the version in tauri.conf.json)"
+        required: true
+
+# `permissions` are declared per JOB: the Windows build only reads the repository.
+env:
+  CARGO_PROFILE_DEV_DEBUG: '0'
+  SQLX_OFFLINE: "true"
+  CMAKE_ARGS: "-DGGML_NATIVE=off"
+  # Public half of the update signing key, pinned into the app at build time.
+  # A repository VARIABLE (not a secret): it is public by nature.
+  TXTCASTER_UPDATE_PUBKEY: ${{ vars.TXTCASTER_UPDATE_PUBKEY }}
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Refuse to build without a pinned public key
+        shell: bash
+        run: |
+          if [ -z "$TXTCASTER_UPDATE_PUBKEY" ]; then
+            echo "::error::TXTCASTER_UPDATE_PUBKEY repository variable is not set; a release build must pin the update key"; exit 1; fi
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Tag must match the app version
+        shell: bash
+        run: |
+          v=$(python3 -c "import json;print(json.load(open('apps/desktop/src-tauri/tauri.conf.json'))['version'])")
+          [ "v$v" = "${{ inputs.tag }}" ] || { echo "::error::tag ${{ inputs.tag }} != v$v in tauri.conf.json"; exit 1; }
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/desktop/src-tauri
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
+        with:
+          python-version: "3.11"
+      - name: Build, smoke test and pack the engine packages (unsigned; engine.json is signed on the owner's machine)
+        shell: bash
+        run: |
+          mkdir -p out-engine
+          version="$(sed -n 's/^__version__ = "\(.*\)"/\1/p' engine/txtcaster_engine/__init__.py)"
+          (cd apps/desktop/src-tauri && cargo build --release --features release-tools --bin update_sign)
+          signer=apps/desktop/src-tauri/target/release/update_sign
+          for variant in cpu lite cuda13; do
+            dist=engine/dist-$variant; [ "$variant" = cpu ] && dist=engine/dist
+            flag=; [ "$variant" = lite ] && flag=--reader-only
+            ENGINE_VARIANT=$variant ./scripts/build_engine.sh
+            uv run --no-project python scripts/smoke_test.py "$dist/txtcaster-engine/txtcaster-engine.exe" $flag
+            "$signer" engine-pack --dir "$dist/txtcaster-engine" --out-prefix "out-engine/txtcaster-engine-$version-windows-x86_64-$variant"
+            rm -rf "$dist" engine/build "engine/.venv-build-$variant"
+          done
+      - name: Fetch the pinned LGPL FFmpeg
+        shell: bash
+        run: ./scripts/fetch_ffmpeg_windows.sh apps/desktop/src-tauri/ffmpeg
+      - name: Build Tauri NSIS installer (public key pinned)
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm tauri build --config src-tauri/tauri.bundle.conf.json --config src-tauri/tauri.ffmpeg.conf.json --bundles nsis
+      - name: The bundle must carry FFmpeg
+        shell: bash
+        run: |
+          for f in ffmpeg/ffmpeg.exe ffmpeg/ffprobe.exe ffmpeg/LICENSE.txt ffmpeg/COPYING.GPLv3.txt ffmpeg/SOURCE.txt NOTICE; do
+            test -f "apps/desktop/src-tauri/target/release/$f" || { echo "::error::bundle is missing $f"; exit 1; }
+          done
+          apps/desktop/src-tauri/target/release/ffmpeg/ffmpeg.exe -hide_banner -version | head -n 1
+          apps/desktop/src-tauri/target/release/ffmpeg/ffprobe.exe -hide_banner -version | head -n 1
+      - name: Collect
+        shell: bash
+        run: |
+          mkdir -p out
+          find apps/desktop/src-tauri/target/release/bundle/nsis -type f -name '*-setup.exe' -exec cp {} out/ \;
+          ls -la out
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-windows
+          path: out/*
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-windows-engine
+          path: out-engine/*
+          if-no-files-found: error

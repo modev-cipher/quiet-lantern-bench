@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE script_segment\n            SET original_text = COALESCE(original_text, text),\n                text = ?,\n                audio_hash = NULL,\n                duration_ms = NULL\n          WHERE id = ? AND text <> ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "30c376de2e83d06b7db77290c96ff141ac4d6b84a3922e5d805fd00b96479290"
+}

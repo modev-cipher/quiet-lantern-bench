@@ -1,0 +1,48 @@
+{
+  "provenance": {
+    "source_docs": [
+      "https://ai.google.dev/gemini-api/docs/troubleshooting",
+      "https://ai.google.dev/gemini-api/docs/api-errors",
+      "https://cloud.google.com/apis/design/errors"
+    ],
+    "checked_date": "2026-09-15"
+  },
+  "errors": {
+    "overload_503_high_demand": {
+      "http_status": 503,
+      "body": "{\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}"
+    },
+    "overload_503_retry_info": {
+      "http_status": 503,
+      "body": "{\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"The service is temporarily unavailable. Please try again later.\",\n    \"status\": \"UNAVAILABLE\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"30s\"\n      }\n    ]\n  }\n}"
+    },
+    "overload_500_internal": {
+      "http_status": 500,
+      "body": "{\n  \"error\": {\n    \"code\": 500,\n    \"message\": \"An internal error has occurred. Please retry your request.\",\n    \"status\": \"INTERNAL\"\n  }\n}"
+    },
+    "overload_504_deadline_exceeded": {
+      "http_status": 504,
+      "body": "{\n  \"error\": {\n    \"code\": 504,\n    \"message\": \"The request deadline was exceeded. Please try again later.\",\n    \"status\": \"DEADLINE_EXCEEDED\"\n  }\n}"
+    },
+    "quota_429_resource_exhausted": {
+      "http_status": 429,
+      "body": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"Resource has been exhausted (e.g. check quota).\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"60s\"\n      }\n    ]\n  }\n}"
+    },
+    "quota_429_rate_limit_exceeded": {
+      "http_status": 429,
+      "body": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"Rate limit exceeded for requests per minute (RPM).\",\n    \"status\": \"RESOURCE_EXHAUSTED\"\n  }\n}"
+    },
+    "auth_400_api_key_invalid": {
+      "http_status": 400,
+      "body": "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"API key not valid. Please pass a valid API key.\",\n    \"status\": \"INVALID_ARGUMENT\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"API_KEY_INVALID\"\n      }\n    ]\n  }\n}"
+    },
+    "auth_401_unauthenticated": {
+      "http_status": 401,
+      "body": "{\n  \"error\": {\n    \"code\": 401,\n    \"message\": \"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid credential.\",\n    \"status\": \"UNAUTHENTICATED\"\n  }\n}"
+    },
+    "auth_403_permission_denied": {
+      "http_status": 403,
+      "body": "{\n  \"error\": {\n    \"code\": 403,\n    \"message\": \"The caller does not have permission\",\n    \"status\": \"PERMISSION_DENIED\"\n  }\n}"
+    }
+  }
+}

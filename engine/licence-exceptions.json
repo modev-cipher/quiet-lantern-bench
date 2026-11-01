@@ -1,0 +1,37 @@
+{
+  "permanent": {
+    "certifi": {"licence": "MPL-2.0", "ruling": "owner 2026-10-20: permanent exception"},
+    "tqdm": {"licence": "MPL-2.0 AND MIT", "ruling": "owner 2026-10-20: permanent exception"},
+    "soxr": {"licence": "LGPL-2.1-or-later", "via": "librosa (chatterbox-tts)", "ruling": "owner 2026-10-20: permanent exception, dynamically linked"}
+  },
+  "known_violation": {},
+  "pending_owner": {
+    "defusedxml": {"licence": "PSF-2.0", "note": "permissive, not copyleft; outside MIT/Apache/BSD/ISC"},
+    "typing-extensions": {"licence": "PSF-2.0", "note": "permissive, not copyleft; outside MIT/Apache/BSD/ISC"},
+    "pillow": {"licence": "MIT-CMU (HPND)", "note": "permissive, not copyleft; outside MIT/Apache/BSD/ISC"},
+    "numpy": {"licence": "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0", "note": "Zlib and CC0 components are permissive, outside the four"},
+    "regex": {"licence": "Apache-2.0 AND CNRI-Python", "note": "CNRI-Python component is permissive, outside the four"},
+    "torch": {"licence": "Apache-2.0 AND BSD AND MIT AND BSL-1.0 (+ LLVM exception)", "note": "BSL-1.0 component is permissive, outside the four"},
+    "cuda-bindings": {"licence": "NVIDIA Software License", "note": "GPU build only; NVIDIA EULA redistribution terms"},
+    "cuda-toolkit": {"licence": "NVIDIA EULA", "note": "GPU build only"},
+    "nvidia-cublas": {"licence": "NVIDIA Proprietary", "note": "GPU build only"},
+    "nvidia-cuda-cupti": {"licence": "NVIDIA Proprietary", "note": "GPU build only"},
+    "nvidia-cuda-nvrtc": {"licence": "NVIDIA Proprietary", "note": "GPU build only"},
+    "nvidia-cuda-runtime": {"licence": "NVIDIA Proprietary", "note": "GPU build only"},
+    "nvidia-cudnn-cu13": {"licence": "NVIDIA Proprietary", "note": "GPU build only"},
+    "nvidia-cufft": {"licence": "NVIDIA Proprietary", "note": "GPU build only"},
+    "nvidia-cufile": {"licence": "NVIDIA Proprietary", "note": "GPU build only"},
+    "nvidia-curand": {"licence": "NVIDIA Proprietary", "note": "GPU build only"},
+    "nvidia-cusolver": {"licence": "NVIDIA Proprietary", "note": "GPU build only"},
+    "nvidia-cusparse": {"licence": "NVIDIA Proprietary", "note": "GPU build only"},
+    "nvidia-cusparselt-cu13": {"licence": "NVIDIA Proprietary", "note": "GPU build only"},
+    "nvidia-nccl-cu13": {"licence": "NVIDIA Proprietary", "note": "GPU build only"},
+    "nvidia-nvjitlink": {"licence": "NVIDIA Proprietary", "note": "GPU build only"},
+    "nvidia-nvshmem-cu13": {"licence": "NVIDIA Proprietary", "note": "GPU build only"}
+  },
+  "reviewed": {
+    "addict": {"licence": "MIT", "version": "2.4.0", "source": "addict-2.4.0.dist-info/LICENSE"},
+    "python-dateutil": {"licence": "Apache-2.0 OR BSD-3-Clause", "version": "2.9.0.post0", "source": "python_dateutil-2.9.0.post0.dist-info/LICENSE (dual)"},
+    "pypdfium2": {"licence": "BSD-3-Clause AND Apache-2.0", "version": "5.12.1", "source": "pypdfium2 dist-info LICENSES; bundled pdfium build deps (FreeType FTL, ICU, libjpeg-turbo IJG, lcms, openjpeg, libpng, libtiff, zlib) are permissive and listed in BUILD_LICENSES"}
+  }
+}

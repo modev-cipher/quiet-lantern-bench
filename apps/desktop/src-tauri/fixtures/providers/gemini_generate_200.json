@@ -1,0 +1,20 @@
+{
+  "candidates": [
+    {
+      "content": {
+        "role": "model",
+        "parts": [
+          { "text": "[{\"text\": \"Native" },
+          { "text": " lecture.\"}]" }
+        ]
+      },
+      "finishReason": "STOP"
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 21,
+    "candidatesTokenCount": 9,
+    "totalTokenCount": 30
+  },
+  "modelVersion": "fixture"
+}

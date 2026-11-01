@@ -1,0 +1,128 @@
+{
+  "name": "gemini-live-agent-tools",
+  "provider": "gemini",
+  "doc_url": "https://ai.google.dev/gemini-api/docs/live-api/tools",
+  "doc_accessed": "2026-08-29",
+  "channel_protocol_version": 1,
+  "steps": [
+    {
+      "expect_handshake": {
+        "connection": 1,
+        "target_absent": [
+          "key=",
+          "access_token",
+          "fixture-gemini-key"
+        ],
+        "headers_present": [
+          "x-goog-api-key"
+        ]
+      }
+    },
+    {
+      "expect_text": {
+        "contains": [
+          "\"setup\"",
+          "models/gemini-2.5-flash-native-audio-preview-12-2025",
+          "\"behavior\":\"NON_BLOCKING\"",
+          "\"search_book\"",
+          "\"open_passage\"",
+          "\"go_to_passage\"",
+          "\"highlight_passage\"",
+          "\"pause_playback\"",
+          "Recognition is not evidence",
+          "\"jump_to_chapter\"",
+          "\"jump_to_page\"",
+          "\"resume_playback\""
+        ],
+        "absent": [
+          "fixture-gemini-key",
+          "seek_relative",
+          "summarize_section",
+          "teacher_anchor",
+          "update_learning_profile"
+        ]
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"setupComplete\":{}}"
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"toolCall\":{\"functionCalls\":[{\"id\":\"agent-1\",\"name\":\"search_book\",\"args\":{\"queries\":[\"astrolabe meridian\"]}}]}}"
+      }
+    },
+    {
+      "expect_text": {
+        "contains": [
+          "\"toolResponse\"",
+          "\"id\":\"agent-1\"",
+          "\"name\":\"search_book\"",
+          "\"scheduling\":\"WHEN_IDLE\"",
+          "untrusted_book_data"
+        ],
+        "absent": [
+          "fixture-gemini-key",
+          "\"error\""
+        ]
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"toolCall\":{\"functionCalls\":[{\"id\":\"agent-2\",\"name\":\"go_to_passage\",\"args\":{\"handle\":\"deadbeef\"}}]}}"
+      }
+    },
+    {
+      "expect_text": {
+        "contains": [
+          "\"toolResponse\"",
+          "\"id\":\"agent-2\"",
+          "\"name\":\"go_to_passage\"",
+          "\"scheduling\":\"WHEN_IDLE\"",
+          "\"position_ms\":2000"
+        ],
+        "absent": [
+          "fixture-gemini-key"
+        ]
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"toolCall\":{\"functionCalls\":[{\"id\":\"agent-3\",\"name\":\"highlight_passage\",\"args\":{\"handle\":\"deadbeef\"}}]}}"
+      }
+    },
+    {
+      "expect_text": {
+        "contains": [
+          "\"toolResponse\"",
+          "\"id\":\"agent-3\"",
+          "\"error\"",
+          "highlight_not_applied",
+          "\"scheduling\":\"WHEN_IDLE\""
+        ],
+        "absent": [
+          "fixture-gemini-key"
+        ]
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"toolCall\":{\"functionCalls\":[{\"id\":\"agent-4\",\"name\":\"pause_playback\",\"args\":{}}]}}"
+      }
+    },
+    {
+      "expect_text": {
+        "contains": [
+          "\"toolResponse\"",
+          "\"id\":\"agent-4\"",
+          "\"scheduling\":\"WHEN_IDLE\"",
+          "\"paused\":true"
+        ],
+        "absent": [
+          "fixture-gemini-key"
+        ]
+      }
+    }
+  ]
+}

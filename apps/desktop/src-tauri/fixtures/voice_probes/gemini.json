@@ -1,0 +1,38 @@
+{
+  "provider": "gemini",
+  "doc_url": "https://ai.google.dev/api/models",
+  "auth_doc_url": "https://ai.google.dev/gemini-api/docs/api-key",
+  "checked": "2026-08-20",
+  "probe": {
+    "method": "GET",
+    "url": "https://generativelanguage.googleapis.com/v1beta/models?pageSize=1",
+    "auth_headers": ["x-goog-api-key"]
+  },
+  "responses": {
+    "active": {
+      "status": 200,
+      "body": "{\"models\":[{\"name\":\"models/gemini-2.0-flash\",\"displayName\":\"Gemini 2.0 Flash\"}],\"nextPageToken\":\"tok\"}",
+      "expect": "active"
+    },
+    "invalid_key_400": {
+      "status": 400,
+      "body": "{\"error\":{\"code\":400,\"message\":\"API key not valid. Please pass a valid API key.\",\"status\":\"INVALID_ARGUMENT\",\"details\":[{\"@type\":\"type.googleapis.com/google.rpc.ErrorInfo\",\"reason\":\"API_KEY_INVALID\",\"domain\":\"googleapis.com\"}]}}",
+      "expect": "invalid"
+    },
+    "unauthorized_401": {
+      "status": 401,
+      "body": "{\"error\":{\"code\":401,\"message\":\"Request had invalid authentication credentials.\",\"status\":\"UNAUTHENTICATED\"}}",
+      "expect": "invalid"
+    },
+    "forbidden_403": {
+      "status": 403,
+      "body": "{\"error\":{\"code\":403,\"message\":\"Permission denied on resource.\",\"status\":\"PERMISSION_DENIED\"}}",
+      "expect": "invalid"
+    },
+    "out_of_quota_429": {
+      "status": 429,
+      "body": "{\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "expect": "out_of_quota"
+    }
+  }
+}

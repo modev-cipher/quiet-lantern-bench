@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO page_geometry (page_id, geometry_version, geometry_json)\n         SELECT ?, ?, ?\n         WHERE EXISTS (\n            SELECT 1 FROM page p\n            JOIN book b ON b.id = p.book_id\n            WHERE p.id = ? AND b.id = ? AND b.blocks_version IS ?\n         )\n         ON CONFLICT(page_id) DO UPDATE SET\n            geometry_version = excluded.geometry_version,\n            geometry_json = excluded.geometry_json",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 6
+    },
+    "nullable": []
+  },
+  "hash": "d15245ffc937ae83daf9c071fbbb29e842b834cd5cd9e0fa1de85fd1b9a23c1b"
+}

@@ -1,0 +1,62 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id as \"id!\", book_id, page_no, width_pt, height_pt, render_hash, text_json,\n                  needs_upgrade as \"needs_upgrade: bool\"\n           FROM page WHERE book_id = ? ORDER BY page_no",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "book_id",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "page_no",
+        "ordinal": 2,
+        "type_info": "Integer"
+      },
+      {
+        "name": "width_pt",
+        "ordinal": 3,
+        "type_info": "Float"
+      },
+      {
+        "name": "height_pt",
+        "ordinal": 4,
+        "type_info": "Float"
+      },
+      {
+        "name": "render_hash",
+        "ordinal": 5,
+        "type_info": "Text"
+      },
+      {
+        "name": "text_json",
+        "ordinal": 6,
+        "type_info": "Text"
+      },
+      {
+        "name": "needs_upgrade: bool",
+        "ordinal": 7,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "34cca0575ee1c973d79909b7c34e55cb993326a9f5b4e43b434ebf2d5fc76500"
+}

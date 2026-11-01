@@ -1,0 +1,52 @@
+{
+  "reviewedOn": "2026-10-27",
+  "sources": [
+    "https://developers.openai.com/api/docs/guides/latest-model",
+    "https://api-docs.deepseek.com/api/create-chat-completion/",
+    "https://console.groq.com/docs/reasoning",
+    "https://docs.together.ai/docs/inference/chat/reasoning"
+  ],
+  "cases": [
+    {
+      "base": "https://api.openai.com/v1",
+      "model": "gpt-6-luna",
+      "expected": {
+        "reasoning_effort": "low"
+      }
+    },
+    {
+      "base": "https://api.deepseek.com",
+      "model": "deepseek-flash",
+      "expected": {
+        "temperature": 0,
+        "reasoning_effort": "low"
+      }
+    },
+    {
+      "base": "https://api.groq.com/openai/v1",
+      "model": "openai/gpt-oss-20b",
+      "expected": {
+        "temperature": 0,
+        "reasoning_effort": "low",
+        "include_reasoning": false
+      }
+    },
+    {
+      "base": "https://api.together.ai/v1",
+      "model": "Qwen/Qwen3.5-9B",
+      "expected": {
+        "temperature": 0,
+        "reasoning": {
+          "enabled": false
+        }
+      }
+    },
+    {
+      "base": "https://other.example/v1",
+      "model": "gpt-6-luna",
+      "expected": {
+        "temperature": 0
+      }
+    }
+  ]
+}

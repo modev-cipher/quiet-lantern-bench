@@ -1,0 +1,59 @@
+{
+  "name": "deepgram-endpoint-race-dedupe",
+  "provider": "deepgram",
+  "doc_url": "https://developers.deepgram.com/docs/utterance-end",
+  "doc_accessed": "2026-08-21",
+  "channel_protocol_version": 1,
+  "steps": [
+    {
+      "expect_handshake": {
+        "connection": 1,
+        "target_contains": [
+          "/v1/listen",
+          "model=nova-3",
+          "encoding=linear16",
+          "sample_rate=16000"
+        ],
+        "target_absent": ["key=", "access_token", "fixture-deepgram-key"],
+        "headers_present": ["authorization"]
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"Results\",\"channel_index\":[0,1],\"start\":0.0,\"duration\":0.62,\"is_final\":false,\"speech_final\":false,\"channel\":{\"alternatives\":[{\"transcript\":\"what does\",\"confidence\":0.92,\"words\":[{\"word\":\"what\",\"start\":0.08,\"end\":0.24,\"confidence\":0.92},{\"word\":\"does\",\"start\":0.24,\"end\":0.46,\"confidence\":0.91}]}]}}"
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"Results\",\"channel_index\":[0,1],\"start\":0.0,\"duration\":1.94,\"is_final\":true,\"speech_final\":true,\"channel\":{\"alternatives\":[{\"transcript\":\"what does figure three show\",\"confidence\":0.97,\"words\":[{\"word\":\"what\",\"start\":0.08,\"end\":0.24,\"confidence\":0.97},{\"word\":\"does\",\"start\":0.24,\"end\":0.46,\"confidence\":0.96},{\"word\":\"figure\",\"start\":0.52,\"end\":0.9,\"confidence\":0.98},{\"word\":\"three\",\"start\":0.9,\"end\":1.28,\"confidence\":0.95},{\"word\":\"show\",\"start\":1.44,\"end\":1.86,\"confidence\":0.97}]}]}}"
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"UtteranceEnd\",\"channel\":[0,1],\"last_word_end\":1.86}"
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"Results\",\"channel_index\":[0,1],\"start\":1.94,\"duration\":0.5,\"is_final\":false,\"speech_final\":false,\"channel\":{\"alternatives\":[{\"transcript\":\"\",\"confidence\":0.0,\"words\":[]}]}}"
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"Results\",\"channel_index\":[0,1],\"start\":2.44,\"duration\":0.7,\"is_final\":false,\"speech_final\":false,\"channel\":{\"alternatives\":[{\"transcript\":\"and the axes\",\"confidence\":0.9,\"words\":[{\"word\":\"and\",\"start\":2.5,\"end\":2.66,\"confidence\":0.9},{\"word\":\"the\",\"start\":2.66,\"end\":2.8,\"confidence\":0.89},{\"word\":\"axes\",\"start\":2.8,\"end\":3.14,\"confidence\":0.91}]}]}}"
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"type\":\"UtteranceEnd\",\"channel\":[0,1],\"last_word_end\":3.14}"
+      }
+    },
+    {
+      "expect_text": {
+        "contains": ["\"type\":\"CloseStream\""],
+        "absent": ["fixture-deepgram-key"]
+      }
+    },
+    "server_close"
+  ]
+}

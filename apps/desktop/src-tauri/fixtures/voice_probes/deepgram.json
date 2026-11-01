@@ -1,0 +1,32 @@
+{
+  "provider": "deepgram",
+  "doc_url": "https://developers.deepgram.com/reference/manage/projects/list",
+  "checked": "2026-08-20",
+  "probe": {
+    "method": "GET",
+    "url": "https://api.deepgram.com/v1/projects",
+    "auth_headers": ["authorization"]
+  },
+  "responses": {
+    "active": {
+      "status": 200,
+      "body": "{\"projects\":[{\"project_id\":\"9c2e1fd0-63f9-4b8a-8f6a-000000000000\",\"name\":\"default\"}]}",
+      "expect": "active"
+    },
+    "unauthorized_401": {
+      "status": 401,
+      "body": "{\"err_code\":\"INVALID_AUTH\",\"err_msg\":\"Invalid credentials.\",\"request_id\":\"a1\"}",
+      "expect": "invalid"
+    },
+    "forbidden_403": {
+      "status": 403,
+      "body": "{\"err_code\":\"INSUFFICIENT_PERMISSIONS\",\"err_msg\":\"Project does not permit this action.\",\"request_id\":\"a2\"}",
+      "expect": "invalid"
+    },
+    "out_of_quota_429": {
+      "status": 429,
+      "body": "{\"err_code\":\"TOO_MANY_REQUESTS\",\"err_msg\":\"Rate limit exceeded.\",\"request_id\":\"a3\"}",
+      "expect": "out_of_quota"
+    }
+  }
+}

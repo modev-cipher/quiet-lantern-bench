@@ -1,0 +1,17 @@
+{
+  "expectedRange": "bytes=131072-199999",
+  "rule": "verified-chunk bitmap lives on the phone; stale If-Range makes the sender answer the whole file with 200",
+  "sidecar": {
+    "chunk_size": 65536,
+    "etag": "etag-38f9269cd4366d5f",
+    "total_chunks": 4,
+    "verified": [
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "staleAnswer": 200,
+  "staleIfRange": "etag-0000000000000000"
+}

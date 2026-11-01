@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO hw_benchmark (id, profile_json, compute_score, rtf_table_json, measured_at)\n         VALUES (1, '{}', 0, ?, ?)\n         ON CONFLICT(id) DO UPDATE SET rtf_table_json = excluded.rtf_table_json,\n                                       measured_at = excluded.measured_at",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "6d6acbdd7d8d7c3998bbaab5de0f9f40459277c76d8cf763b7766ad5e2cacb92"
+}

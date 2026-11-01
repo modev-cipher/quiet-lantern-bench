@@ -1,0 +1,44 @@
+{
+  "name": "elevenlabs-first-chunk-buffer",
+  "provider": "elevenlabs",
+  "doc_url": "https://elevenlabs.io/docs/api-reference/text-to-speech/v-1-text-to-speech-voice-id-stream-input",
+  "doc_accessed": "2026-08-22",
+  "channel_protocol_version": 1,
+  "steps": [
+    {
+      "expect_handshake": {
+        "connection": 1,
+        "target_contains": ["/v1/text-to-speech/", "/stream-input", "model_id="],
+        "target_absent": [
+          "xi-api-key",
+          "authorization",
+          "single_use_token",
+          "fixture-elevenlabs-key"
+        ],
+        "headers_present": ["xi-api-key"]
+      }
+    },
+    {
+      "expect_text": {
+        "contains": ["\"text\":\" \""],
+        "absent": ["fixture-elevenlabs-key"]
+      }
+    },
+    {
+      "expect_text": {
+        "contains": ["\"text\":\"Go on. \"", "\"flush\":true"],
+        "absent": ["fixture-elevenlabs-key"]
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"audio\":\"AgD9/w==\",\"alignment\":{\"chars\":[\"G\",\"o\",\" \",\"o\",\"n\",\".\"],\"charStartTimesMs\":[0,120,240,300,420,540],\"charDurationsMs\":[120,120,60,120,120,80]}}"
+      }
+    },
+    {
+      "send_text": {
+        "text": "{\"audio\":null,\"isFinal\":true}"
+      }
+    }
+  ]
+}

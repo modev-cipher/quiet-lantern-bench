@@ -1,0 +1,25 @@
+{
+  "checked": "2026-08-28",
+  "cartesia_tts": {
+    "protocol_version": "2026-08-14",
+    "endpoint": "https://api.cartesia.ai/tts/sse",
+    "auth": "Authorization: Bearer (sk_car_ API key)",
+    "error_retry": "HTTP statuses per shared taxonomy with Retry-After preserved; in-stream error events classify by status_code; retries stay within the recorded binding",
+    "probe_model_list": "GET /voices (https://docs.cartesia.ai/api-reference/voices/list)",
+    "retention_disclosure": "https://cartesia.ai/legal/privacy",
+    "terms": "https://cartesia.ai/legal/terms",
+    "ai_voice_disclosure": "terms restrict voice impersonation; no provider-mandated AI-generation disclosure — app-level duty stands",
+    "native_timing": "word timestamps over SSE add_timestamps, seconds, original-text words"
+  },
+  "openai_tts": {
+    "protocol_version": "none (dated model ids)",
+    "endpoint": "https://api.openai.com/v1/audio/speech",
+    "auth": "Authorization: Bearer",
+    "error_retry": "HTTP statuses per shared taxonomy with Retry-After preserved; retries stay within the recorded binding",
+    "probe_model_list": "GET /v1/models",
+    "retention_disclosure": "https://developers.openai.com/api/docs/guides/your-data",
+    "terms": "https://openai.com/policies/usage-policies",
+    "ai_voice_disclosure": "usage policies require disclosing AI-generated content; app-level duty stands",
+    "native_timing": "none — deliberate local-align fallback provider (T16)"
+  }
+}

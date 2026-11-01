@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE book SET extracting_since = ?\n         WHERE id = ? AND extracting_owner = ? AND extracting_since >= ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "a8a03ceab6b478d32135376d9ec43f62da7643d3ae8fdb543f7291c5114bd242"
+}

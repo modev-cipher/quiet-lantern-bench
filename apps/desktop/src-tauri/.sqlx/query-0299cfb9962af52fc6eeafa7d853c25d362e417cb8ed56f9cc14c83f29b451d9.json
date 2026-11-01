@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE book SET layout_analysed = ? WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "0299cfb9962af52fc6eeafa7d853c25d362e417cb8ed56f9cc14c83f29b451d9"
+}

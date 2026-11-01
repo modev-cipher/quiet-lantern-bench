@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO voice_profile (id, name, engine, kind, preset_voice_id, reference_wav_path, params_json, created_at)\n         VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 8
+    },
+    "nullable": []
+  },
+  "hash": "a536ebf92979fb1863a009b6c6e5df1d1f197fdad3908e3be91e8705ad5b82d1"
+}

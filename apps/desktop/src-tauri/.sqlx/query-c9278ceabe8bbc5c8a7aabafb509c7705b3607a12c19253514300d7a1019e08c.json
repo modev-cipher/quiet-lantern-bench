@@ -1,0 +1,92 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id as \"id!\", job_id, chapter_id, idx, page_no, kind, figure_id, text,\n                  source_span_json, flags_json, audio_hash, duration_ms, original_text\n           FROM script_segment WHERE job_id = ? ORDER BY idx",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "job_id",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "chapter_id",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "idx",
+        "ordinal": 3,
+        "type_info": "Integer"
+      },
+      {
+        "name": "page_no",
+        "ordinal": 4,
+        "type_info": "Integer"
+      },
+      {
+        "name": "kind",
+        "ordinal": 5,
+        "type_info": "Text"
+      },
+      {
+        "name": "figure_id",
+        "ordinal": 6,
+        "type_info": "Text"
+      },
+      {
+        "name": "text",
+        "ordinal": 7,
+        "type_info": "Text"
+      },
+      {
+        "name": "source_span_json",
+        "ordinal": 8,
+        "type_info": "Text"
+      },
+      {
+        "name": "flags_json",
+        "ordinal": 9,
+        "type_info": "Text"
+      },
+      {
+        "name": "audio_hash",
+        "ordinal": 10,
+        "type_info": "Text"
+      },
+      {
+        "name": "duration_ms",
+        "ordinal": 11,
+        "type_info": "Integer"
+      },
+      {
+        "name": "original_text",
+        "ordinal": 12,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "c9278ceabe8bbc5c8a7aabafb509c7705b3607a12c19253514300d7a1019e08c"
+}

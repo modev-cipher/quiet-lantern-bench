@@ -1,0 +1,13 @@
+{
+  "name": "txtcaster",
+  "private": true,
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@11.10.0",
+  "scripts": {
+    "tauri": "pnpm --filter @txtcaster/desktop tauri",
+    "lint": "pnpm --filter @txtcaster/desktop lint",
+    "typecheck": "pnpm --filter @txtcaster/desktop typecheck",
+    "test": "pnpm --filter @txtcaster/desktop test",
+    "test:e2e": "pnpm --filter @txtcaster/desktop test:e2e"
+  }
+}

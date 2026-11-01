@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE render_job SET tts_plan_json = ?, updated_at = ?\n                 WHERE id = ? AND tts_plan_json = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "004de952c3e7b07cfe0c32c945662a6449a8804afc11b1db6bf7737a20b79a85"
+}

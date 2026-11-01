@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE figure_region SET caption = ?, explanation = ?, caption_confidence = ? WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "0648526af64be42f2748193dc88ab88d8e164df16a71fbd2c4776d353e3f6ef7"
+}

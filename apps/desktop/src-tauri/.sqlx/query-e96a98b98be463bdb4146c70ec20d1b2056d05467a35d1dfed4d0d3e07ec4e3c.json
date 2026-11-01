@@ -1,0 +1,56 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT profile_json, compute_score, tok_s_gpu, tok_s_cpu, rtf_table_json, fingerprint, measured_at\n           FROM hw_benchmark WHERE id = 1",
+  "describe": {
+    "columns": [
+      {
+        "name": "profile_json",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "compute_score",
+        "ordinal": 1,
+        "type_info": "Integer"
+      },
+      {
+        "name": "tok_s_gpu",
+        "ordinal": 2,
+        "type_info": "Float"
+      },
+      {
+        "name": "tok_s_cpu",
+        "ordinal": 3,
+        "type_info": "Float"
+      },
+      {
+        "name": "rtf_table_json",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "fingerprint",
+        "ordinal": 5,
+        "type_info": "Text"
+      },
+      {
+        "name": "measured_at",
+        "ordinal": 6,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "e96a98b98be463bdb4146c70ec20d1b2056d05467a35d1dfed4d0d3e07ec4e3c"
+}

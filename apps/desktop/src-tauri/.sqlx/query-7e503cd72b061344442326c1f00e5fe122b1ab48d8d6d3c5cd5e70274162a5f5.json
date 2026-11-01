@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO voice_tool_outcome\n         (session_id, tool, call_id, ok, code, pos_ms, created_at)\n         VALUES (?, ?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 7
+    },
+    "nullable": []
+  },
+  "hash": "7e503cd72b061344442326c1f00e5fe122b1ab48d8d6d3c5cd5e70274162a5f5"
+}

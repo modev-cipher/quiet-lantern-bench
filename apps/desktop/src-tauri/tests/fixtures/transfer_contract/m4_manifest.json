@@ -1,0 +1,24 @@
+{
+  "alignment": null,
+  "castId": "cst_c12",
+  "contentHash": "38f9269cd4366d5f65af672a5be9f882351f22145fb6d046a3d529e43e05edd4",
+  "durationSeconds": 12.5,
+  "etag": "etag-38f9269cd4366d5f",
+  "files": [
+    {
+      "chunkHashes": [
+        "96357428d747e0434c708b0ce96eae5f1e44a0e5c2c44305f97767abf55c5d5e",
+        "7733ffc57c359a4834eccd03dca04543b29aa542d72fcbf73284000c12608a62",
+        "58d1638e76dbc0963189c2aa182406628679647a6912e7cbeefbf769bcced8d3",
+        "3ae5766fd19db3200f5b056b897284cff9cc373b5c745500da052e32d260618b"
+      ],
+      "chunkSize": 65536,
+      "path": "audio.opus",
+      "sha256": "38f9269cd4366d5f65af672a5be9f882351f22145fb6d046a3d529e43e05edd4",
+      "size": 200000
+    }
+  ],
+  "protocol": 1,
+  "title": "Contract Pin Book",
+  "voiceId": null
+}

@@ -1,0 +1,32 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT key as \"key!\", value, updated_at FROM learning_profile\n           ORDER BY updated_at DESC, key",
+  "describe": {
+    "columns": [
+      {
+        "name": "key!",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "value",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "updated_at",
+        "ordinal": 2,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "a6e5456917de3dde7494179c84cddcabc5b7e5f4e473ae18b82b667b20fd0fd3"
+}
