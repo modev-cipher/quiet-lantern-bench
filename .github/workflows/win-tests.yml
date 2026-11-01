@@ -21,11 +21,21 @@ jobs:
           workspaces: apps/desktop/src-tauri
       - name: Fetch FFmpeg
         shell: bash
-        run: ./scripts/fetch_ffmpeg_windows.sh apps/desktop/src-tauri/ffmpeg && echo "$PWD/apps/desktop/src-tauri/ffmpeg" >> "$GITHUB_PATH"
+        run: ./scripts/fetch_ffmpeg_windows.sh apps/desktop/src-tauri/ffmpeg && cygpath -w "$PWD/apps/desktop/src-tauri/ffmpeg" >> "$GITHUB_PATH"
       - name: Native library tests
         shell: bash
         working-directory: apps/desktop/src-tauri
-        run: cargo test --lib -- --test-threads=4
+        run: |
+          # The test exe links Tauri's dialogs but carries no app manifest, so comctl32 v5 loads
+          # and it dies with STATUS_ENTRYPOINT_NOT_FOUND. The shipped app embeds its manifest.
+          exe=$(cargo test --lib --no-run --message-format=json | python -c "import json,sys;[print(m['executable']) for m in map(json.loads,sys.stdin) if m.get('executable') and m.get('profile',{}).get('test')]" | tail -n 1)
+          cat > "$exe.manifest" <<'XML'
+          <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+          <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0"><dependency><dependentAssembly>
+          <assemblyIdentity type="win32" name="Microsoft.Windows.Common-Controls" version="6.0.0.0" processorArchitecture="*" publicKeyToken="6595b64144ccf1df" language="*"/>
+          </dependentAssembly></dependency></assembly>
+          XML
+          "$exe" --test-threads=4
       - name: Native integration suites
         if: always()
         shell: bash

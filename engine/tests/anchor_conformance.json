@@ -1,0 +1,403 @@
+{
+  "cases": [
+    {
+      "block": null,
+      "countable": true,
+      "expect": {
+        "demoted": 0,
+        "located": 3,
+        "rateTokens": 3,
+        "rung": "word",
+        "tokens": 3
+      },
+      "kind": "text",
+      "name": "plain forward walk",
+      "page": [
+        [
+          "Raw",
+          0
+        ],
+        [
+          "CPU",
+          0
+        ],
+        [
+          "power",
+          0
+        ]
+      ],
+      "reference": null,
+      "spoken": [
+        "raw",
+        "cpu",
+        "power"
+      ]
+    },
+    {
+      "block": [
+        90.0,
+        115.0,
+        560.0,
+        140.0
+      ],
+      "countable": true,
+      "expect": {
+        "demoted": 0,
+        "located": 1,
+        "rateTokens": 2,
+        "rung": "word",
+        "tokens": 2
+      },
+      "kind": "text",
+      "name": "repeated word disambiguated by the block",
+      "page": [
+        [
+          "system",
+          0
+        ],
+        [
+          "alpha",
+          0
+        ],
+        [
+          "system",
+          1
+        ],
+        [
+          "beta",
+          1
+        ]
+      ],
+      "reference": null,
+      "spoken": [
+        "system",
+        "alpha"
+      ]
+    },
+    {
+      "block": null,
+      "countable": true,
+      "expect": {
+        "demoted": 0,
+        "located": 0,
+        "rateTokens": 1,
+        "rung": "page",
+        "tokens": 1
+      },
+      "kind": "text",
+      "name": "hyphen fragments are not joined",
+      "page": [
+        [
+          "sys",
+          0
+        ],
+        [
+          "tems",
+          1
+        ]
+      ],
+      "reference": null,
+      "spoken": [
+        "systems"
+      ]
+    },
+    {
+      "block": null,
+      "countable": false,
+      "expect": {
+        "demoted": 0,
+        "located": 0,
+        "rateTokens": 0,
+        "rung": "page",
+        "tokens": 3
+      },
+      "kind": "figure_cue",
+      "name": "figure cue takes the page rung and leaves the denominator",
+      "page": [
+        [
+          "Figure",
+          0
+        ],
+        [
+          "one",
+          0
+        ]
+      ],
+      "reference": null,
+      "spoken": [
+        "figure",
+        "one",
+        "shows"
+      ]
+    },
+    {
+      "block": [
+        40.0,
+        90.0,
+        560.0,
+        140.0
+      ],
+      "countable": true,
+      "expect": {
+        "demoted": 0,
+        "located": 0,
+        "rateTokens": 2,
+        "rung": "block",
+        "tokens": 2
+      },
+      "kind": "text",
+      "name": "nothing located falls to the block",
+      "page": [
+        [
+          "printed",
+          0
+        ],
+        [
+          "prose",
+          0
+        ]
+      ],
+      "reference": null,
+      "spoken": [
+        "lecture",
+        "commentary"
+      ]
+    },
+    {
+      "block": null,
+      "countable": true,
+      "expect": {
+        "demoted": 0,
+        "located": 1,
+        "rateTokens": 2,
+        "rung": "word",
+        "tokens": 2
+      },
+      "kind": "text",
+      "name": "apostrophes fold rather than split",
+      "page": [
+        [
+          "dont",
+          0
+        ],
+        [
+          "stop",
+          0
+        ]
+      ],
+      "reference": null,
+      "spoken": [
+        "don't",
+        "stop"
+      ]
+    },
+    {
+      "block": null,
+      "countable": true,
+      "expect": {
+        "demoted": 0,
+        "located": 3,
+        "rateTokens": 3,
+        "rung": "word",
+        "tokens": 3
+      },
+      "kind": "text",
+      "name": "a compound page word serves two needles",
+      "page": [
+        [
+          "man-made",
+          0
+        ],
+        [
+          "systems",
+          0
+        ]
+      ],
+      "reference": null,
+      "spoken": [
+        "man",
+        "made",
+        "systems"
+      ]
+    },
+    {
+      "block": null,
+      "countable": true,
+      "expect": {
+        "demoted": 0,
+        "located": 2,
+        "rateTokens": 2,
+        "rung": "word",
+        "tokens": 2
+      },
+      "kind": "text",
+      "name": "a compound spoken entry searches all of its tokens",
+      "page": [
+        [
+          "man",
+          0
+        ],
+        [
+          "made",
+          0
+        ]
+      ],
+      "reference": null,
+      "spoken": [
+        "man-made"
+      ]
+    },
+    {
+      "block": null,
+      "countable": true,
+      "expect": {
+        "demoted": 1,
+        "located": 2,
+        "rateTokens": 3,
+        "rung": "word",
+        "tokens": 3
+      },
+      "kind": "text",
+      "name": "a reference the segment never said demotes the match",
+      "page": [
+        [
+          "alpha",
+          0
+        ],
+        [
+          "beta",
+          0
+        ],
+        [
+          "gamma",
+          0
+        ]
+      ],
+      "reference": [
+        "alpha",
+        "beta"
+      ],
+      "spoken": [
+        "alpha",
+        "beta",
+        "gamma"
+      ]
+    },
+    {
+      "block": null,
+      "countable": true,
+      "expect": {
+        "demoted": 0,
+        "located": 2,
+        "rateTokens": 2,
+        "rung": "word",
+        "tokens": 2
+      },
+      "kind": "text",
+      "name": "a reference that agrees demotes nothing",
+      "page": [
+        [
+          "alpha",
+          0
+        ],
+        [
+          "beta",
+          0
+        ]
+      ],
+      "reference": [
+        "alpha",
+        "beta"
+      ],
+      "spoken": [
+        "alpha",
+        "beta"
+      ]
+    },
+    {
+      "block": null,
+      "countable": true,
+      "expect": {
+        "demoted": 2,
+        "located": 0,
+        "rateTokens": 2,
+        "rung": "line",
+        "tokens": 2
+      },
+      "kind": "text",
+      "name": "every match demoted lands on the line rung",
+      "page": [
+        [
+          "alpha",
+          0
+        ],
+        [
+          "beta",
+          0
+        ]
+      ],
+      "reference": [
+        "gamma"
+      ],
+      "spoken": [
+        "alpha",
+        "beta"
+      ]
+    },
+    {
+      "block": [
+        10.0,
+        600.0,
+        40.0,
+        640.0
+      ],
+      "countable": true,
+      "expect": {
+        "demoted": 0,
+        "located": 1,
+        "rateTokens": 1,
+        "rung": "word",
+        "tokens": 1
+      },
+      "kind": "text",
+      "name": "a block that encloses no page word falls back to the whole page",
+      "page": [
+        [
+          "systems",
+          0
+        ]
+      ],
+      "reference": null,
+      "spoken": [
+        "systems"
+      ]
+    },
+    {
+      "block": null,
+      "countable": false,
+      "expect": {
+        "demoted": 0,
+        "located": 0,
+        "rateTokens": 0,
+        "rung": "page",
+        "tokens": 5
+      },
+      "kind": "text",
+      "name": "code block placeholder leaves the denominator",
+      "page": [
+        [
+          "printed",
+          0
+        ]
+      ],
+      "reference": null,
+      "spoken": [
+        "a",
+        "code",
+        "block",
+        "appears",
+        "here"
+      ]
+    }
+  ]
+}
