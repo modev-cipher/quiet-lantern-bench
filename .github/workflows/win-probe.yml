@@ -9,7 +9,7 @@ permissions:
   actions: read
 jobs:
   probe:
-    runs-on: windows-2022
+    runs-on: windows-latest
     timeout-minutes: 20
     steps:
       - uses: actions/download-artifact@v4
