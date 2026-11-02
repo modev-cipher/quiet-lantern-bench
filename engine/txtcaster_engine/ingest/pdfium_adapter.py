@@ -48,13 +48,16 @@ come back are the native adapter's `RawBlock` / `RawWord` shapes exactly.
 """
 
 import ctypes
+import functools
 import io
 import logging
 import math
 import re
+import threading
+from collections import deque
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from typing import BinaryIO
+from typing import BinaryIO, ParamSpec, TypeVar
 
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
@@ -667,11 +670,66 @@ def _artifact_share(chars: list[_Char], blocks: Sequence[RawBlock]) -> tuple[flo
 _LOG = logging.getLogger(__name__)
 
 
+class _FifoLock:
+    """Re-entrant and handed over in arrival order: a plain lock let a page-by-page extraction
+    re-take PDFium before a waiting page render woke, so the open page waited for the whole job."""
+
+    def __init__(self) -> None:
+        self._guard = threading.Lock()
+        self._owner: int | None = None
+        self._depth = 0
+        self._queue: deque[tuple[int, threading.Lock]] = deque()
+
+    def __enter__(self) -> None:
+        me = threading.get_ident()
+        with self._guard:
+            if self._owner == me:
+                self._depth += 1
+                return
+            if self._owner is None:
+                self._owner, self._depth = me, 1
+                return
+            gate = threading.Lock()
+            gate.acquire()
+            self._queue.append((me, gate))
+        gate.acquire()
+
+    def __exit__(self, *_: object) -> None:
+        with self._guard:
+            self._depth -= 1
+            if self._depth > 0:
+                return
+            if self._queue:
+                self._owner, gate = self._queue.popleft()
+                self._depth = 1
+                gate.release()
+            else:
+                self._owner = None
+
+
+_PDFIUM_LOCK = _FifoLock()
+"""PDFium is not thread-safe, even across documents, and the engine reaches it from executor
+threads: an on-demand page render overlapping a job's extraction corrupted the heap."""
+
+_P = ParamSpec("_P")
+_R = TypeVar("_R")
+
+
+def _serialized(call: Callable[_P, _R]) -> Callable[_P, _R]:
+    @functools.wraps(call)
+    def locked(*args: _P.args, **kwargs: _P.kwargs) -> _R:
+        with _PDFIUM_LOCK:
+            return call(*args, **kwargs)
+
+    return locked
+
+
 class PdfiumDocument:
     backend = "pdfium"
     source_label = "pdfium"
     is_reflowable = False
 
+    @_serialized
     def __init__(self, doc: pdfium.PdfDocument, book_path: str = "") -> None:
         self._doc = doc
         self._path = book_path
@@ -714,6 +772,7 @@ class PdfiumDocument:
             )
             return 0
 
+    @_serialized
     def page_size(self, index: int) -> tuple[float, float]:
         try:
             page = self._doc.get_page(index)
@@ -728,6 +787,7 @@ class PdfiumDocument:
         finally:
             page.close()
 
+    @_serialized
     def page_text(self, index: int) -> PageText:
         try:
             page = self._doc.get_page(index)
@@ -767,6 +827,7 @@ class PdfiumDocument:
         finally:
             page.close()
 
+    @_serialized
     def render_png(self, index: int, scale: float, clip: Bbox | None = None) -> bytes:
         page = self._doc.get_page(index)
         try:
@@ -790,6 +851,7 @@ class PdfiumDocument:
         finally:
             page.close()
 
+    @_serialized
     def toc(self) -> list[list[object]]:
         entries: list[list[object]] = []
         for bookmark in self._doc.get_toc(max_depth=15):
@@ -799,6 +861,7 @@ class PdfiumDocument:
             entries.append([int(bookmark.level) + 1, bookmark.get_title(), page_no])
         return entries
 
+    @_serialized
     def metadata(self) -> dict[str, str]:
         raw = self._doc.get_metadata_dict(skip_empty=True)
         return {str(key).lower(): str(value) for key, value in raw.items()}
@@ -809,6 +872,7 @@ class PdfiumDocument:
     def page_number_from_location(self, spine_index: int) -> int:
         raise IngestError("ERR_BAD_REQUEST", "not a reflowed document")
 
+    @_serialized
     def close(self) -> None:
         self._objects = None
         self._doc.close()
@@ -967,6 +1031,7 @@ def _declares_encryption(book_path: str) -> bool:
         return False
 
 
+@_serialized
 def open_pdfium(book_path: str) -> PdfiumDocument:
     try:
         doc = pdfium.PdfDocument(book_path)

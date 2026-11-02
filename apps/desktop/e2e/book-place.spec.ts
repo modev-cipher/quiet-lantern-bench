@@ -463,3 +463,48 @@ test("a cover-open that resolves after the user has moved on does not open the B
   await expect(page.getByTestId("reading-view")).toHaveCount(0);
   await expect(page.getByTestId("appearance-settings")).toBeVisible();
 });
+
+test("the resume note on a restored Book never blocks the seek bar and leaves once playback starts", async ({
+  page,
+}) => {
+  await bootWithSession(page);
+  await page.getByTestId("study-resume").click();
+  await expect(page.getByTestId("reading-view")).toBeVisible();
+  await page.reload();
+  const reading = page.getByTestId("reading-view");
+  const chip = page.getByTestId("session-resume-chip");
+  await expect(chip).toBeVisible();
+  const seek = reading.getByTestId("player-seek");
+  await expect(seek).toBeVisible();
+  const chipBox = (await chip.boundingBox())!;
+  const seekBox = (await seek.boundingBox())!;
+  const x = chipBox.x + chipBox.width / 2;
+  const y = seekBox.y + seekBox.height / 2;
+  expect(
+    y >= chipBox.y && y <= chipBox.y + chipBox.height,
+    "the note sits over the bar in this layout, so the click below goes through it",
+  ).toBe(true);
+
+  const before = await page.evaluate(
+    () => document.querySelector("audio")!.currentTime,
+  );
+  const low = Number(await seek.getAttribute("aria-valuemin"));
+  const high = Number(await seek.getAttribute("aria-valuemax"));
+  const target = low + ((x - seekBox.x) / seekBox.width) * (high - low);
+  expect(Math.abs(target - before)).toBeGreaterThan(1);
+  await page.mouse.click(x, y);
+  await expect
+    .poll(
+      async () =>
+        Math.abs(
+          (await page.evaluate(
+            () => document.querySelector("audio")!.currentTime,
+          )) - target,
+        ),
+      { message: "a press on the bar under the note seeks there" },
+    )
+    .toBeLessThan(1);
+
+  await reading.getByTestId("player-toggle").click();
+  await expect(chip, "playing makes the note moot").toHaveCount(0);
+});

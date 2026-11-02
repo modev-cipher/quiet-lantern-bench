@@ -197,10 +197,7 @@ pid = app_pid()
 guest(f"tr '\\0' '\\n' </proc/{pid}/environ | grep -E '^(WAYLAND_DISPLAY|XDG_SESSION_TYPE|GDK_BACKEND|APPDIR)='; cat /proc/{pid}/mountinfo | grep -c 'mount_txtCas'", 20)
 _, sockets = guest(f"python3 /tmp/guest_ui.py sockets {pid}", 30)
 counts = dict(line.split() for line in sockets.splitlines() if len(line.split()) == 2)
-if KIND == "deb":
-    check(counts.get("wayland-0", "0") != "0" and counts.get("X11-unix/X", "0") == "0", f"native Wayland client, not XWayland ({counts})")
-else:
-    check(counts.get("X11-unix/X", "0") != "0", f"AppImage runs through XWayland as bundled ({counts})")
+check(counts.get("wayland-0", "0") != "0" and counts.get("X11-unix/X", "0") == "0", f"native Wayland client, not XWayland ({counts})")
 guest("python3 /tmp/guest_ui.py dump | cut -c1-90 | head -30", 40)
 quit_app()
 now = int(time.time() * 1000)

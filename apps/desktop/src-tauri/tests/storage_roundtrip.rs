@@ -3791,3 +3791,65 @@ async fn migration_0033_drops_unused_kokoro_presets_outside_the_desktop_language
         "unused es/fr/hi/it/pt presets go; a preset a job names and every other row stay"
     );
 }
+
+#[tokio::test]
+async fn migration_0034_rerenders_pdf_pages_drawn_before_pdfium_was_serialized() {
+    let (_dir, pool) = test_pool().await;
+    let pdf = sample_book();
+    let epub = book::Book {
+        id: new_id(),
+        format: "epub".into(),
+        source_path: "/books/os.epub".into(),
+        content_hash: "def456".into(),
+        ..sample_book()
+    };
+    let mut page_ids = Vec::new();
+    for b in [&pdf, &epub] {
+        book::insert_book(&pool, b).await.expect("book");
+        let page = book::Page {
+            id: new_id(),
+            book_id: b.id.clone(),
+            page_no: 1,
+            width_pt: Some(595.0),
+            height_pt: Some(842.0),
+            render_hash: None,
+            text_json: None,
+            needs_upgrade: false,
+        };
+        book::insert_page(&pool, &page).await.expect("page");
+        book::set_page_render_hash(&pool, &page.id, "deadbeef")
+            .await
+            .expect("hash");
+        page_ids.push(page.id);
+    }
+
+    let m0034 = storage::MIGRATOR
+        .iter()
+        .find(|migration| migration.version == 34)
+        .expect("0034 exists");
+    sqlx::raw_sql(&m0034.sql)
+        .execute(&pool)
+        .await
+        .expect("apply 0034");
+
+    let hash = |book_id: String| {
+        let pool = pool.clone();
+        async move {
+            book::get_page(&pool, &book_id, 1)
+                .await
+                .expect("get")
+                .expect("some")
+                .render_hash
+        }
+    };
+    assert_eq!(
+        hash(pdf.id.clone()).await,
+        None,
+        "a PDF page drawn while PDFium ran on several threads may be blank and is drawn again"
+    );
+    assert_eq!(
+        hash(epub.id.clone()).await.as_deref(),
+        Some("deadbeef"),
+        "EPUB pages never went through PDFium and keep their render"
+    );
+}

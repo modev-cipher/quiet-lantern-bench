@@ -61,6 +61,9 @@ jobs:
           New-Item -ItemType Directory -Force hostile\engine\txtcaster_engine | Out-Null
           Set-Content hostile\engine\pyproject.toml ''
           Set-Content hostile\engine\txtcaster_engine\__main__.py "open(r'$PWD\hostile\RAN','w')"
+          Remove-Item Env:RUST_LOG -ErrorAction SilentlyContinue
+          $env:TXTCASTER_DEBUG = '1'
+          $env:TXTCASTER_LOG_DIR = "$PWD\applog"
           Start-Process "$env:LOCALAPPDATA\txtCaster\txtCaster.exe" -WorkingDirectory "$PWD\hostile"
       - name: Diagnose launch
         shell: pwsh
@@ -82,6 +85,17 @@ jobs:
         run: |
           python ci/win_drive.py "$PWD/shots" "$(cygpath -w "$PWD/book.pdf")" full 2>&1 | tee drive.log
           test ! -e hostile/RAN
+      - name: No CSP violation or UI crash in the session log
+        shell: pwsh
+        run: |
+          $logs = @(Get-ChildItem applog\*.log -ErrorAction SilentlyContinue)
+          if ($logs.Count -eq 0) { throw "no session log, so a violation could not be seen" }
+          $all = Get-Content $logs.FullName
+          "session log: $($logs.Count) file(s), $($all.Count) lines"
+          if (-not ($all | Select-String ' INFO ')) { throw "the session log holds no app events, so a violation could not be seen" }
+          $bad = $all | Select-String 'ui crashed'
+          if ($bad) { $bad | Out-String -Width 200; throw "the webview reported a CSP violation or UI crash" }
+          "no CSP violation or UI crash from wizard to page view"
       - name: Check the output with the bundled ffprobe
         shell: pwsh
         run: |
@@ -125,6 +139,21 @@ jobs:
           if (Test-Path "$env:LOCALAPPDATA\txtcaster-cache") { throw "cache left behind" }
           if (-not (Test-Path "$env:LOCALAPPDATA\txtcaster-data\db.sqlite")) { throw "uninstall removed the user's data without being asked" }
           "uninstall removed the app and cache and kept the data"
+      - name: Uninstall with "Delete the application data" ticked
+        shell: pwsh
+        run: |
+          $i = Get-ChildItem inst\*.exe | Select-Object -First 1
+          Start-Process $i.FullName -ArgumentList '/S' -Wait
+          if (-not (Test-Path "$env:LOCALAPPDATA\txtCaster\uninstall.exe")) { throw "reinstall failed" }
+          New-Item -ItemType Directory -Force "$env:LOCALAPPDATA\txtcaster-cache\audio" | Out-Null
+          Set-Content "$env:LOCALAPPDATA\txtcaster-cache\audio\probe.bin" 'cached audio'
+          Get-ChildItem "$env:LOCALAPPDATA" | Where-Object Name -match 'txtcaster' | Select-Object Name | Out-String
+          python ci/win_uninstall.py "$PWD\shots" "$env:LOCALAPPDATA\txtCaster\uninstall.exe" 2>&1 | Tee-Object uninstall.log
+          if ($LASTEXITCODE -ne 0) { throw "uninstaller drive failed" }
+          Start-Sleep 10
+          $left = Get-ChildItem "$env:LOCALAPPDATA" | Where-Object Name -match 'txtcaster'
+          if ($left) { $left | Select-Object FullName | Out-String -Width 160; throw "delete application data left these behind" }
+          "the ticked uninstall removed the app, cache, data and webview profile"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -134,3 +163,5 @@ jobs:
             shots/*
             drive.log
             failure.log
+            uninstall.log
+            applog/*

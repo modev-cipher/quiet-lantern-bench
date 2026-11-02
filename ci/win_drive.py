@@ -209,4 +209,7 @@ time.sleep(25)
 dump("no-audio-device-later")
 if not main_window().exists(timeout=2):
     raise SystemExit("app closed during playback without an audio device")
+click("(?i)^page$", 30, ("Button", "RadioButton", "TabItem"))
+time.sleep(8)
+dump("page-view")
 log("full journey done")

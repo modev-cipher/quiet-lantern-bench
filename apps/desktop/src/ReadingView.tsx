@@ -1869,14 +1869,14 @@ function ReadingView({
             <div className="pointer-events-none absolute inset-x-0 bottom-24 z-10 flex justify-center">
               <p
                 data-testid="session-resume-chip"
-                className="animate-rise-in shadow-overlay pointer-events-auto flex items-center gap-2.5 rounded-md border border-ink-800 bg-ink-900 py-1.5 ps-4 pe-2 text-secondary text-ink-200"
+                className="animate-rise-in shadow-overlay flex items-center gap-2.5 rounded-md border border-ink-800 bg-ink-900 py-1.5 ps-4 pe-2 text-secondary text-ink-200"
               >
                 {t("reader.resumed")}
                 <button
                   type="button"
                   aria-label={t("reader.dismiss")}
                   onClick={onDismissResumeNotice}
-                  className="rounded-full p-1 text-ink-400 transition-colors duration-200 hover:text-ink-100"
+                  className="pointer-events-auto rounded-full p-1 text-ink-400 transition-colors duration-200 hover:text-ink-100"
                 >
                   ×
                 </button>

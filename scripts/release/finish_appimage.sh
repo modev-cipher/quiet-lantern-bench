@@ -20,6 +20,11 @@ cat > "$appdir/usr/share/txtcaster/fonts.conf" <<'FONTS'
 FONTS
 sed -i '/^exec /i export FONTCONFIG_FILE="${FONTCONFIG_FILE:-$this_dir/usr/share/txtcaster/fonts.conf}"' "$appdir/AppRun"
 grep -q FONTCONFIG_FILE "$appdir/AppRun"
+# linuxdeploy's GTK hook forces X11, so Wayland sessions drew through XWayland with uneven frame
+# pacing. GTK then picks the session's own backend, and a user's GDK_BACKEND still wins.
+gtk_hook="$appdir/apprun-hooks/linuxdeploy-plugin-gtk.sh"
+sed -i '/^export GDK_BACKEND=/d' "$gtk_hook"
+if grep -q GDK_BACKEND "$gtk_hook"; then exit 1; fi
 rm -f "$image"
 cd "$bundle"
 ARCH=x86_64 LDAI_OUTPUT="$(basename "$image")" "$tool" --appimage-extract-and-run --appdir "$(basename "$appdir")"

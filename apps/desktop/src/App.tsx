@@ -397,6 +397,11 @@ function App() {
   );
   const [sessionNonce, setSessionNonce] = useState(0);
   const playbackDuration = usePlayback((s) => s.duration);
+  const playbackPlaying = usePlayback((s) => s.playing);
+
+  useEffect(() => {
+    if (playbackPlaying) setResumeNotice(false);
+  }, [playbackPlaying]);
 
   const openSession = useCallback(
     (

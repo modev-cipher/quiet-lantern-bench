@@ -11,6 +11,7 @@ import { reportPlaybackEvent } from "./readingClockDiagnostics";
 import { registerAudioElement } from "./playbackElement";
 import { applyPlayerVolume, streamStillSettling } from "./playbackVolumeModel";
 import { nextStall, NO_STALL, stalled } from "./playbackStallModel";
+import { createSeekGate, type SeekGate } from "./playbackSeekGate";
 import { t } from "./i18n";
 import {
   createSourceSwitcher,
@@ -24,6 +25,9 @@ import { usePlayback } from "./usePlayback";
 function PlaybackEngine() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const switcher = useRef<SourceSwitcher | null>(null);
+  const seekGate = useRef<SeekGate | null>(null);
+  const gatedPath = useRef<string | null>(null);
+  const finishTrack = useRef<() => void>(() => {});
   const lastListened = useRef(-1);
   const listenedKey = useRef<string | null>(null);
   const streamStartedAt = useRef<number | null>(null);
@@ -58,6 +62,28 @@ function PlaybackEngine() {
         onEngineError: (message) => dispatch({ type: "engineError", message }),
       });
     }
+    if (seekGate.current == null) {
+      seekGate.current = createSeekGate(audio, {
+        shouldPlay: () => getSnapshot().playing,
+        resume: () => {
+          const attempt = switcher.current?.installGeneration() ?? -1;
+          return audio.play().catch((error: unknown) => {
+            if (switcher.current?.playAttemptStillCurrent(attempt)) {
+              dispatch({ type: "engineError" });
+            }
+            throw error;
+          });
+        },
+        onEnded: () => finishTrack.current(),
+        setTimer: (run, ms) => window.setTimeout(run, ms),
+        clearTimer: (id) => window.clearTimeout(id),
+      });
+    }
+    const path = item?.path ?? null;
+    if (gatedPath.current !== path) {
+      gatedPath.current = path;
+      seekGate.current.reset();
+    }
     if (item != null) {
       const key = sourceKey(item);
       if (listenedKey.current !== key) {
@@ -80,6 +106,7 @@ function PlaybackEngine() {
     // currentSrc after detach) and the event/store feedback became a
     // permanent play/pause oscillation — see reconcileAction.
     const engine = switcher.current;
+    if (seekGate.current?.holds()) return;
     const action = reconcileAction(
       playing,
       audio.paused,
@@ -113,7 +140,8 @@ function PlaybackEngine() {
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || seekTo === null) return;
-    audio.currentTime = seekTo;
+    if (seekGate.current != null) seekGate.current.seek(seekTo);
+    else audio.currentTime = seekTo;
     dispatch({ type: "seekConsumed" });
   }, [seekNonce, seekTo]);
 
@@ -125,6 +153,7 @@ function PlaybackEngine() {
       if (!audio || switcher.current?.installedKey() == null) return;
       stall = nextStall(stall, audio.currentTime);
       if (stalled(stall)) {
+        seekGate.current?.reset();
         dispatch({ type: "engineError", message: t("player.noSoundOutput") });
       }
     }, 1000);
@@ -147,6 +176,13 @@ function PlaybackEngine() {
   }, [volume, fade, item]);
 
   const installed = () => switcher.current?.installedKey() ?? null;
+
+  finishTrack.current = () => {
+    dispatch({ type: "engineEnded" });
+    if (item != null && installed() === sourceKey(item)) {
+      saveListen(item.id, 1);
+    }
+  };
 
   const settleVolume = (element: HTMLAudioElement) => {
     if (streamStillSettling(streamStartedAt.current, Date.now())) {
@@ -197,6 +233,7 @@ function PlaybackEngine() {
         dispatch({ type: "enginePlaying", playing: true });
       }}
       onPause={(event) => {
+        if (seekGate.current?.holds()) return;
         // A pause with no installed source is the switch detach (the old
         // pipeline being released) or churn before the new source attaches
         // — never the user; reporting it as engine state would clobber the
@@ -224,19 +261,17 @@ function PlaybackEngine() {
       }}
       onWaiting={() => dispatch({ type: "engineBuffering", buffering: true })}
       onVolumeChange={(event) => settleVolume(event.currentTarget)}
+      onSeeked={() => seekGate.current?.onSeeked()}
       onPlaying={(event) => {
+        seekGate.current?.onPlaying();
         streamStartedAt.current = Date.now();
         settleVolume(event.currentTarget);
         dispatch({ type: "engineBuffering", buffering: false });
       }}
       onCanPlay={() => dispatch({ type: "engineBuffering", buffering: false })}
-      onEnded={() => {
-        dispatch({ type: "engineEnded" });
-        if (item != null && installed() === sourceKey(item)) {
-          saveListen(item.id, 1);
-        }
-      }}
+      onEnded={() => finishTrack.current()}
       onError={(event) => {
+        seekGate.current?.reset();
         reportPlaybackEvent("error", event.currentTarget.currentTime);
         if (switcher.current?.wantsSource()) dispatch({ type: "engineError" });
       }}
