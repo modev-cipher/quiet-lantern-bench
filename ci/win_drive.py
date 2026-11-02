@@ -105,11 +105,8 @@ def until(what, fn, seconds, every=5):
 
 def file_dialog(path):
     def present():
-        for w in Desktop(backend="uia").windows():
-            if w.element_info.class_name == "#32770":
-                return w
-        for w in main_window().children(control_type="Window"):
-            if w.element_info.class_name == "#32770":
+        for w in main_window().children():
+            if w.element_info.class_name == "#32770" and name_of(w) == "Open":
                 return w
         return None
 

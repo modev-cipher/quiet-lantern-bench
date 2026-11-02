@@ -94,7 +94,7 @@
   "wizard.reason.vram": "يحتاج نحو {need} GB من VRAM — لديك {have} GB ✓",
   "wizard.reason.ram": "يحتاج نحو {need} GB من RAM على CPU — لديك {have} GB ✓",
   "wizard.reason.bestFit": "الأنسب لجهازك",
-  "wizard.intro.tts": "اختر محرّك الصوت — يمكنك إضافة غيره لاحقًا واختيار صوت لكل كتاب.",
+  "wizard.intro.tts": "اختر صوتًا لتنزيله، أو تخطَّ هذه الخطوة ووصّل مزوّدك لاحقًا. يمكنك إضافة المزيد واختيار صوت لكل كتاب.",
   "wizard.intro.llm": "اختر عقل وضع المعلّم — يشرح الكتب كمحاضرة.",
   "wizard.noGpu": "لم يُكتشف GPU — كل شيء يعمل على CPU",
   "wizard.sharedMemory": "ذاكرة مشتركة",

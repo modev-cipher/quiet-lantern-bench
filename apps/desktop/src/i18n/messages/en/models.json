@@ -90,7 +90,7 @@
   "wizard.reason.vram": "needs ~{need} GB VRAM — you have {have} GB ✓",
   "wizard.reason.ram": "needs ~{need} GB RAM on CPU — you have {have} GB ✓",
   "wizard.reason.bestFit": "best fit for your hardware",
-  "wizard.intro.tts": "Choose your voice engine — you can add more later, and pick per book.",
+  "wizard.intro.tts": "Choose a voice to download, or skip this and connect your own provider later. You can add more and pick per book.",
   "wizard.intro.llm": "Choose the Teacher-mode brain — explains books like a lecture.",
   "wizard.noGpu": "No GPU detected — everything runs on CPU",
   "wizard.sharedMemory": "shared memory",
