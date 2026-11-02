@@ -230,9 +230,11 @@ function PlaybackEngine() {
         // from a source the user can hear; only installed sources speak
         // for engine state.
         if (installed() == null) return;
+        seekGate.current?.onPlay();
         dispatch({ type: "enginePlaying", playing: true });
       }}
       onPause={(event) => {
+        if (installed() != null) seekGate.current?.onPause();
         if (seekGate.current?.holds()) return;
         // A pause with no installed source is the switch detach (the old
         // pipeline being released) or churn before the new source attaches

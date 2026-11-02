@@ -3,13 +3,15 @@ import { describe, expect, it } from "vitest";
 import {
   createSeekGate,
   SEEK_RESUME_QUIET_MS,
+  type SeekGate,
   type SeekableAudio,
 } from "./playbackSeekGate";
 
 // The stub wedges the way WebKitGTK 2.50 on GStreamer 1.20 (the AppImage and
 // Ubuntu 22.04 stack) did when measured: a seek that lands while the element
 // plays, or while a play() is still starting, leaves it at the target with
-// readyState 2 and no further progress.
+// readyState 2 and no further progress. Element events reach the gate the
+// way PlaybackEngine forwards them.
 class WedgingAudio implements SeekableAudio {
   paused = false;
   seeking = false;
@@ -19,6 +21,7 @@ class WedgingAudio implements SeekableAudio {
   starting = false;
   wedged = false;
   ops: string[] = [];
+  gate: SeekGate | null = null;
   private time = 0;
   private settle: (() => void) | null = null;
   private fail: ((cause: unknown) => void) | null = null;
@@ -37,13 +40,16 @@ class WedgingAudio implements SeekableAudio {
 
   pause(): void {
     this.paused = true;
+    this.starting = false;
     this.ops.push("pause");
+    this.gate?.onPause();
   }
 
   play(): Promise<void> {
     this.paused = false;
     this.starting = true;
     this.ops.push("play");
+    this.gate?.onPlay();
     return new Promise((resolve, reject) => {
       this.settle = resolve;
       this.fail = reject;
@@ -52,14 +58,16 @@ class WedgingAudio implements SeekableAudio {
 
   finishSeek(): void {
     this.seeking = false;
+    this.gate?.onSeeked();
   }
 
   startPlaying(): void {
     this.starting = false;
+    this.gate?.onPlaying();
     this.settle?.();
   }
 
-  rejectPlay(): void {
+  refusePlay(): void {
     this.starting = false;
     this.paused = true;
     this.fail?.(new DOMException("blocked", "NotAllowedError"));
@@ -81,44 +89,43 @@ function rig(audio = new WedgingAudio(), playing = () => true) {
     },
     clearTimer: (id) => timers.delete(id),
   });
+  audio.gate = gate;
   const quiet = () => {
     const pending = [...timers.values()];
     timers.clear();
     for (const run of pending) run();
   };
-  const seeked = () => {
-    audio.finishSeek();
-    gate.onSeeked();
-  };
-  return { audio, gate, quiet, seeked, timers, events };
+  return { audio, gate, quiet, timers, events };
+}
+
+function last(ops: string[], back = 1): string | undefined {
+  return ops[ops.length - back];
 }
 
 describe("seek gate", () => {
   it("pauses a playing element before seeking and resumes once the seek has settled", () => {
-    const { audio, gate, quiet, seeked } = rig();
+    const { audio, gate, quiet } = rig();
     gate.seek(120);
     expect(audio.ops).toEqual(["pause", "seek 120"]);
     expect(gate.holds()).toBe(true);
-    seeked();
+    audio.finishSeek();
     expect(audio.ops).not.toContain("play");
     quiet();
     expect(audio.ops).toEqual(["pause", "seek 120", "play"]);
-    audio.startPlaying();
-    gate.onPlaying();
     expect(gate.holds()).toBe(false);
     expect(audio.wedged).toBe(false);
   });
 
   it("holds through a whole drag and resumes once at its end", () => {
-    const { audio, gate, quiet, seeked } = rig();
+    const { audio, gate, quiet } = rig();
     for (const target of [100, 130, 160, 190, 220]) {
       gate.seek(target);
-      seeked();
+      audio.finishSeek();
     }
     quiet();
     expect(audio.ops.filter((op) => op === "pause")).toHaveLength(1);
     expect(audio.ops.filter((op) => op === "play")).toHaveLength(1);
-    expect(audio.ops[audio.ops.length - 2]).toBe("seek 220");
+    expect(last(audio.ops, 2)).toBe("seek 220");
     expect(audio.wedged).toBe(false);
   });
 
@@ -126,22 +133,20 @@ describe("seek gate", () => {
     const { audio, gate, quiet } = rig();
     gate.seek(100);
     gate.seek(200);
-    audio.finishSeek();
     audio.seeking = true;
     gate.onSeeked();
     quiet();
     expect(audio.ops).not.toContain("play");
   });
 
-  it("defers a seek that arrives while playback is restarting until it plays", () => {
-    const { audio, gate, quiet, seeked } = rig();
+  it("defers a seek that arrives while its own resume is starting", () => {
+    const { audio, gate, quiet } = rig();
     gate.seek(100);
-    seeked();
+    audio.finishSeek();
     quiet();
     gate.seek(300);
     expect(audio.currentTime).toBe(100);
     audio.startPlaying();
-    gate.onPlaying();
     expect(audio.ops).toEqual([
       "pause",
       "seek 100",
@@ -150,17 +155,41 @@ describe("seek gate", () => {
       "seek 300",
     ]);
     expect(audio.wedged).toBe(false);
-    seeked();
+    audio.finishSeek();
     quiet();
-    expect(audio.ops[audio.ops.length - 1]).toBe("play");
+    expect(last(audio.ops)).toBe("play");
+  });
+
+  it("defers a seek that arrives while any other play is starting", () => {
+    const audio = new WedgingAudio();
+    audio.paused = true;
+    const { gate } = rig(audio);
+    void audio.play();
+    gate.seek(450);
+    expect(audio.ops).toEqual(["play"]);
+    audio.startPlaying();
+    expect(audio.ops).toEqual(["play", "pause", "seek 450"]);
+    expect(audio.wedged).toBe(false);
+  });
+
+  it("lands a deferred seek on a start that is paused instead", () => {
+    const audio = new WedgingAudio();
+    audio.paused = true;
+    const { gate } = rig(audio, () => false);
+    void audio.play();
+    gate.seek(75);
+    audio.pause();
+    expect(audio.currentTime).toBe(75);
+    expect(audio.wedged).toBe(false);
+    expect(gate.holds()).toBe(false);
   });
 
   it("leaves an element the user paused paused", () => {
     const audio = new WedgingAudio();
     audio.paused = true;
-    const { gate, quiet, seeked } = rig(audio, () => false);
+    const { gate, quiet } = rig(audio, () => false);
     gate.seek(50);
-    seeked();
+    audio.finishSeek();
     quiet();
     expect(audio.ops).toEqual(["seek 50"]);
     expect(gate.holds()).toBe(false);
@@ -168,36 +197,32 @@ describe("seek gate", () => {
 
   it("stays paused when the user pauses during a drag", () => {
     let playing = true;
-    const { audio, gate, quiet, seeked } = rig(
-      new WedgingAudio(),
-      () => playing,
-    );
+    const { audio, gate, quiet } = rig(new WedgingAudio(), () => playing);
     gate.seek(80);
     playing = false;
-    seeked();
+    audio.finishSeek();
     quiet();
     expect(audio.ops).toEqual(["pause", "seek 80"]);
     expect(gate.holds()).toBe(false);
   });
 
   it("lands a deferred seek when the restart is refused", async () => {
-    const { audio, gate, quiet, seeked } = rig();
+    const { audio, gate, quiet } = rig();
     gate.seek(100);
-    seeked();
+    audio.finishSeek();
     quiet();
     gate.seek(250);
-    audio.rejectPlay();
+    audio.refusePlay();
     await Promise.resolve();
     await Promise.resolve();
-    expect(gate.holds()).toBe(false);
     expect(audio.currentTime).toBe(250);
     expect(audio.wedged).toBe(false);
   });
 
   it("ends the track instead of restarting it when a drag lands on the end", () => {
-    const { audio, gate, quiet, seeked, events } = rig();
+    const { audio, gate, quiet, events } = rig();
     gate.seek(600);
-    seeked();
+    audio.finishSeek();
     quiet();
     expect(audio.ops).not.toContain("play");
     expect(events).toEqual(["ended"]);
@@ -214,9 +239,9 @@ describe("seek gate", () => {
   });
 
   it("forgets a hold when the source changes", () => {
-    const { gate, timers, seeked } = rig();
+    const { audio, gate, timers } = rig();
     gate.seek(90);
-    seeked();
+    audio.finishSeek();
     gate.reset();
     expect(timers.size).toBe(0);
     expect(gate.holds()).toBe(false);

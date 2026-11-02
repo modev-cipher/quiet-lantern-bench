@@ -3,7 +3,8 @@
 // play() is still starting: it sits at the target with readyState 2 and
 // never advances. Measured 2026-11-02 with a plain page; WebKitGTK 2.54 and
 // pausing first both play through. So every seek runs on a paused element,
-// and playback resumes once, after the seeks of a drag have settled.
+// a seek during a start waits for "playing", and playback resumes once,
+// after the seeks of a drag have settled.
 
 export const SEEK_RESUME_QUIET_MS = 250;
 
@@ -28,20 +29,21 @@ export interface SeekGateDeps {
 
 export interface SeekGate {
   seek(time: number): void;
-  onSeeked(): void;
+  onPlay(): void;
   onPlaying(): void;
+  onPause(): void;
+  onSeeked(): void;
   /// Whether the gate, not the user, owns the element's paused state.
   holds(): boolean;
   reset(): void;
 }
 
-type Phase = "idle" | "holding" | "resuming";
-
 export function createSeekGate(
   audio: SeekableAudio,
   deps: SeekGateDeps,
 ): SeekGate {
-  let phase: Phase = "idle";
+  let holding = false;
+  let starting = false;
   let deferred: number | null = null;
   let timer: number | null = null;
 
@@ -53,61 +55,68 @@ export function createSeekGate(
 
   const seekPaused = (time: number) => {
     if (!audio.paused && audio.readyState >= HAVE_METADATA) {
-      phase = "holding";
+      holding = true;
       audio.pause();
     }
     audio.currentTime = time;
   };
 
+  const takeDeferred = (): number | null => {
+    const time = deferred;
+    deferred = null;
+    return time;
+  };
+
   const resumeWhenQuiet = () => {
     timer = null;
-    if (phase !== "holding" || audio.seeking) return;
+    if (!holding || audio.seeking) return;
+    holding = false;
     if (audio.ended) {
-      phase = "idle";
       deps.onEnded();
       return;
     }
-    if (!deps.shouldPlay()) {
-      phase = "idle";
-      return;
-    }
-    phase = "resuming";
+    if (!deps.shouldPlay()) return;
+    starting = true;
     deps.resume().catch(() => {
-      if (phase !== "resuming") return;
-      phase = "idle";
-      if (deferred == null) return;
-      const time = deferred;
-      deferred = null;
-      audio.currentTime = time;
+      starting = false;
+      const time = takeDeferred();
+      if (time != null && audio.paused) audio.currentTime = time;
     });
   };
 
   return {
     seek(time) {
       stopTimer();
-      if (phase === "resuming") {
+      if (starting) {
         deferred = time;
         return;
       }
       seekPaused(time);
     },
+    onPlay() {
+      starting = true;
+    },
+    onPlaying() {
+      starting = false;
+      const time = takeDeferred();
+      if (time != null) seekPaused(time);
+    },
+    onPause() {
+      if (!starting) return;
+      starting = false;
+      const time = takeDeferred();
+      if (time != null) audio.currentTime = time;
+    },
     onSeeked() {
-      if (phase !== "holding" || audio.seeking) return;
+      if (!holding || audio.seeking) return;
       stopTimer();
       timer = deps.setTimer(resumeWhenQuiet, SEEK_RESUME_QUIET_MS);
     },
-    onPlaying() {
-      if (phase !== "resuming") return;
-      phase = "idle";
-      if (deferred == null) return;
-      const time = deferred;
-      deferred = null;
-      seekPaused(time);
-    },
-    holds: () => phase !== "idle",
+    holds: () => holding,
     reset() {
       stopTimer();
-      phase = "idle";
+      holding = false;
+      starting = false;
       deferred = null;
     },
   };
