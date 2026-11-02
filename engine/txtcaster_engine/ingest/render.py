@@ -17,6 +17,8 @@ from txtcaster_engine.ingest.version import geometry_version, render_identity
 
 GEOMETRY_ENVELOPE_VERSION = 1
 COORD_DECIMALS = 2
+# Rasters cached before PDFium calls were serialized can be blank; a bump redraws every page.
+RASTER_EPOCH = 2
 
 _LOG = logging.getLogger(__name__)
 
@@ -75,7 +77,7 @@ class PageRender:
 
 
 def page_cache_key(content_hash: str, page_no: int, scale: float) -> str:
-    raw = f"{content_hash}:{page_no}:{scale:g}:{render_identity()}"
+    raw = f"{content_hash}:{page_no}:{scale:g}:{render_identity()}:raster={RASTER_EPOCH}"
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 

@@ -7,7 +7,7 @@
 set -euo pipefail
 repo="$(cd "$(dirname "$0")/../.." && pwd)"
 root="${RELEASE_BUILD_ROOT:-$HOME/.cache/txtcaster-release-build}"
-image=txtcaster-linux-build:22.04
+image="txtcaster-linux-build:22.04-$(cat "$repo"/scripts/release/{linux.Containerfile,build_libpulse.sh} | sha256sum | cut -c1-12)"
 mkdir -p "$root/home"
 podman image exists "$image" || podman build -t "$image" -f "$repo/scripts/release/linux.Containerfile" "$repo/scripts/release"
 exec podman run --rm --userns=keep-id --security-opt label=disable \
