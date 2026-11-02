@@ -2,7 +2,8 @@
   "bundle": {
     "resources": {
       "ffmpeg/": "ffmpeg/",
-      "ffmpeg-lib/": "lib/"
+      "ffmpeg-lib/": "lib/",
+      "pulse-lib/": "pulse/"
     }
   }
 }

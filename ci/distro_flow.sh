@@ -11,6 +11,15 @@ fail() { echo "FAIL $*" | tee -a "$OUT/result.txt"; shot "fail"; finish 1; }
 shot() { import -window root "$OUT/$1.png" 2>/dev/null; }
 pause() { python3 -I -c "import time;time.sleep($1)"; }
 c() { xdotool mousemove "$1" "$2" click 1; }
+seekbar() { echo $(( 411 + (925 - 411) * $1 / 100 )) 710; }
+listen() {
+  timeout "$1" parec -d probe.monitor --format=s16le --rate=24000 --channels=1 >"$OUT/rec.raw" 2>>"$OUT/parec.log"
+  python3 -I -c "
+import sys,array,math
+d=open(sys.argv[1],'rb').read();a=array.array('h');a.frombytes(d[:len(d)//2*2])
+print(int(math.sqrt(sum(x*x for x in a)/max(1,len(a)))))" "$OUT/rec.raw"
+  rm -f "$OUT/rec.raw"
+}
 db() { sqlite3 "$A/db.sqlite" "$1" 2>/dev/null; }
 alive() { pgrep -x txtcaster >/dev/null; }
 finish() {
@@ -90,18 +99,32 @@ pass "cast writes an MP3 ($(stat -c %s "$mp3") bytes)"
 pause 2; shot 11-done
 c 180 247; pause 3; shot 12-library-done
 c 360 438; pause 3
-parec -d probe.monitor --format=s16le --rate=24000 --channels=1 >"$OUT/rec.raw" 2>"$OUT/parec.log" &
-REC=$!
-sleep 6
+rms=$(listen 6)
 shot 13-playing
-kill "$REC" 2>/dev/null
-rms=$(python3 -I -c "
-import sys,array,math
-d=open(sys.argv[1],'rb').read();a=array.array('h');a.frombytes(d[:len(d)//2*2])
-print(int(math.sqrt(sum(x*x for x in a)/max(1,len(a)))))" "$OUT/rec.raw")
-rm -f "$OUT/rec.raw"
 [ "${rms:-0}" -gt 100 ] || { pactl list short sink-inputs | cut -c1-80; fail "playback reaches the audio server (rms=$rms)"; }
 pass "playback reaches the audio server (rms=$rms)"
+# libpulse 15.99 to 16.1 can leave the player silent after a seek: seek while playing, then pause, seek and play.
+heard=0 tries=0
+for p in 20 65 35 80 10 55 25 70 45 15 60 30; do
+  tries=$((tries + 1))
+  c $(seekbar $p); pause 1
+  rms=$(listen 3)
+  if [ "${rms:-0}" -gt 100 ]; then heard=$((heard + 1)); else echo "seek to $p% while playing: silent (rms=$rms)"; fi
+done
+for p in 40 75 20 60 5 50; do
+  tries=$((tries + 1))
+  c 668 750; pause 2; c $(seekbar $p); pause 2; c 668 750; pause 1
+  rms=$(listen 3)
+  if [ "${rms:-0}" -gt 100 ]; then heard=$((heard + 1)); else echo "pause, seek to $p%, play: silent (rms=$rms)"; fi
+done
+shot 13b-after-seeks
+common=$(for p in $(pgrep -x WebKitWebProces); do grep -o '/[^ ]*libpulsecommon-[0-9.]*\.so' "/proc/$p/maps"; done | sort -u | head -n 1)
+[ "$heard" = "$tries" ] || fail "playback resumes after every seek ($heard/$tries, ${common:-no libpulse})"
+pass "playback resumes after every seek ($tries)"
+version=${common##*libpulsecommon-}; version=${version%.so}
+[ -n "$common" ] && [ "$(printf '%s\n' 17.0 "$version" | sort -V | head -n 1)" = 17.0 ] \
+  || fail "the player loads libpulse 17 or later (${common:-none})"
+pass "the player loads $common"
 alive || fail "app alive at the end"
 pass "app alive at the end"
 if grep -q 'CSP violation' "$OUT/app.log"; then

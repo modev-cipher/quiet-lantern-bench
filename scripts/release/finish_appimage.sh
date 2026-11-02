@@ -26,14 +26,7 @@ gtk_hook="$appdir/apprun-hooks/linuxdeploy-plugin-gtk.sh"
 sed -i '/^export GDK_BACKEND=/d' "$gtk_hook"
 if grep -q GDK_BACKEND "$gtk_hook"; then exit 1; fi
 # See build_libpulse.sh: the pinned client library replaces the 22.04 one.
-pulse="${LIBPULSE_PREFIX:-/opt/libpulse}"
-rm -f "$appdir"/usr/lib/libpulse.so* "$appdir"/usr/lib/libpulsecommon-*.so
-cp -L "$pulse/usr/lib/libpulse.so.0" "$appdir/usr/lib/libpulse.so.0"
-cp "$pulse"/usr/lib/pulseaudio/libpulsecommon-*.so "$appdir/usr/lib/"
-for lib in "$appdir"/usr/lib/libpulse.so.0 "$appdir"/usr/lib/libpulsecommon-*.so; do
-  patchelf --set-rpath '$ORIGIN' "$lib"
-done
-test -e "$appdir/usr/lib/libpulsecommon-17.0.so"
+"$(dirname "$0")/stage_libpulse.sh" "${LIBPULSE_PREFIX:-/opt/libpulse}" "$appdir/usr/lib"
 rm -f "$image"
 cd "$bundle"
 ARCH=x86_64 LDAI_OUTPUT="$(basename "$image")" "$tool" --appimage-extract-and-run --appdir "$(basename "$appdir")"

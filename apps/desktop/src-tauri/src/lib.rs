@@ -13,6 +13,8 @@ pub mod hardware;
 pub mod ingest_fallback;
 pub mod lan_sender;
 pub mod learning_profile;
+#[cfg(target_os = "linux")]
+pub mod libpulse;
 pub mod library;
 pub mod logging;
 pub mod media_server;
@@ -5690,7 +5692,13 @@ fn setup_app(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    #[cfg(target_os = "linux")]
+    libpulse::restart_with_bundled_libpulse();
     logging::init();
+    #[cfg(target_os = "linux")]
+    if libpulse::bundled_libpulse_in_use() {
+        tracing::info!("audio uses the bundled libpulse 17.0");
+    }
     let app = tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             if let Some(window) = app.get_webview_window("main") {

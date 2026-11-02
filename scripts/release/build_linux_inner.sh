@@ -14,6 +14,7 @@ case "${1:-}" in
   app)
     [ -n "${TXTCASTER_UPDATE_PUBKEY:-}" ] || { echo "TXTCASTER_UPDATE_PUBKEY is required" >&2; exit 2; }
     ./scripts/fetch_ffmpeg_linux.sh apps/desktop/src-tauri
+    ./scripts/release/stage_libpulse.sh /opt/libpulse apps/desktop/src-tauri/pulse-lib
     cd apps/desktop
     # node_modules is the host's, installed from the same lockfile: never reinstall it from in here.
     export pnpm_config_verify_deps_before_run=false npm_config_verify_deps_before_run=false

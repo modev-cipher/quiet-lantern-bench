@@ -12,6 +12,10 @@ on:
         description: optional image filter
         required: false
         default: ""
+      drop_bundled_libpulse:
+        description: control run without the deb/rpm's bundled libpulse
+        type: boolean
+        default: false
 permissions:
   contents: read
   actions: read
@@ -85,7 +89,7 @@ jobs:
           if [ "${{ matrix.kind }}" = deb ]; then find pkg -name '*.rpm' -delete; find pkg -name '*.deb' -exec mv {} pkg/ \; ; fi
           if [ "${{ matrix.kind }}" = rpm ]; then find pkg -name '*.deb' -delete; find pkg -name '*.rpm' -exec mv {} pkg/ \; ; fi
           if [ "${{ matrix.kind }}" = appimage ]; then find pkg -name '*.AppImage' -exec mv {} pkg/ \; ; fi
-          docker run --rm --security-opt seccomp=unconfined --security-opt apparmor=unconfined --cap-add SYS_ADMIN --device /dev/fuse --shm-size=1g -v "$PWD:/w" "${{ matrix.image }}" bash /w/ci/distro_test.sh "${{ matrix.kind }}"
+          docker run --rm --security-opt seccomp=unconfined --security-opt apparmor=unconfined --cap-add SYS_ADMIN --device /dev/fuse --shm-size=1g -e DROP_BUNDLED_LIBPULSE=${{ inputs.drop_bundled_libpulse && '1' || '' }} -v "$PWD:/w" "${{ matrix.image }}" bash /w/ci/distro_test.sh "${{ matrix.kind }}"
       - uses: actions/upload-artifact@v4
         if: ${{ always() && (inputs.only == '' || contains(matrix.image, inputs.only)) }}
         with:

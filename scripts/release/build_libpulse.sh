@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # libpulse 15.99 to 16.1 keeps a corked stream's clock running before its first play, so GStreamer
 # starts that far ahead and playback stalls for as long as it sat paused (fixed in 17.0). The
-# AppImage replaces Ubuntu 22.04's client library with this pinned build.
+# AppImage, deb and rpm carry this pinned build (stage_libpulse.sh).
 #   build_libpulse.sh DESTDIR   (installs DESTDIR/usr/lib/...; compiled-in paths stay /usr and /etc)
 set -euo pipefail
 dest="${1:?destination directory required}"

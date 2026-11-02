@@ -17,6 +17,7 @@ build/
 target/
 apps/desktop/src-tauri/ffmpeg/
 apps/desktop/src-tauri/ffmpeg-lib/
+apps/desktop/src-tauri/pulse-lib/
 logs/
 node_modules/
 __pycache__/
