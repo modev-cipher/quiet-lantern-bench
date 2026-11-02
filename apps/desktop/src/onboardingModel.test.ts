@@ -85,6 +85,28 @@ describe("recommendModel", () => {
     expect(rec?.model.id).toBe("fast");
   });
 
+  it("prefers the fastest model when everything is heavy on this machine", () => {
+    const rec = recommendModel(
+      [
+        model({
+          id: "kokoro",
+          quality_score: 82,
+          speed_score: 95,
+          badge: "orange",
+        }),
+        model({
+          id: "chatterbox",
+          quality_score: 90,
+          speed_score: 70,
+          badge: "orange",
+        }),
+      ],
+      "tts",
+    );
+    expect(rec?.model.id).toBe("kokoro");
+    expect(rec?.fallback).toBe(true);
+  });
+
   it("falls back to the best yellow when nothing is green", () => {
     const rec = recommendModel(
       [

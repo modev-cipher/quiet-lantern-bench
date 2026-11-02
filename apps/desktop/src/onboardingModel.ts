@@ -42,9 +42,10 @@ export function recommendModel(
   for (const tier of TIER_ORDER) {
     const pool = candidates
       .filter((m) => m.badge === tier)
-      .sort(
-        (a, b) =>
-          b.quality_score - a.quality_score || b.speed_score - a.speed_score,
+      .sort((a, b) =>
+        tier === "orange" || tier === "red"
+          ? b.speed_score - a.speed_score || b.quality_score - a.quality_score
+          : b.quality_score - a.quality_score || b.speed_score - a.speed_score,
       );
     if (pool.length > 0) {
       return { model: pool[0], fallback: tier !== "green" };

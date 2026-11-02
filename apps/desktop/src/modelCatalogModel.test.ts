@@ -239,6 +239,25 @@ describe("groupByTask", () => {
 });
 
 describe("recommendModel", () => {
+  it("prefers the fastest model when everything is heavy on this machine", () => {
+    const rec = recommendModel([
+      model({
+        id: "kokoro",
+        quality_score: 82,
+        speed_score: 95,
+        badge: "orange",
+      }),
+      model({
+        id: "chatterbox",
+        quality_score: 90,
+        speed_score: 70,
+        badge: "orange",
+      }),
+    ]);
+    expect(rec?.model.id).toBe("kokoro");
+    expect(rec?.fallback).toBe(true);
+  });
+
   it("picks the highest-quality green-fit model, tie-broken by speed", () => {
     const rec = recommendModel([
       model({

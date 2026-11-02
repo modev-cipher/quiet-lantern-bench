@@ -85,7 +85,9 @@ export function completeReadySet(installs: InstalledModel[]): Set<string> {
 export function textReadySet(installs: InstalledModel[]): Set<string> {
   return new Set(
     installs
-      .filter((i) => (i.missingFiles ?? []).every((path) => path.includes("mmproj")))
+      .filter((i) =>
+        (i.missingFiles ?? []).every((path) => path.includes("mmproj")),
+      )
       .map((i) => i.modelId),
   );
 }
@@ -212,7 +214,10 @@ export function fitReason(
   const ramNeed = formatGbFromMb(model.min_free_ram_mb);
   const ramFree = hw?.ram.freeMb;
   if (ramFree != null) {
-    return t("models.fit.ramHave", { need: ramNeed, have: formatGbFromMb(ramFree) });
+    return t("models.fit.ramHave", {
+      need: ramNeed,
+      have: formatGbFromMb(ramFree),
+    });
   }
   return t("models.fit.ram", { need: ramNeed });
 }
@@ -229,7 +234,10 @@ export function diskBlockMessage(
   const neededGb = model.disk_bytes / 1e9;
   const freeGb = hw.disk.modelsFreeGb;
   if (neededGb <= freeGb) return null;
-  return t("models.diskBlock", { need: formatGb(neededGb), have: formatGb(freeGb) });
+  return t("models.diskBlock", {
+    need: formatGb(neededGb),
+    have: formatGb(freeGb),
+  });
 }
 
 function formatGb(gb: number): string {
@@ -281,7 +289,11 @@ export function recommendModel(
     .filter((model) => model.badge === "yellow")
     .sort(byQuality);
   if (hybrid.length > 0) return { model: hybrid[0]!, fallback: true };
-  const best = [...live].sort(byQuality)[0]!;
+  const bySpeed = (a: CatalogModelEntry, b: CatalogModelEntry) =>
+    b.speed_score - a.speed_score || b.quality_score - a.quality_score;
+  const heavy = live.filter((model) => model.badge === "orange").sort(bySpeed);
+  if (heavy.length > 0) return { model: heavy[0]!, fallback: true };
+  const best = [...live].sort(bySpeed)[0]!;
   return { model: best, fallback: true };
 }
 
@@ -353,16 +365,23 @@ export function downloadPct(progress: ModelDownloadProgress): number {
 }
 
 export function downloadStatusLabel(progress: ModelDownloadProgress): string {
-  if (progress.state === "reconnecting") return t("models.download.reconnecting");
+  if (progress.state === "reconnecting")
+    return t("models.download.reconnecting");
   if (progress.state === "verifying") {
     if (progress.filesTotal > 1) {
-      return t("models.download.verifyingFile", { index: progress.fileIndex + 1, total: progress.filesTotal });
+      return t("models.download.verifyingFile", {
+        index: progress.fileIndex + 1,
+        total: progress.filesTotal,
+      });
     }
     return t("models.download.verifying");
   }
   if (progress.state === "done") return t("models.download.finishing");
   if (progress.filesTotal > 1) {
-    return t("models.download.downloadingFile", { index: progress.fileIndex + 1, total: progress.filesTotal });
+    return t("models.download.downloadingFile", {
+      index: progress.fileIndex + 1,
+      total: progress.filesTotal,
+    });
   }
   return t("models.download.downloading");
 }
