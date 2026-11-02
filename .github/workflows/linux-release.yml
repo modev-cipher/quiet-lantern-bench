@@ -41,8 +41,13 @@ jobs:
           RUST_LOG=info dbus-run-session -- timeout 40 xvfb-run -a txtcaster > run.log 2>&1 || [ $? = 124 ]
           tail -n 20 run.log
           grep -E 'ffmpeg source=bundled' run.log
-          grep -F 'audio uses the bundled libpulse 17.0' run.log
           test -f /usr/lib/txtCaster/pulse/libpulse-LGPL.txt
+          ls /usr/lib/x86_64-linux-gnu/pulseaudio/
+          if ls /usr/lib/x86_64-linux-gnu/pulseaudio/libpulsecommon-1[56].*.so >/dev/null 2>&1; then
+            grep -F 'audio uses the bundled libpulse 17.0' run.log
+          else
+            ! grep -F 'bundled libpulse' run.log
+          fi
       - name: The AppImage rejects color fonts
         run: |
           image=$(ls ${{ runner.temp }}/rb/target/release/bundle/appimage/*.AppImage)
