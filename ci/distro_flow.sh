@@ -110,10 +110,18 @@ if grep -q 'CSP violation' "$OUT/app.log"; then
 fi
 pass "no content-security violations"
 pkill -x txtcaster; for _ in $(seq 15); do alive || break; sleep 1; done
+pactl unload-module module-null-sink; sleep 2
+pactl list short sinks | cut -c1-70
+start || fail "launch with no audio output"
+sleep 8
+c 360 438; pause 4; shot 14-no-output-opened; c 668 750; pause 30; shot 15-no-output
+alive || fail "no audio output keeps the app alive"
+pass "no audio output keeps the app alive"
+pkill -x txtcaster; for _ in $(seq 15); do alive || break; sleep 1; done
 pkill -x wireplumber; pkill -x pipewire-pulse; pkill -x pipewire; sleep 2
 start || fail "launch with no audio server"
 sleep 8
-c 360 438; pause 4; c 668 750; pause 28; shot 14-no-sound
+c 360 438; pause 4; c 668 750; pause 30; shot 16-no-server
 alive || fail "no audio server keeps the app alive"
 pass "no audio server keeps the app alive"
 finish 0
