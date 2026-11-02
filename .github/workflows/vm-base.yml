@@ -1,0 +1,82 @@
+name: vm-base
+on:
+  workflow_dispatch:
+    inputs:
+      series:
+        description: Ubuntu series
+        default: noble
+permissions:
+  contents: read
+jobs:
+  base:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: KVM and tools
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          sudo apt-get update -qq
+          sudo apt-get install -y -q qemu-system-x86 qemu-utils cloud-image-utils >/dev/null
+          ls -la /dev/kvm
+      - name: Build the desktop image
+        run: |
+          curl -fsSL -o base.img "https://cloud-images.ubuntu.com/${{ inputs.series }}/current/${{ inputs.series }}-server-cloudimg-amd64.img"
+          qemu-img create -q -f qcow2 -F qcow2 -b base.img disk.qcow2 30G
+          cat > user-data <<'CI'
+          #cloud-config
+          hostname: ubuntu-desktop
+          users:
+            - name: tester
+              groups: [sudo, audio, video]
+              shell: /bin/bash
+              sudo: ALL=(ALL) NOPASSWD:ALL
+              lock_passwd: false
+              plain_text_passwd: testpass
+          ssh_pwauth: true
+          package_update: true
+          packages:
+            - ubuntu-desktop-minimal
+            - linux-generic
+            - python3-gi
+            - gir1.2-atspi-2.0
+            - at-spi2-core
+            - sqlite3
+            - zstd
+            - libsecret-tools
+            - pulseaudio-utils
+            - x11-utils
+            - openssh-server
+          write_files:
+            - path: /etc/skel/.config/gnome-initial-setup-done
+              content: "yes\n"
+          runcmd:
+            - apt-get remove -y gnome-initial-setup update-notifier || true
+            - mkdir -p /home/tester/.config && echo yes > /home/tester/.config/gnome-initial-setup-done && chown -R tester:tester /home/tester/.config
+            - sh -c 'apt-get install -y "linux-modules-extra-$(uname -r)" || true'
+            - systemctl set-default graphical.target
+            - cloud-init clean --logs || true
+            - touch /etc/cloud/cloud-init.disabled
+            - poweroff
+          CI
+          printf 'instance-id: desktop\nlocal-hostname: ubuntu-desktop\n' > meta-data
+          cloud-localds seed.iso user-data meta-data
+          timeout 3600 qemu-system-x86_64 -enable-kvm -cpu host -m 8G -smp 4 -display none -serial file:serial.log \
+            -drive file=disk.qcow2,if=virtio -drive file=seed.iso,if=virtio,format=raw \
+            -netdev user,id=n0 -device virtio-net-pci,netdev=n0
+          tail -n 5 serial.log | cut -c1-160
+          qemu-img convert -c -O qcow2 disk.qcow2 desktop.qcow2
+          ls -la desktop.qcow2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ inputs.series }}
+          retention-days: 7
+          path: desktop.qcow2
+          compression-level: 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: base-log-${{ inputs.series }}
+          retention-days: 3
+          path: serial.log
