@@ -1,0 +1,98 @@
+name: distro-matrix
+on:
+  workflow_dispatch:
+    inputs:
+      packages_run:
+        description: linux-release run holding linux-appimage and linux-deb-rpm
+        required: true
+      engine_run:
+        description: run holding linux-engine-cpu
+        required: true
+      only:
+        description: optional image filter
+        required: false
+        default: ""
+permissions:
+  contents: read
+  actions: read
+jobs:
+  prep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            ci
+            catalog
+      - run: python3 -I ci/fetch_kokoro.py catalog/catalog.json models
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kokoro
+          retention-days: 1
+          path: models
+          compression-level: 0
+  test:
+    needs: prep
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { image: "ubuntu:22.04", kind: deb, artifact: linux-deb-rpm }
+          - { image: "ubuntu:24.04", kind: deb, artifact: linux-deb-rpm }
+          - { image: "ubuntu:26.04", kind: deb, artifact: linux-deb-rpm }
+          - { image: "debian:12", kind: deb, artifact: linux-deb-rpm }
+          - { image: "debian:13", kind: deb, artifact: linux-deb-rpm }
+          - { image: "fedora:43", kind: rpm, artifact: linux-deb-rpm }
+          - { image: "ubuntu:24.04", kind: appimage, artifact: linux-appimage }
+          - { image: "fedora:43", kind: appimage, artifact: linux-appimage }
+          - { image: "archlinux:latest", kind: appimage, artifact: linux-appimage }
+    steps:
+      - uses: actions/checkout@v4
+        if: ${{ inputs.only == '' || contains(matrix.image, inputs.only) }}
+        with:
+          persist-credentials: false
+          sparse-checkout: ci
+      - uses: actions/download-artifact@v4
+        if: ${{ inputs.only == '' || contains(matrix.image, inputs.only) }}
+        with:
+          name: ${{ matrix.artifact }}
+          path: pkg
+          run-id: ${{ inputs.packages_run }}
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        if: ${{ inputs.only == '' || contains(matrix.image, inputs.only) }}
+        with:
+          name: linux-engine-cpu
+          path: engine-pack
+          run-id: ${{ inputs.engine_run }}
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        if: ${{ inputs.only == '' || contains(matrix.image, inputs.only) }}
+        with:
+          name: kokoro
+          path: models
+      - name: Clean-image install and journey
+        if: ${{ inputs.only == '' || contains(matrix.image, inputs.only) }}
+        run: |
+          find pkg -type f | cut -c1-80
+          ls engine-pack | cut -c1-70
+          first=$(ls engine-pack/*.tar.zst.* | head -1)
+          cat engine-pack/*.tar.zst.* | tar --zstd -t | head -1 | grep -q '^txtcaster-engine/' && echo 1 > engine-pack/.strip || echo 0 > engine-pack/.strip
+          python3 -I ci/make_pdf.py "$PWD/book.pdf"
+          if [ "${{ matrix.kind }}" = deb ]; then find pkg -name '*.rpm' -delete; find pkg -name '*.deb' -exec mv {} pkg/ \; ; fi
+          if [ "${{ matrix.kind }}" = rpm ]; then find pkg -name '*.deb' -delete; find pkg -name '*.rpm' -exec mv {} pkg/ \; ; fi
+          if [ "${{ matrix.kind }}" = appimage ]; then find pkg -name '*.AppImage' -exec mv {} pkg/ \; ; fi
+          docker run --rm --security-opt seccomp=unconfined --security-opt apparmor=unconfined --cap-add SYS_ADMIN --device /dev/fuse --shm-size=1g -v "$PWD:/w" "${{ matrix.image }}" bash /w/ci/distro_test.sh "${{ matrix.kind }}"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() && (inputs.only == '' || contains(matrix.image, inputs.only)) }}
+        with:
+          name: evidence-${{ strategy.job-index }}
+          retention-days: 7
+          path: |
+            out/*.png
+            out/*.txt
+            out/*.log
+          if-no-files-found: warn
