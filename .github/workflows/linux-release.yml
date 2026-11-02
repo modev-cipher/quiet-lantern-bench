@@ -1,5 +1,11 @@
 name: linux-release
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      engines:
+        description: Also build the CPU and CUDA engines
+        type: boolean
+        default: false
 permissions:
   contents: read
 jobs:
@@ -35,17 +41,29 @@ jobs:
           RUST_LOG=info dbus-run-session -- timeout 40 xvfb-run -a txtcaster > run.log 2>&1 || [ $? = 124 ]
           tail -n 20 run.log
           grep -E 'ffmpeg source=bundled' run.log
+      - name: The AppImage rejects color fonts
+        run: |
+          image=$(ls ${{ runner.temp }}/rb/target/release/bundle/appimage/*.AppImage)
+          chmod +x "$image"
+          (cd "$(mktemp -d)" && "$image" --appimage-extract AppRun >/dev/null && grep FONTCONFIG_FILE squashfs-root/AppRun && "$image" --appimage-extract usr/share/txtcaster/fonts.conf >/dev/null && grep -c rejectfont squashfs-root/usr/share/txtcaster/fonts.conf)
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: linux-packages
+          name: linux-appimage
+          retention-days: 7
+          path: ${{ runner.temp }}/rb/target/release/bundle/appimage/*.AppImage
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: linux-deb-rpm
           retention-days: 7
           path: |
             ${{ runner.temp }}/rb/target/release/bundle/deb/*.deb
             ${{ runner.temp }}/rb/target/release/bundle/rpm/*.rpm
-            ${{ runner.temp }}/rb/target/release/bundle/appimage/*.AppImage
           if-no-files-found: error
   engines:
+    if: ${{ inputs.engines }}
     runs-on: ubuntu-latest
     timeout-minutes: 240
     strategy:

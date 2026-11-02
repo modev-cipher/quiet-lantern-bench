@@ -7,6 +7,19 @@ tool="${HOME}/.cache/tauri/linuxdeploy-plugin-appimage.AppImage"
 appdir="$(ls -d "$bundle"/*.AppDir)"
 image="$(ls "$bundle"/*.AppImage)"
 rm -f "$appdir"/usr/lib/libwayland-*.so*
+# The bundled WebKit's Skia aborts the page on COLRv1 color fonts such as Fedora's Noto Color
+# Emoji, freezing the window on the first emoji drawn. Plain glyphs replace color ones here.
+mkdir -p "$appdir/usr/share/txtcaster"
+cat > "$appdir/usr/share/txtcaster/fonts.conf" <<'FONTS'
+<?xml version="1.0"?>
+<!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+<fontconfig>
+  <include ignore_missing="yes">/etc/fonts/fonts.conf</include>
+  <selectfont><rejectfont><pattern><patelt name="color"><bool>true</bool></patelt></pattern></rejectfont></selectfont>
+</fontconfig>
+FONTS
+sed -i '/^exec /i export FONTCONFIG_FILE="${FONTCONFIG_FILE:-$this_dir/usr/share/txtcaster/fonts.conf}"' "$appdir/AppRun"
+grep -q FONTCONFIG_FILE "$appdir/AppRun"
 rm -f "$image"
 cd "$bundle"
 ARCH=x86_64 LDAI_OUTPUT="$(basename "$image")" "$tool" --appimage-extract-and-run --appdir "$(basename "$appdir")"
