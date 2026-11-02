@@ -113,7 +113,7 @@ pkill -x txtcaster; for _ in $(seq 15); do alive || break; sleep 1; done
 pkill -x wireplumber; pkill -x pipewire-pulse; pkill -x pipewire; sleep 2
 start || fail "launch with no audio server"
 sleep 8
-c 360 438; pause 28; shot 14-no-sound
+c 360 438; pause 4; c 668 750; pause 28; shot 14-no-sound
 alive || fail "no audio server keeps the app alive"
 pass "no audio server keeps the app alive"
 finish 0

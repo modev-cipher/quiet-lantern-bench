@@ -205,6 +205,8 @@ with open(os.path.join(OUT, "outputs.json"), "w", encoding="utf-8") as f:
 open_book()
 time.sleep(6)
 dump("playing-no-audio-device")
+time.sleep(25)
+dump("no-audio-device-later")
 if not main_window().exists(timeout=2):
     raise SystemExit("app closed during playback without an audio device")
 log("full journey done")

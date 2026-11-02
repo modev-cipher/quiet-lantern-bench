@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 import { fixtureBook, fixtureChapters, installTauriMock } from "./tauriMock";
+import { storeError } from "./i18nText";
 
 const DAILY_QUOTA_REASON = {
   kind: "rate_limit",
@@ -102,7 +103,7 @@ test("a refused switch on the per-minute card reaches the user too", async ({
   await page.getByTestId("job-rate-limit-overnight-job-per-minute").click();
 
   await expect(alert).toBeVisible();
-  await expect(alert).toContainText(REFUSAL);
+  await expect(alert).toContainText(storeError(REFUSAL));
   expect(
     unhandled,
     "a dropped rejection crashes nothing but leaves the user with a dead button",
@@ -136,7 +137,7 @@ test("the per-minute refusal is the only alert a role query can reach", async ({
   ).toBeVisible();
   const byRole = page.getByRole("alert");
   await expect(byRole).toHaveCount(1);
-  await expect(byRole).toContainText(REFUSAL);
+  await expect(byRole).toContainText(storeError(REFUSAL));
   await expect(
     page.getByTestId("job-rate-limit-card-job-per-minute").getByRole("alert"),
     "an alert nested inside the role='status' card makes getByRole('alert') ambiguous between the \

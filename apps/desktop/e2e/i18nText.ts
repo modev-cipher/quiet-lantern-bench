@@ -21,6 +21,11 @@ const catalog: Record<string, unknown> = Object.assign(
 
 export const e2eLocale = LOCALE;
 
+/** What a reader sees for an uncatalogued English error from the native side. */
+export function storeError(text: string): string {
+  return LOCALE === "ar" ? msg("error.unexplained") : text;
+}
+
 /** The visible text of a catalog message in the suite's locale. */
 export function msg(
   key: string,

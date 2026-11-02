@@ -1,7 +1,7 @@
 import { providerDisplayName } from "../src/i18n/providerNames";
 import { expect, test, type Page, type Locator } from "@playwright/test";
 
-import { fragment, msg } from "./i18nText";
+import { fragment, msg, storeError } from "./i18nText";
 import { fixtureBook, installTauriMock } from "./tauriMock";
 import type {
   CastConsentRow,
@@ -545,7 +545,7 @@ test("locked vault unlocks (or goes session-only) right on the sub-page (blocker
   await page.getByTestId("providers-vault-unlock").click();
   await expectProviderText(
     page.getByTestId("providers-vault-error"),
-    "wrong passphrase",
+    msg("error.wrongPassphrase"),
   );
   await page.getByTestId("providers-vault-passphrase").fill("letmein");
   await page.getByTestId("providers-vault-unlock").click();
@@ -879,7 +879,7 @@ test("listing failure is an inline error with the free-text fallback standing (F
   await page.getByTestId("connection-models-c-router").click();
   await expectProviderText(
     page.getByTestId("connection-models-error-c-router"),
-    "connection refused",
+    storeError("connection refused"),
   );
   // The custom override still applies — never a dead dropdown.
   await page.getByTestId("connection-models-custom-c-router").fill("m-1");
@@ -981,7 +981,7 @@ test("cloud voices are creatable from the connection sub-page (blocker 8)", asyn
   await page.getByTestId("connection-voice-save-c-car").click();
   await expectProviderText(
     page.getByTestId("connection-voice-notice-c-car"),
-    "voice id",
+    msg("error.enterVoiceId"),
   );
   await page.getByTestId("connection-voice-id-c-car").fill("aria-voice-9");
   await page.getByTestId("connection-voice-save-c-car").click();

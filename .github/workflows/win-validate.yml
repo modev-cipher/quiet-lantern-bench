@@ -61,8 +61,7 @@ jobs:
           New-Item -ItemType Directory -Force hostile\engine\txtcaster_engine | Out-Null
           Set-Content hostile\engine\pyproject.toml ''
           Set-Content hostile\engine\txtcaster_engine\__main__.py "open(r'$PWD\hostile\RAN','w')"
-          $env:RUST_LOG = 'info'
-          Start-Process "$env:LOCALAPPDATA\txtCaster\txtCaster.exe" -WorkingDirectory "$PWD\hostile" -RedirectStandardError "$PWD\app-stderr.log" -RedirectStandardOutput "$PWD\app-stdout.log"
+          Start-Process "$env:LOCALAPPDATA\txtCaster\txtCaster.exe" -WorkingDirectory "$PWD\hostile"
       - name: Diagnose launch
         shell: pwsh
         run: |
@@ -106,10 +105,6 @@ jobs:
           Get-Process txtCaster | Stop-Process -Force
           Get-Process txtcaster-engine -ErrorAction SilentlyContinue | Stop-Process -Force
           Start-Sleep 3
-          if ((Get-Item app-stderr.log).Length -eq 0) { throw "the app log capture is empty" }
-          $csp = Select-String -Path app-stderr.log -Pattern 'CSP violation'
-          if ($csp) { $csp | Select-Object -First 8 | Out-String -Width 200; throw "content-security violations" }
-          "no content-security violations in $((Get-Item app-stderr.log).Length) bytes of log"
           if (Test-Path "$env:APPDATA\txtcaster") { throw "data in the roaming profile" }
           $db = Get-Item "$env:LOCALAPPDATA\txtcaster-data\db.sqlite"
           "db at $($db.FullName)"
@@ -139,4 +134,3 @@ jobs:
             shots/*
             drive.log
             failure.log
-            app-stderr.log

@@ -22,6 +22,16 @@ describe("commandErrorText", () => {
     );
   });
 
+  it("names the native refusals a reader can act on", () => {
+    setLocalePreference("ar");
+    expect(commandErrorText("wrong passphrase, or the vault file was modified")).toBe(
+      t("error.wrongPassphrase"),
+    );
+    expect(commandErrorText("Enter the provider's voice id.")).toBe(
+      t("error.enterVoiceId"),
+    );
+  });
+
   it("keeps text that is already Arabic", () => {
     setLocalePreference("ar");
     expect(commandErrorText("تعذّر فتح الملف")).toBe("تعذّر فتح الملف");

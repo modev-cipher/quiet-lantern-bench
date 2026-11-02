@@ -165,6 +165,13 @@
   "startup.openFolder": "Open data folder",
   "startup.quit": "Close txtCaster",
   "error.unexplained": "Something went wrong. Please try again.",
+  "error.wrongPassphrase": "Wrong passphrase, or the vault file was modified.",
+  "error.nameTheVoice": "Give this voice a name so you can find it later.",
+  "error.enterVoiceId": "Enter the provider's voice id.",
+  "error.builtInVoice": "Built-in voices cannot be deleted.",
+  "error.importActive": "Another book import is already in progress.",
+  "error.engineInUse": "The engine can't be removed while audio jobs are running.",
+  "error.audioInUse": "Saved audio can't be cleared while audio jobs are running.",
   "error.jobActive": "An audio job is queued, running or paused for this book. Cancel it first.",
   "error.extractionActive": "This book's text is being re-extracted. Stop that first.",
   "error.noBook": "This book is no longer in your library."

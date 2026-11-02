@@ -8,7 +8,7 @@ import {
   installTauriMock,
 } from "./tauriMock";
 import { castStep } from "./castSteps";
-import { e2eLocale, fragment, msg } from "./i18nText";
+import { e2eLocale, fragment, msg, storeError } from "./i18nText";
 import { OVERPROMISE, QUEUED_OVERNIGHT } from "./overnightCopy";
 
 test("creates a job and follows it through the stepper to an exported mp3", async ({
@@ -239,7 +239,7 @@ test("surfaces create_job errors inside the modal", async ({ page }) => {
   const modal = page.getByTestId("job-modal");
   await expect(modal).toBeVisible();
   await expect(modal.getByRole("alert")).toContainText(
-    "voice profile 'missing' not found",
+    storeError("voice profile 'missing' not found"),
   );
 });
 

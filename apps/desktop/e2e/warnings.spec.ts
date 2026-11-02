@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 import { castStep } from "./castSteps";
-import { e2eLocale, fragment, msg } from "./i18nText";
+import { e2eLocale, fragment, msg, storeError } from "./i18nText";
 import { OVERNIGHT_HINT, OVERPROMISE, QUEUED_OVERNIGHT } from "./overnightCopy";
 
 import {
@@ -355,7 +355,7 @@ test("a red confirm is spent by the attempt: a failed start re-asks on Cast and 
   await expect(dialog).toBeVisible();
   await page.getByTestId("red-confirm-run-anyway").click();
   await expect(
-    modal.getByRole("alert").filter({ hasText: "engine busy" }),
+    modal.getByRole("alert").filter({ hasText: storeError("engine busy") }),
   ).toBeVisible();
   await expect(noJob).toHaveCount(0);
 
@@ -395,7 +395,7 @@ test("a red confirm does not survive a fit round-trip (red → orange → red)",
     page
       .getByTestId("job-modal")
       .getByRole("alert")
-      .filter({ hasText: "engine busy" }),
+      .filter({ hasText: storeError("engine busy") }),
   ).toBeVisible();
 
   await page.getByTestId("cast-explain-figures").uncheck();
