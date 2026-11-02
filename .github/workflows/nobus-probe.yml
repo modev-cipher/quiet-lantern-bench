@@ -1,0 +1,46 @@
+name: nobus-probe
+on:
+  workflow_dispatch:
+    inputs:
+      packages_run:
+        required: true
+permissions:
+  contents: read
+  actions: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: linux-deb-rpm
+          path: pkg
+          run-id: ${{ inputs.packages_run }}
+          github-token: ${{ github.token }}
+      - name: Probe
+        run: |
+          cat > probe.sh <<'SH'
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update -qq >/dev/null
+          apt-get install -y -q --no-install-recommends /w/pkg/deb/*.deb xvfb xdotool gdb procps imagemagick >/dev/null 2>&1
+          ls /usr/bin/dbus-launch 2>&1 | head -1
+          useradd -m tester
+          cat > /tmp/run.sh <<'IN'
+          unset DBUS_SESSION_BUS_ADDRESS
+          export DISPLAY=:9 GDK_BACKEND=x11 RUST_LOG=info XDG_RUNTIME_DIR=/tmp/xr
+          mkdir -p -m 700 $XDG_RUNTIME_DIR
+          Xvfb :9 -screen 0 1400x900x24 >/dev/null 2>&1 &
+          sleep 2
+          txtcaster >/tmp/app.log 2>&1 &
+          A=$!
+          s=0; until xdotool search --onlyvisible --name '^txtCaster$' >/dev/null 2>&1 || [ $s -ge 60 ]; do sleep 1; s=$((s+1)); done
+          echo "window-after $s, alive $(kill -0 $A 2>/dev/null && echo yes || echo no)"
+          tail -n 12 /tmp/app.log | cut -c1-200
+          for t in /proc/$A/task/*; do echo "$(cat $t/comm) $(cat $t/wchan 2>/dev/null)"; done | sort | uniq -c
+          gdb -p $A -batch -ex 'thread apply all bt 14' 2>/dev/null | grep -E '^(Thread|#)' | cut -c1-120 | head -60
+          import -window root /tmp/shot.png; ls -la /tmp/shot.png | cut -c20-60
+          IN
+          su tester -s /bin/bash -c 'bash /tmp/run.sh'
+          SH
+          docker run --rm --cap-add SYS_PTRACE --security-opt seccomp=unconfined -v "$PWD:/w" ubuntu:24.04 bash /w/probe.sh
