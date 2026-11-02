@@ -34,11 +34,15 @@ sleep 2
 printf test | gnome-keyring-daemon --unlock --components=secrets >"$OUT/kr.log" 2>&1
 openbox >/dev/null 2>&1 &
 pipewire >"$OUT/pw.log" 2>&1 &
-sleep 1
-wireplumber >"$OUT/wp.log" 2>&1 &
-pipewire-pulse >"$OUT/pp.log" 2>&1 &
 sleep 3
-pactl load-module module-null-sink sink_name=probe >/dev/null && pactl set-default-sink probe
+pipewire-pulse >"$OUT/pp.log" 2>&1 &
+sleep 2
+for _ in $(seq 10); do
+  pgrep -x wireplumber >/dev/null || { wireplumber >>"$OUT/wp.log" 2>&1 & }
+  sleep 3
+  pactl load-module module-null-sink sink_name=probe >/dev/null 2>&1 && pactl set-default-sink probe && break
+done
+pactl list short sinks | grep -q probe || fail "harness: test sink"
 pactl info | grep -E 'Server Name|Default Sink' | cut -c1-80
 
 start || { tail -n 20 "$OUT/app.log" | cut -c1-200; fail "first launch shows a window"; }
