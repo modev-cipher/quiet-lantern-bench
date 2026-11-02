@@ -23,7 +23,7 @@ jobs:
           cat > probe.sh <<'SH'
           export DEBIAN_FRONTEND=noninteractive
           apt-get update -qq >/dev/null
-          apt-get install -y -q --no-install-recommends /w/pkg/deb/*.deb xvfb xdotool gdb procps imagemagick >/dev/null 2>&1
+          apt-get install -y -q --no-install-recommends libasound2t64 /w/pkg/deb/*.deb xvfb xdotool gdb procps imagemagick >/dev/null 2>&1
           ls /usr/bin/dbus-launch 2>&1 | head -1
           useradd -m tester
           cat > /tmp/run.sh <<'IN'
