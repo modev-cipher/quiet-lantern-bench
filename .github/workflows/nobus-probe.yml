@@ -18,23 +18,29 @@ jobs:
           path: pkg
           run-id: ${{ inputs.packages_run }}
           github-token: ${{ github.token }}
-      - name: Probe the runner host the way the release check does
+      - name: Control with a plain GTK application
         run: |
           sudo apt-get update -qq >/dev/null
-          sudo apt-get install -y -q ./pkg/deb/*.deb xvfb xdotool gdb dbus-x11 >/dev/null 2>&1 || true
-          env | grep -E 'DBUS|XDG_RUNTIME' || true
-          dpkg -l xdg-desktop-portal 2>/dev/null | tail -n 1 | cut -c1-60
-          busctl --user list --no-pager 2>&1 | head -8 | cut -c1-90
-          (timeout 50 dbus-monitor --session > mon.log 2>&1 &)
-          sleep 1
-          S=$(date +%s)
-          RUST_LOG=info timeout 45 xvfb-run -a txtcaster > run.log 2>&1 &
-          for at in 8 18; do
-            while [ $(( $(date +%s) - S )) -lt $at ]; do sleep 1; done
-            A=$(pgrep -x txtcaster | head -1)
-            echo "=== main thread at ${at}s pid ${A:-none}"
-            [ -n "$A" ] && sudo gdb -p "$A" -batch -ex 'thread 1' -ex 'bt 30' 2>/dev/null | grep -E '^#' | cut -c1-120
-          done
-          wait || true
-          echo "--- log"; grep -vE '^$' run.log | cut -c1-130 | head -8
-          echo "--- bus calls"; grep -E 'member=|error' mon.log | grep -vE 'NameOwnerChanged|NameAcquired|NameLost|interface=org.freedesktop.DBus; member=(Hello|AddMatch|RemoveMatch)' | cut -c1-170 | head -40
+          sudo apt-get install -y -q ./pkg/deb/*.deb xvfb python3-gi gir1.2-gtk-3.0 >/dev/null 2>&1 || true
+          cat > gtkapp.py <<'PY'
+          import time, gi
+          gi.require_version("Gtk", "3.0")
+          from gi.repository import Gtk
+          a = Gtk.Application(application_id="test.plain.gtk")
+          t = time.time()
+          a.register(None)
+          print(f"plain GtkApplication register {time.time() - t:.1f}s")
+          PY
+          probe() {
+            /usr/bin/python3 -I -c 'import time;print(time.strftime("%X"))'
+            for n in 1 2; do xvfb-run -a /usr/bin/python3 gtkapp.py 2>&1 | grep register; done
+            S=$(date +%s); RUST_LOG=info timeout 45 xvfb-run -a txtcaster > run.log 2>&1 &
+            for _ in $(seq 45); do grep -q ffmpeg\ source run.log 2>/dev/null && break; sleep 1; done
+            echo "$1: txtCaster setup after $(( $(date +%s) - S ))s"
+            pkill -x txtcaster; wait || true
+          }
+          systemctl --user stop xdg-desktop-portal xdg-document-portal xdg-permission-store 2>/dev/null || true
+          probe 'portal activatable, cannot start'
+          probe 'second launch in the same session'
+          systemctl --user mask xdg-desktop-portal 2>&1 | cut -c1-80 || true
+          probe 'portal unit masked'
