@@ -1,5 +1,6 @@
 # Runs inside the VM's desktop session: finds the app's controls by name through AT-SPI.
 import re
+import subprocess
 import sys
 import time
 
@@ -51,7 +52,14 @@ def find(pattern, timeout):
 
 
 command = sys.argv[1]
-if command == "dump":
+if command == "sockets":
+    lines = subprocess.check_output(["sudo", "ss", "-xpHn"], text=True).splitlines()
+    tag = f"pid={sys.argv[2]},"
+    peers = {line.split()[7] for line in lines if tag in line and len(line.split()) > 7}
+    for name in ("wayland-0", "X11-unix/X"):
+        hits = [line for line in lines if len(line.split()) > 7 and name in line.split()[4] and line.split()[5] in peers]
+        print(name, len(hits))
+elif command == "dump":
     for node in nodes():
         try:
             name = node.get_name() or ""

@@ -105,6 +105,8 @@ def click(pattern, wait=2.0):
 
 def rms_of_new_audio(start, seconds):
     time.sleep(seconds)
+    if not os.path.exists("guest.wav"):
+        return 0
     with open("guest.wav", "rb") as f:
         f.seek(max(start, 44))
         data = f.read()
@@ -175,10 +177,12 @@ else:
     guest(f"mv /home/tester/{os.path.basename(PACKAGE)} /home/tester/txtCaster.AppImage; chmod +x /home/tester/txtCaster.AppImage; dpkg -l libfuse2t64 fuse3 2>/dev/null | tail -n 2 | cut -c1-60", 30)
 A = "/home/tester/.local/share/txtcaster"
 guest(f"mkdir -p {A}/engine {A}/models/tts", 20, quiet=True)
-for name in sorted(os.listdir("engine-pack")):
-    if ".tar.zst." in name:
-        subprocess.run(SCP + [f"engine-pack/{name}", f"tester@127.0.0.1:/tmp/{name}"], check=True)
-guest(f"cat /tmp/*.tar.zst.* | tar --zstd -x -C {A}/engine --strip-components=1; rm /tmp/*.tar.zst.*; printf '{{\"engineVersion\":\"0.1.0\",\"engineApi\":1,\"variant\":\"cpu\",\"platform\":\"linux-x86_64\"}}' > {A}/engine/install.json; ls {A}/engine | head -4", 300)
+unpack = subprocess.run(
+    "cat engine-pack/*.tar.zst.* | " + " ".join(f"'{w}'" for w in SSH) + f" 'tar --zstd -x -C {A}/engine --strip-components=$(cat engine-pack.strip 2>/dev/null || echo STRIP)'".replace("$(cat engine-pack.strip 2>/dev/null || echo STRIP)", open("engine-pack/.strip").read().strip()),
+    shell=True,
+)
+check(unpack.returncode == 0, "engine unpacked")
+guest(f"printf '{{\\"engineVersion\\":\\"0.1.0\\",\\"engineApi\\":1,\\"variant\\":\\"cpu\\",\\"platform\\":\\"linux-x86_64\\"}}' > {A}/engine/install.json; ls {A}/engine | head -4; cat {A}/engine/install.json", 30)
 subprocess.run(SCP + ["-r", "models", f"tester@127.0.0.1:{A}/models/tts/kokoro-82m"], check=True)
 
 # --- first launch
@@ -189,9 +193,9 @@ time.sleep(10)
 shot("wizard")
 pid = app_pid()
 guest(f"tr '\\0' '\\n' </proc/{pid}/environ | grep -E '^(WAYLAND_DISPLAY|XDG_SESSION_TYPE|GDK_BACKEND|APPDIR)='; cat /proc/{pid}/mountinfo | grep -c 'mount_txtCas'", 20)
-code, sockets = guest(f"ss -xp | grep -E 'pid={pid},' | grep -c wayland; sudo ss -xp | grep 'wayland-0' | grep -c 'pid={pid},'; DISPLAY=:0 xwininfo -root -tree 2>/dev/null | grep -ci txtcaster", 20)
-counts = sockets.split()
-check(len(counts) == 3 and counts[1] != "0" and counts[2] == "0", f"native Wayland client, not XWayland (wayland sockets {counts[1:2]}, X11 windows {counts[2:3]})")
+_, sockets = guest(f"python3 /tmp/guest_ui.py sockets {pid}", 30)
+counts = dict(line.split() for line in sockets.splitlines() if len(line.split()) == 2)
+check(counts.get("wayland-0", "0") != "0" and counts.get("X11-unix/X", "0") == "0", f"native Wayland client, not XWayland ({counts})")
 guest("python3 /tmp/guest_ui.py dump | cut -c1-90 | head -30", 40)
 quit_app()
 now = int(time.time() * 1000)
@@ -232,7 +236,7 @@ for _ in range(180):
 shot("cast-end")
 check(state == "DONE", f"real Kokoro cast finishes ({state})")
 click("^Shelf$", 3)
-start = os.path.getsize("guest.wav")
+start = os.path.getsize("guest.wav") if os.path.exists("guest.wav") else 0
 click("^Open book$", 2)
 level = rms_of_new_audio(start, 8)
 shot("playing")

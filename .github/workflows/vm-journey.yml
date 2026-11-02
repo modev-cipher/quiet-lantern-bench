@@ -52,9 +52,10 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
           sudo apt-get update -qq
-          sudo apt-get install -y -q qemu-system-x86 qemu-utils sshpass imagemagick >/dev/null
+          sudo apt-get install -y -q qemu-system-x86 qemu-utils sshpass imagemagick zstd >/dev/null
           python3 -I ci/fetch_kokoro.py catalog/catalog.json models | tail -n 1
           python3 -I ci/make_pdf.py "$PWD/book.pdf"
+          cat engine-pack/*.tar.zst.* | tar --zstd -t | head -1 | grep -q '^txtcaster-engine/' && echo 1 > engine-pack/.strip || echo 0 > engine-pack/.strip
       - name: Boot the desktop
         run: |
           nohup qemu-system-x86_64 -enable-kvm -cpu host -m 10G -smp 4 -display none \
