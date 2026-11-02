@@ -51,10 +51,15 @@ while time.time() < end:
         log("uninstaller closed itself")
         break
     try:
-        close = window.child_window(title_re="^(Close|Finish)$", control_type="Button")
-        if close.exists(timeout=1) and close.is_enabled():
+        close = [
+            b
+            for b in window.descendants(control_type="Button")
+            if b.window_text() in ("Close", "Finish")
+            and b.parent().element_info.control_type != "TitleBar"
+        ]
+        if close and close[0].is_enabled():
             shot("done")
-            close.click_input()
+            close[0].click_input()
             log("uninstall finished")
             break
     except Exception as err:
