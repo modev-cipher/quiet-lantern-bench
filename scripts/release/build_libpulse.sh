@@ -22,3 +22,4 @@ meson setup "$work/build" "$work/pulseaudio-$version" --prefix=/usr --sysconfdir
   -Delogind=disabled -Dconsolekit=disabled
 meson compile -C "$work/build"
 DESTDIR="$dest" meson install -C "$work/build"
+install -Dm644 -t "$dest/usr/share/doc/libpulse" "$work/pulseaudio-$version/LGPL" "$work/pulseaudio-$version/LICENSE"

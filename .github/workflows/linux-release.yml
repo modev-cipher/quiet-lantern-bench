@@ -42,6 +42,7 @@ jobs:
           tail -n 20 run.log
           grep -E 'ffmpeg source=bundled' run.log
           grep -F 'audio uses the bundled libpulse 17.0' run.log
+          test -f /usr/lib/txtCaster/pulse/libpulse-LGPL.txt
       - name: The AppImage rejects color fonts
         run: |
           image=$(ls ${{ runner.temp }}/rb/target/release/bundle/appimage/*.AppImage)

@@ -9,6 +9,8 @@ mkdir -p "$dest"
 rm -f "$dest"/libpulse.so* "$dest"/libpulsecommon-*.so
 cp -L "$prefix/usr/lib/libpulse.so.0" "$dest/libpulse.so.0"
 cp "$prefix"/usr/lib/pulseaudio/libpulsecommon-*.so "$dest/"
+cp "$prefix/usr/share/doc/libpulse/LGPL" "$dest/libpulse-LGPL.txt"
+cp "$prefix/usr/share/doc/libpulse/LICENSE" "$dest/libpulse-LICENSE.txt"
 for lib in "$dest"/libpulse.so.0 "$dest"/libpulsecommon-*.so; do
   patchelf --set-rpath '$ORIGIN' "$lib"
 done
