@@ -49,15 +49,21 @@ Xvfb :9 -screen 0 1400x900x24 -nolisten tcp >"$OUT/x.log" 2>&1 &
 sleep 2
 printf test | gnome-keyring-daemon --unlock --components=secrets >"$OUT/kr.log" 2>&1
 openbox >/dev/null 2>&1 &
-pipewire >"$OUT/pw.log" 2>&1 &
-sleep 3
-pipewire-pulse >"$OUT/pp.log" 2>&1 &
-sleep 2
-for _ in $(seq 10); do
-  pgrep -x wireplumber >/dev/null || { wireplumber >>"$OUT/wp.log" 2>&1 & }
+if [ "${AUDIO_SERVER:-}" = pulseaudio ]; then
+  pulseaudio -n --daemonize=no --exit-idle-time=-1 --load=module-native-protocol-unix --load=module-always-sink >"$OUT/pa.log" 2>&1 &
   sleep 3
-  pactl load-module module-null-sink sink_name=probe >/dev/null 2>&1 && pactl set-default-sink probe && break
-done
+  pactl load-module module-null-sink sink_name=probe >/dev/null 2>&1 && pactl set-default-sink probe
+else
+  pipewire >"$OUT/pw.log" 2>&1 &
+  sleep 3
+  pipewire-pulse >"$OUT/pp.log" 2>&1 &
+  sleep 2
+  for _ in $(seq 10); do
+    pgrep -x wireplumber >/dev/null || { wireplumber >>"$OUT/wp.log" 2>&1 & }
+    sleep 3
+    pactl load-module module-null-sink sink_name=probe >/dev/null 2>&1 && pactl set-default-sink probe && break
+  done
+fi
 pactl list short sinks | grep -q probe || fail "harness: test sink"
 pactl info | grep -E 'Server Name|Default Sink' | cut -c1-80
 
@@ -146,7 +152,7 @@ c 360 438; pause 4; shot 14-no-output-opened; c 668 750; pause 30; shot 15-no-ou
 alive || fail "no audio output keeps the app alive"
 pass "no audio output keeps the app alive"
 pkill -x txtcaster; for _ in $(seq 15); do alive || break; sleep 1; done
-pkill -x wireplumber; pkill -x pipewire-pulse; pkill -x pipewire; sleep 2
+pkill -x wireplumber; pkill -x pipewire-pulse; pkill -x pipewire; pkill -x pulseaudio; sleep 2
 start || fail "launch with no audio server"
 sleep 8
 c 360 438; pause 4; c 668 750; pause 30; shot 16-no-server
