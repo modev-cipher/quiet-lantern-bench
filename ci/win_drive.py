@@ -146,11 +146,9 @@ time.sleep(4)
 dump("imported")
 
 def open_book():
-    click("^Library$|^Books$", 20)
+    click("^Shelf$", 20)
     time.sleep(2)
-    e = find("^book$", None, 30)[0]
-    log("open book")
-    e.click_input()
+    click("^Open book$", 30)
     time.sleep(4)
 
 
@@ -159,10 +157,8 @@ def variant():
         return json.load(f)["variant"]
 
 
-click("^book$", types=("Button", "Hyperlink", "ListItem", "Group", "Text", "Image"))
-time.sleep(4)
-dump("reader")
-click("^Cast this book$")
+click("^Cast$")
+time.sleep(2)
 dump("cast-scope")
 click("^Next: Sound")
 dump("cast-sound-reader-engine")
@@ -181,9 +177,11 @@ click_near("^(Download|Get|Install)", r"Pro\+", 60)
 dump("kokoro-downloading")
 until("kokoro installed", lambda: scalar("select count(*) from model_install where model_id='kokoro-82m'") == 1, 1200)
 dump("kokoro-installed")
-open_book()
-dump("reader-2")
-click("^Cast this book$")
+click("^Shelf$", 20)
+time.sleep(2)
+dump("shelf-2")
+click("^Cast$")
+time.sleep(2)
 click("^Next: Sound")
 dump("cast-sound-cpu")
 click("^Local$")
