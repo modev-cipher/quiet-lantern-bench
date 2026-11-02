@@ -33,6 +33,8 @@ tail -n 3 out/install.log | cut -c1-200
 [ $pkg_ok = 1 ] || { echo "FAIL install"; tail -n 30 out/install.log; exit 1; }
 if [ "$kind" != appimage ]; then
   echo "--- missing libraries"; ldd "$APP" | grep 'not found' && { echo "FAIL ldd"; exit 1; }
+  echo "--- unresolved symbols with only the declared dependencies"
+  LD_BIND_NOW=1 timeout 8 env -u DISPLAY "$APP" 2>&1 | grep -E 'symbol lookup error|cannot open shared' && { echo "FAIL symbols"; exit 1; }
 fi
 case $fam in
   deb) apt-get install -y -q --no-install-recommends systemd xvfb openbox xdotool dbus dbus-x11 gnome-keyring pipewire pipewire-pulse wireplumber pulseaudio-utils imagemagick sqlite3 python3 zstd fonts-noto-core fonts-noto-color-emoji procps >>out/install.log 2>&1;;

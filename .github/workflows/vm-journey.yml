@@ -1,0 +1,81 @@
+name: vm-journey
+on:
+  workflow_dispatch:
+    inputs:
+      base_run:
+        description: vm-base run holding the desktop image
+        required: true
+      series:
+        default: noble
+      packages_run:
+        required: true
+      engine_run:
+        required: true
+permissions:
+  contents: read
+  actions: read
+jobs:
+  journey:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        kind: [deb, appimage]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            ci
+            catalog
+      - uses: actions/download-artifact@v4
+        with:
+          name: desktop-${{ inputs.series }}
+          run-id: ${{ inputs.base_run }}
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.kind == 'deb' && 'linux-deb-rpm' || 'linux-appimage' }}
+          path: pkg
+          run-id: ${{ inputs.packages_run }}
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: linux-engine-cpu
+          path: engine-pack
+          run-id: ${{ inputs.engine_run }}
+          github-token: ${{ github.token }}
+      - name: Tools and model
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          sudo apt-get update -qq
+          sudo apt-get install -y -q qemu-system-x86 qemu-utils sshpass imagemagick >/dev/null
+          python3 -I ci/fetch_kokoro.py catalog/catalog.json models | tail -n 1
+          python3 -I ci/make_pdf.py "$PWD/book.pdf"
+      - name: Boot the desktop
+        run: |
+          nohup qemu-system-x86_64 -enable-kvm -cpu host -m 10G -smp 4 -display none \
+            -drive file=desktop.qcow2,if=virtio \
+            -device virtio-vga,xres=1400,yres=900 -device qemu-xhci -device usb-tablet -device usb-kbd \
+            -audiodev wav,id=snd0,path=guest.wav -device intel-hda -device hda-output,audiodev=snd0 \
+            -netdev user,id=n0,hostfwd=tcp:127.0.0.1:2222-:22 -device virtio-net-pci,netdev=n0 \
+            -qmp unix:qmp.sock,server,nowait -serial file:serial.log > qemu.log 2>&1 &
+          for i in $(seq 120); do sshpass -p testpass ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=3 -p 2222 tester@127.0.0.1 true 2>/dev/null && break; sleep 5; done
+          sshpass -p testpass ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p 2222 tester@127.0.0.1 'systemctl is-system-running; lsmod | grep -cE "snd_hda_intel|virtio_gpu"; aplay -l 2>/dev/null | head -3'
+      - name: Journey
+        run: |
+          package=$(find pkg -type f \( -name '*.deb' -o -name '*.AppImage' \) | head -1)
+          echo "$package"
+          python3 ci/vm_journey.py "${{ matrix.kind }}" "$package" out
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vm-evidence-${{ inputs.series }}-${{ matrix.kind }}
+          retention-days: 7
+          path: |
+            out/*
+            qemu.log
+          if-no-files-found: warn
