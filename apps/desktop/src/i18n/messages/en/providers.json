@@ -86,7 +86,7 @@
   "providers.copy.29": "Cast consents could not be read",
   "providers.copy.30": "Retry",
   "providers.copy.31": "Revoke",
-  "providers.copy.32": "The key vault is locked — key validity is unknown until it is unlocked.",
+  "providers.copy.32": "No system keyring is available, so keys are kept in a passphrase-protected vault on this computer. Enter your passphrase, or choose one if this is your first key.",
   "providers.copy.33": "Vault passphrase",
   "providers.copy.34": "Unlock",
   "providers.copy.35": "Use keys session-only",

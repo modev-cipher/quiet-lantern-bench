@@ -324,6 +324,45 @@ test("on the reader engine, the word timing link offers the full engine", async 
   await expect(page.getByTestId("engine-setup-sheet")).toBeVisible();
 });
 
+test("the reader engine opens the cast on cloud voices", async ({ page }) => {
+  await page.addInitScript(() => {
+    (window as unknown as { __mockEngine: unknown }).__mockEngine = {
+      status: { state: "ready", port: 1 },
+      variant: "lite",
+      cancelled: false,
+      offerError: null,
+      failNext: null,
+    };
+  });
+  await openModal(page, {
+    ...CLOUD,
+    ttsVoices: [
+      {
+        voiceProfileId: "vp-oai",
+        name: "Alloy (OpenAI)",
+        voiceId: "alloy",
+        connectionId: "c-oai",
+        connectionName: "OpenAI TTS",
+        provider: "openai_tts",
+        model: "tts-1",
+        loopback: false,
+      },
+    ],
+  });
+  await expect(page.getByTestId("voice-engine-cloud")).toHaveAttribute(
+    "aria-checked",
+    "true",
+  );
+  await expect(page.getByTestId("cast-cascade-model-tts")).toHaveValue(
+    "vp-oai",
+  );
+  await page.getByTestId("voice-engine-local").click();
+  await expect(page.getByTestId("voice-engine-local")).toHaveAttribute(
+    "aria-checked",
+    "true",
+  );
+});
+
 test("fetching models fills the suggestion list and applies the tier default", async ({
   page,
 }) => {

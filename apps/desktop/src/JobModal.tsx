@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { invoke } from "@tauri-apps/api/core";
-import { engineRefusal } from "./engineSetupModel";
-import { openEngineSetup } from "./engineSetupStore";
+import { engineRefusal, LITE_VARIANT } from "./engineSetupModel";
+import { ensureEngine, openEngineSetup } from "./engineSetupStore";
 
 import {
   cloudArgs,
@@ -202,6 +202,8 @@ function JobModal({
   const [voiceEngineMode, setVoiceEngineMode] = useState<"local" | "cloud">(
     draft?.voiceEngineMode ?? "local",
   );
+  const [readerEngine, setReaderEngine] = useState(false);
+  const readerVoiceDefaulted = useRef(false);
   const [pickedVoiceId, setPickedVoiceId] = useState<string | null>(
     draft?.pickedVoiceId ?? null,
   );
@@ -949,6 +951,32 @@ function JobModal({
     [effectiveCloudProviderId, effectiveCloudVoiceId, cloudVoiceMemory],
   );
 
+  useEffect(() => {
+    if (draft != null) return;
+    let live = true;
+    void invoke<string | null>("engine_active_variant")
+      .then((variant) => {
+        if (live && variant === LITE_VARIANT) setReaderEngine(true);
+      })
+      .catch(console.error);
+    return () => {
+      live = false;
+    };
+  }, [draft]);
+
+  useEffect(() => {
+    if (!readerEngine || readerVoiceDefaulted.current) return;
+    handleSwitchVoiceEngine("cloud");
+    if (effectiveCloudProviderId && effectiveCloudVoiceId) {
+      readerVoiceDefaulted.current = true;
+    }
+  }, [
+    readerEngine,
+    handleSwitchVoiceEngine,
+    effectiveCloudProviderId,
+    effectiveCloudVoiceId,
+  ]);
+
   const handleSelectLlmProvider = useCallback(
     (newProvId: string) => {
       setSelectedProviders((prev) => ({ ...prev, llm: newProvId }));
@@ -1456,7 +1484,12 @@ function JobModal({
     if (destination === "models") onPickModels();
     else goToView("providers");
   };
-  const openModels = () => openSetup("models");
+  const openModels = () => {
+    const open = () => openSetup("models");
+    void ensureEngine("localAi", open).then((ready) => {
+      if (ready) open();
+    });
+  };
   const openProviders = () => openSetup("providers");
   const needsAttention =
     choicesUnready ||

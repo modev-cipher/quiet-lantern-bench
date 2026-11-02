@@ -288,7 +288,7 @@
   "phase.voice.local": "{voice} — on this computer",
   "phase.voice.pick": "On this computer — pick a voice below",
   "cast.onDeviceLocal": "On this device (Local)",
-  "cast.missing.noVoice": "No narration voice is installed yet — install a voice model to cast this book.",
+  "cast.missing.noVoice": "No narration voice yet — install a voice model, or choose Cloud and connect a provider.",
   "cast.missing.voice": "{name} isn't installed yet — needed to speak this book.",
   "cast.missing.voiceFallback": "The selected voice",
   "cast.missing.teacher": "Teacher mode needs a language model, and none is installed yet.",

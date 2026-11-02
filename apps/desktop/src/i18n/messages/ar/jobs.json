@@ -340,7 +340,7 @@
   "phase.voice.local": "{voice} — على هذا الجهاز",
   "phase.voice.pick": "على هذا الجهاز — اختر صوتًا أدناه",
   "cast.onDeviceLocal": "على هذا الجهاز (محلي)",
-  "cast.missing.noVoice": "لم يُثبَّت صوت للسرد بعد — ثبّت Model صوت لتسجيل هذا الكتاب.",
+  "cast.missing.noVoice": "لا يوجد صوت للسرد بعد — ثبّت Model صوت، أو اختر «سحابي» ووصّل مزوّدًا.",
   "cast.missing.voice": "{name} غير مثبّت بعد — يلزم لقراءة هذا الكتاب بصوت مسموع.",
   "cast.missing.voiceFallback": "الصوت المختار",
   "cast.missing.teacher": "يحتاج وضع المعلّم إلى Model لغوي، ولم يُثبَّت أي منها بعد.",
