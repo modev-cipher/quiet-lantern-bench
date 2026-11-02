@@ -11,7 +11,7 @@ fail() { echo "FAIL $*" | tee -a "$OUT/result.txt"; shot "fail"; finish 1; }
 shot() { import -window root "$OUT/$1.png" 2>/dev/null; }
 pause() { python3 -I -c "import time;time.sleep($1)"; }
 c() { xdotool mousemove "$1" "$2" click 1; }
-seekbar() { echo $(( 411 + (925 - 411) * $1 / 100 )) 710; }
+seek() { c $(( 411 + (925 - 411) * $1 / 100 )) 710; }
 listen() {
   timeout "$1" parec -d probe.monitor --format=s16le --rate=24000 --channels=1 >"$OUT/rec.raw" 2>>"$OUT/parec.log"
   python3 -I -c "
@@ -107,13 +107,13 @@ pass "playback reaches the audio server (rms=$rms)"
 heard=0 tries=0
 for p in 20 65 35 80 10 55 25 70 45 15 60 30; do
   tries=$((tries + 1))
-  c $(seekbar $p); pause 1
+  seek $p; pause 1
   rms=$(listen 3)
   if [ "${rms:-0}" -gt 100 ]; then heard=$((heard + 1)); else echo "seek to $p% while playing: silent (rms=$rms)"; fi
 done
 for p in 40 75 20 60 5 50; do
   tries=$((tries + 1))
-  c 668 750; pause 2; c $(seekbar $p); pause 2; c 668 750; pause 1
+  c 668 750; pause 2; seek $p; pause 2; c 668 750; pause 1
   rms=$(listen 3)
   if [ "${rms:-0}" -gt 100 ]; then heard=$((heard + 1)); else echo "pause, seek to $p%, play: silent (rms=$rms)"; fi
 done
