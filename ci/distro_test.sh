@@ -22,8 +22,8 @@ elif [ "$kind" = rpm ]; then
 else
   case $fam in
     deb) for p in libasound2t64 libasound2; do apt-get install -y -q --no-install-recommends "$p" >/dev/null 2>&1 && break; done
-         apt-get install -y -q --no-install-recommends libegl1 libgles2 libfontconfig1 libfreetype6 libharfbuzz0b libfribidi0 libwayland-client0 libwayland-egl1 libwayland-cursor0 libx11-6 libxext6 libxrender1 libxi6 libxcursor1 libxrandr2 libxinerama1 libxcomposite1 libxdamage1 libxfixes3 libx11-xcb1 libxcb1 fuse3 >out/install.log 2>&1 || pkg_ok=0;;
-    rpm) dnf install -y --setopt=install_weak_deps=False alsa-lib mesa-libEGL mesa-libGLES fontconfig freetype harfbuzz fribidi libwayland-client libwayland-egl libwayland-cursor libX11 libXext libXrender libXi libXcursor libXrandr libXinerama libXcomposite libXdamage libXfixes fuse3 >out/install.log 2>&1 || pkg_ok=0;;
+         apt-get install -y -q --no-install-recommends libegl1 libgles2 libfontconfig1 libfreetype6 libharfbuzz0b libfribidi0 libwayland-client0 libwayland-egl1 libwayland-cursor0 libwayland-server0 libx11-6 libxext6 libxrender1 libxi6 libxcursor1 libxrandr2 libxinerama1 libxcomposite1 libxdamage1 libxfixes3 libx11-xcb1 libxcb1 fuse3 >out/install.log 2>&1 || pkg_ok=0;;
+    rpm) dnf install -y --setopt=install_weak_deps=False alsa-lib mesa-libEGL mesa-libGLES fontconfig freetype harfbuzz fribidi libwayland-client libwayland-egl libwayland-cursor libwayland-server libX11 libXext libXrender libXi libXcursor libXrandr libXinerama libXcomposite libXdamage libXfixes fuse3 >out/install.log 2>&1 || pkg_ok=0;;
     arch) pacman -S --noconfirm alsa-lib mesa fontconfig freetype2 harfbuzz fribidi wayland libx11 libxext libxrender libxi libxcursor libxrandr libxinerama libxcomposite libxdamage libxfixes fuse3 >out/install.log 2>&1 || pkg_ok=0;;
   esac
   cp pkg/*.AppImage /opt/txtcaster.AppImage; chmod 755 /opt/txtcaster.AppImage
@@ -53,9 +53,9 @@ chmod -R a+rX /w
 if [ "$kind" = appimage ]; then
   echo "--- FUSE: can a user run it directly?"
   su tester -c "timeout 20 /opt/txtcaster.AppImage --appimage-version" 2>&1 | head -3
-  su tester -c "timeout 12 /opt/txtcaster.AppImage --appimage-mount" 2>&1 | head -2 | cut -c1-200
   export APPIMAGE_EXTRACT_AND_RUN=1
 fi
+install -d -o tester -m 700 /tmp/xdg-tester
 su tester -s /bin/bash -c "cd /w && APPIMAGE_EXTRACT_AND_RUN=${APPIMAGE_EXTRACT_AND_RUN:-} XDG_RUNTIME_DIR=/tmp/xdg-tester dbus-run-session -- bash ci/distro_flow.sh $APP /w/book.pdf /w/out"
 rc=$?
 echo "=== $PRETTY_NAME $kind exit $rc"

@@ -5,7 +5,6 @@ APP=$1 BOOK=$2 OUT=$3
 A=$HOME/.local/share/txtcaster
 export DISPLAY=:9 GDK_BACKEND=x11 GTK_USE_PORTAL=0 RUST_LOG=info
 unset WAYLAND_DISPLAY
-mkdir -p -m 700 "$XDG_RUNTIME_DIR"
 : > "$OUT/result.txt"
 pass() { echo "PASS $*" | tee -a "$OUT/result.txt"; }
 fail() { echo "FAIL $*" | tee -a "$OUT/result.txt"; shot "fail"; finish 1; }
@@ -13,16 +12,16 @@ shot() { import -window root "$OUT/$1.png" 2>/dev/null; }
 pause() { python3 -I -c "import time;time.sleep($1)"; }
 c() { xdotool mousemove "$1" "$2" click 1; }
 db() { sqlite3 "$A/db.sqlite" "$1" 2>/dev/null; }
-alive() { kill -0 "$PID" 2>/dev/null; }
+alive() { pgrep -x txtcaster >/dev/null; }
 finish() {
-  kill "$PID" 2>/dev/null
+  pkill -x txtcaster
   sleep 2
   tail -n 40 "$OUT/app.log" | cut -c1-220 > "$OUT/app-tail.txt"
   exit "$1"
 }
 start() {
   "$APP" >>"$OUT/app.log" 2>&1 &
-  PID=$!
+  sleep 5
   for _ in $(seq 60); do
     xdotool search --onlyvisible --name '^txtCaster$' >/dev/null 2>&1 && return 0
     alive || return 1
@@ -42,7 +41,7 @@ sleep 3
 pactl load-module module-null-sink sink_name=probe >/dev/null && pactl set-default-sink probe
 pactl info | grep -E 'Server Name|Default Sink' | cut -c1-80
 
-start || { cat "$OUT/app.log" | tail -n 20 | cut -c1-200; PID=0; fail "first launch shows a window"; }
+start || { tail -n 20 "$OUT/app.log" | cut -c1-200; fail "first launch shows a window"; }
 pass "first launch shows a window"
 sleep 12
 shot 01-wizard
@@ -51,12 +50,12 @@ colors=$(magick "$OUT/01-wizard.png" -format %k info:)
 pass "wizard renders ($colors colors)"
 c 1067 713; pause 3; shot 02-wizard-voice
 alive || fail "wizard step 2 keeps the app alive"
-kill "$PID"; for _ in $(seq 15); do alive || break; sleep 1; done
+pkill -x txtcaster; for _ in $(seq 15); do alive || break; sleep 1; done
 alive && fail "app exits on request"
 pass "app exits on request"
 grep -q . "$A/db.sqlite" 2>/dev/null || fail "database created"
 now=$(date +%s)000
-db "insert or replace into model_install(model_id,path,sha256,disk_bytes,source,installed_at) values('kokoro-82m','tts/kokoro-82m/','96b0ef0b25c6c42a6be424d082c4b3ddfbf7701ac43d5de7e9b6d2c77662e8ec',348674924,'curated',$now); insert or replace into app_setting(key,value,updated_at) values('onboarding_complete','true',$now),('default_model.tts','kokoro-82m',$now);"
+sqlite3 "$A/db.sqlite" "insert or replace into model_install(model_id,path,sha256,disk_bytes,source,installed_at) values('kokoro-82m','tts/kokoro-82m/','96b0ef0b25c6c42a6be424d082c4b3ddfbf7701ac43d5de7e9b6d2c77662e8ec',348674924,'curated',$now); insert or replace into app_setting(key,value,updated_at) values('onboarding_complete','true',$now),('default_model.tts','kokoro-82m',$now);" || fail "seed the profile"
 start || fail "second launch shows a window"
 sleep 10
 shot 03-library

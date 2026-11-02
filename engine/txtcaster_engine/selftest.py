@@ -69,6 +69,21 @@ def check_language_pipeline(out: IO[str]) -> int:
     return 0
 
 
+def check_pronunciation_fallback(out: IO[str]) -> int:
+    from txtcaster_engine.tts.g2p.unknown_words import BartFallback
+
+    failures = 0
+    for british in (False, True):
+        try:
+            BartFallback(british=british)
+        except Exception as exc:
+            failures += 1
+            print(f"pronunciation fallback FAIL: {type(exc).__name__}: {exc}", file=out)
+    if not failures:
+        print("pronunciation fallback ok", file=out)
+    return failures
+
+
 def check_imports(out: IO[str]) -> int:
     from txtcaster_engine.tts.g2p import english
 
@@ -88,5 +103,6 @@ def check_imports(out: IO[str]) -> int:
         print(f"import ok {module_name}", file=out)
     failures += check_watermarker(out)
     failures += check_language_pipeline(out)
+    failures += check_pronunciation_fallback(out)
     print(f"IMPORT CHECK {'FAIL' if failures else 'PASS'}", file=out)
     return 1 if failures else 0

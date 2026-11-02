@@ -1,11 +1,11 @@
 # Drives the installed app the way a person does: real mouse and keyboard on names read through UI Automation.
-import os, re, sqlite3, sys, time
+import glob, json, os, re, sqlite3, sys, time
 from PIL import ImageGrab
 from pywinauto import Desktop, keyboard
 
 OUT, BOOK = sys.argv[1:3]
 PHASE = sys.argv[3] if len(sys.argv) > 3 else "full"
-DATA = os.path.join(os.environ["LOCALAPPDATA"], "io.github.meedoomostafa.txtcaster")
+DATA = os.path.join(os.environ["APPDATA"], "txtcaster")
 DB = os.path.join(DATA, "db.sqlite")
 os.makedirs(OUT, exist_ok=True)
 step_no = 0
@@ -144,7 +144,22 @@ dump("reader-installing")
 until("book imported", lambda: scalar("select count(*) from book") == 1, 600)
 time.sleep(4)
 dump("imported")
-click("^book")
+
+def open_book():
+    click("^Library$|^Books$", 20)
+    time.sleep(2)
+    e = find("^book$", None, 30)[0]
+    log("open book")
+    e.click_input()
+    time.sleep(4)
+
+
+def variant():
+    with open(os.path.join(DATA, "engine", "install.json"), encoding="utf-8") as f:
+        return json.load(f)["variant"]
+
+
+click("^book$", types=("Button", "Hyperlink", "ListItem", "Group", "Text", "Image"))
 time.sleep(4)
 dump("reader")
 click("^Cast this book$")
@@ -154,9 +169,48 @@ dump("cast-sound-reader-engine")
 click("^Local$")
 dump("cast-local-on-reader")
 click("^Get this model$")
+time.sleep(3)
 dump("full-sheet")
 find("Full engine", None, 60)
 click_near("^Install$", "Full engine")
 dump("full-installing")
-time.sleep(240)
+until("cpu engine", lambda: variant() == "cpu", 1200)
+time.sleep(8)
 dump("after-full-install")
+click_near("^(Download|Get|Install)", r"Pro\+", 60)
+dump("kokoro-downloading")
+until("kokoro installed", lambda: scalar("select count(*) from model_install where model_id='kokoro-82m'") == 1, 1200)
+dump("kokoro-installed")
+open_book()
+dump("reader-2")
+click("^Cast this book$")
+click("^Next: Sound")
+dump("cast-sound-cpu")
+click("^Local$")
+time.sleep(2)
+dump("cast-sound-local")
+click("^Cast now$")
+time.sleep(5)
+dump("cast-started")
+
+
+def job_state():
+    state = scalar("select state from render_job order by rowid desc limit 1")
+    log("job", state)
+    return state if state in ("DONE", "FAILED", "CANCELLED") else None
+
+
+state = until("job end", job_state, 3600, 20)
+dump("job-end")
+if state != "DONE":
+    raise SystemExit("cast ended " + state)
+mp3s = glob.glob(os.path.join(DATA, "exports", "**", "*.mp3"), recursive=True)
+log("outputs", mp3s)
+with open(os.path.join(OUT, "outputs.json"), "w", encoding="utf-8") as f:
+    json.dump(mp3s, f)
+open_book()
+time.sleep(6)
+dump("playing-no-audio-device")
+if not main_window().exists(timeout=2):
+    raise SystemExit("app closed during playback without an audio device")
+log("full journey done")

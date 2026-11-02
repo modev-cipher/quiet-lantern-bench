@@ -110,8 +110,8 @@ jobs:
           Remove-Item "$($db.FullName)-wal","$($db.FullName)-shm" -ErrorAction SilentlyContinue
           Set-Content $db.FullName 'this is not a database'
           Start-Process "$env:LOCALAPPDATA\txtCaster\txtCaster.exe"
-          node ci/drive.mjs "$PWD/shots" x failure 2>&1 | Tee-Object failure.log
-          if (-not (Select-String -Path failure.log -Pattern 'databaseDamaged')) { throw "no startup failure reported" }
+          python ci/win_drive.py "$PWD/shots" x failure "couldn.t open|damaged|startup" 2>&1 | Tee-Object failure.log
+          if (-not (Select-String -Path failure.log -Pattern 'startup failure screen shown')) { throw "no startup failure screen" }
           Get-Process txtCaster | Stop-Process -Force
       - name: Uninstall
         shell: pwsh
