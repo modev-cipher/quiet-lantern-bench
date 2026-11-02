@@ -12,6 +12,13 @@ shot() { import -window root "$OUT/$1.png" 2>/dev/null; }
 pause() { python3 -I -c "import time;time.sleep($1)"; }
 c() { xdotool mousemove "$1" "$2" click 1; }
 seek() { c $(( 411 + (925 - 411) * $1 / 100 )) 710; }
+at() {
+  import -window root "$OUT/at.png" 2>/dev/null
+  magick "$OUT/at.png" -crop 514x1+411+710 -depth 8 txt:- | python3 -I -c "
+import sys,re
+fill=[int(m[1]) for m in (re.match(r'(\d+),0: \((\d+),(\d+),(\d+)',l) for l in sys.stdin) if m and int(m[4])-int(m[2])>60]
+print(round(100*(max(fill)+1)/514) if fill else -1)"
+}
 listen() {
   timeout "$1" parec -d probe.monitor --format=s16le --rate=24000 --channels=1 >"$OUT/rec.raw" 2>>"$OUT/parec.log"
   python3 -I -c "
@@ -104,22 +111,20 @@ shot 13-playing
 [ "${rms:-0}" -gt 100 ] || { pactl list short sink-inputs | cut -c1-80; fail "playback reaches the audio server (rms=$rms)"; }
 pass "playback reaches the audio server (rms=$rms)"
 # libpulse 15.99 to 16.1 can leave the player silent after a seek: seek while playing, then pause, seek and play.
-heard=0 tries=0
-for p in 20 65 35 80 10 55 25 70 45 15 60 30; do
+heard=0 landed=0 tries=0
+check() {
   tries=$((tries + 1))
-  seek $p; pause 1
-  rms=$(listen 3)
-  if [ "${rms:-0}" -gt 100 ]; then heard=$((heard + 1)); else echo "seek to $p% while playing: silent (rms=$rms)"; fi
-done
-for p in 40 75 20 60 5 50; do
-  tries=$((tries + 1))
-  c 668 750; pause 2; seek $p; pause 2; c 668 750; pause 1
-  rms=$(listen 3)
-  if [ "${rms:-0}" -gt 100 ]; then heard=$((heard + 1)); else echo "pause, seek to $p%, play: silent (rms=$rms)"; fi
-done
+  pos=$(at); rms=$(listen 3)
+  [ "$pos" -ge $(($1 - 3)) ] && [ "$pos" -le $(($1 + 8)) ] && landed=$((landed + 1))
+  [ "${rms:-0}" -gt 100 ] && heard=$((heard + 1))
+  echo "$2 $1%: at $pos%, rms $rms" >>"$OUT/seeks.txt"
+}
+for p in 20 65 35 80 10 55 25 70 45 15 60 30; do seek $p; pause 1; check $p "seek while playing to"; done
+for p in 40 75 20 60 5 50; do c 668 750; pause 2; seek $p; pause 2; c 668 750; pause 1; check $p "pause, seek, play at"; done
 shot 13b-after-seeks
 common=$(for p in $(pgrep -x WebKitWebProces); do grep -o '/[^ ]*libpulsecommon-[0-9.]*\.so' "/proc/$p/maps"; done | sort -u | head -n 1)
-[ "$heard" = "$tries" ] || fail "playback resumes after every seek ($heard/$tries, ${common:-no libpulse})"
+[ "$landed" = "$tries" ] || fail "every seek lands where clicked ($landed/$tries, see seeks.txt)"
+[ "$heard" = "$tries" ] || fail "playback resumes after every seek ($heard/$tries, ${common:-no libpulse}, see seeks.txt)"
 pass "playback resumes after every seek ($tries)"
 version=${common##*libpulsecommon-}; version=${version%.so}
 [ -n "$common" ] && [ "$(printf '%s\n' 17.0 "$version" | sort -V | head -n 1)" = 17.0 ] \
