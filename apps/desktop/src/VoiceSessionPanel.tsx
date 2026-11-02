@@ -79,6 +79,7 @@ import {
   SendIcon,
   StopIcon,
 } from "./Icons";
+import { storeTextForReader } from "./i18n/storeText";
 
 /** The activity line shows its clock only once a wait is noticeable. */
 /** A voice reply counts as still arriving this long after its last delta. */
@@ -204,7 +205,10 @@ export default function VoiceSessionPanel({
   const scoped = matchesVoiceScope(bookId, jobId);
   const session = scoped ? snapshot.session : INITIAL_VOICE_SESSION;
   const starting = scoped ? snapshot.starting : false;
-  const startError = scoped ? snapshot.startError : null;
+  const startError =
+    scoped && snapshot.startError != null
+      ? storeTextForReader(snapshot.startError)
+      : null;
   const elsewhere = sessionIsActive(snapshot) && !scoped;
   const [keyRevision, setKeyRevision] = useState(0);
   const [keyPresence, setKeyPresence] = useState<KeyPresence>("unknown");

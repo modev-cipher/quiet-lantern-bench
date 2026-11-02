@@ -163,5 +163,9 @@
   "startup.body.unknown": "جرّب تفتحه تاني. لو المشكلة استمرت، بلّغ عنها بالتفاصيل اللي تحت.",
   "startup.details": "التفاصيل",
   "startup.openFolder": "فتح مجلد البيانات",
-  "startup.quit": "إغلاق txtCaster"
+  "startup.quit": "إغلاق txtCaster",
+  "error.unexplained": "حدث خطأ. يُرجى المحاولة مرة أخرى.",
+  "error.jobActive": "توجد مهمة صوتية في الانتظار أو قيد التشغيل أو متوقفة مؤقتًا لهذا الكتاب. ألغها أولًا.",
+  "error.extractionActive": "يُعاد استخراج نص هذا الكتاب الآن. أوقف ذلك أولًا.",
+  "error.noBook": "لم يعد هذا الكتاب في مكتبتك."
 }

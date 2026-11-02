@@ -1165,6 +1165,12 @@ async fn delete_book(
             );
         }
     }
+    let books_root = data_dir.join("books");
+    let removed_id = book_id.clone();
+    let _ = tokio::task::spawn_blocking(move || {
+        storage::book_files::remove_deleted_book_files(&books_root, &removed_id)
+    })
+    .await;
     storage::export::purge_orphaned_paths(&pool, dirs.exports_dir(), export_paths)
         .await
         .map_err(|e| e.to_string())?;
@@ -1177,12 +1183,6 @@ async fn delete_book(
     .await
     .map_err(|e| e.to_string())?;
     providers::cast_plan::delete_book_consents(&pool, &book_id).await?;
-    let book_dir = data_dir.join("books").join(&book_id);
-    if book_dir.exists() {
-        tokio::fs::remove_dir_all(&book_dir)
-            .await
-            .map_err(|e| e.to_string())?;
-    }
     Ok(())
 }
 
@@ -5551,6 +5551,10 @@ fn setup_app(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
                 Err(error) => tracing::warn!("reading fixture seed failed: {error}"),
             }
         });
+    }
+    let finished = storage::book_files::finish_interrupted_removals(&data_dir.join("books"));
+    if finished > 0 {
+        tracing::info!("finished removing the files of {finished} deleted book(s)");
     }
     match voice_sample::sweep_staging(&data_dir) {
         0 => {}

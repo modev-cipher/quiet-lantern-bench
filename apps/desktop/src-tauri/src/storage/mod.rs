@@ -1,4 +1,5 @@
 pub mod book;
+pub mod book_files;
 pub mod cache;
 pub mod chapter_render;
 pub mod export;

@@ -21,6 +21,7 @@ import type { BookSummary } from "./libraryModel";
 import { providerDisplayName } from "./i18n/providerNames";
 import { goToView } from "./views";
 import { useDialogFocus } from "./useDialogFocus";
+import { commandErrorText } from "./commandError";
 
 export interface StudioJobs {
   jobs: JobSummary[] | null;
@@ -303,7 +304,7 @@ function ActivityTray({
                           (raw) =>
                             setCancelError({
                               jobId: job.id,
-                              message: String(raw),
+                              message: commandErrorText(raw),
                             }),
                         );
                       }}

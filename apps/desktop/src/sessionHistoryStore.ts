@@ -4,6 +4,7 @@ import { F11_STRINGS } from "./f11Strings";
 import { t } from "./i18n";
 import { numberLocale } from "./i18n/localeModel";
 import { getSnapshot } from "./i18n/localeStore";
+import { commandErrorText } from "./commandError";
 
 export interface SessionPosition {
   kind: "ms" | "offset" | "none" | string;
@@ -293,7 +294,7 @@ export function loadHistory(scope: HistoryScope): Promise<void> {
     .catch((error: unknown) => {
       if (scopeTokens.get(key) !== token) return;
       const stale = scopes.get(key) ?? INITIAL_HISTORY_SCOPE;
-      setScope(key, { ...stale, status: "error", error: String(error) });
+      setScope(key, { ...stale, status: "error", error: commandErrorText(error) });
     });
 }
 
@@ -325,7 +326,7 @@ export function loadDetail(sessionId: string): Promise<void> {
       details.set(sessionId, {
         status: "error",
         detail: null,
-        error: String(error),
+        error: commandErrorText(error),
       });
       emit();
     });

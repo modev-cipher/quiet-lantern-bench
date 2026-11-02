@@ -102,7 +102,6 @@ export function VoicePreviewButton({
       data-testid="voice-preview"
       data-state={state}
       aria-label={label}
-      title={label}
       disabled={disabled || state === "loading"}
       onClick={() => void play()}
       className="flex items-center gap-1.5 rounded-lg border border-ink-700 bg-ink-800 px-2.5 py-1.5 text-secondary font-medium text-ink-200 transition-colors hover:bg-ink-700 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"

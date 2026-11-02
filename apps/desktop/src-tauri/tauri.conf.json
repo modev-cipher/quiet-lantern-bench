@@ -21,7 +21,19 @@
       }
     ],
     "security": {
-      "csp": null,
+      "csp": {
+        "default-src": "'self'",
+        "script-src": "'self'",
+        "style-src": "'self' 'unsafe-inline'",
+        "img-src": "'self' asset: http://asset.localhost data: blob:",
+        "media-src": "'self' asset: http://asset.localhost http://127.0.0.1:* blob:",
+        "font-src": "'self' data:",
+        "connect-src": "'self' ipc: http://ipc.localhost asset: http://asset.localhost http://127.0.0.1:*",
+        "object-src": "'none'",
+        "frame-src": "'none'",
+        "base-uri": "'none'",
+        "form-action": "'none'"
+      },
       "assetProtocol": {
         "enable": true,
         "scope": [
@@ -29,6 +41,8 @@
           "$CACHE/txtcaster/**",
           "$DATA/io.github.meedoomostafa.txtcaster/**",
           "$CACHE/io.github.meedoomostafa.txtcaster/**",
+          "$LOCALDATA/txtcaster-data/**",
+          "$LOCALDATA/txtcaster-cache/**",
           "$APPDATA/**",
           "$APPCACHE/**"
         ]

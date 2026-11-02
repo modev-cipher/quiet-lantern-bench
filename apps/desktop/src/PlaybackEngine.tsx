@@ -10,6 +10,8 @@ import { forgetMediaUrl, getMediaUrl } from "./mediaUrl";
 import { reportPlaybackEvent } from "./readingClockDiagnostics";
 import { registerAudioElement } from "./playbackElement";
 import { applyPlayerVolume, streamStillSettling } from "./playbackVolumeModel";
+import { nextStall, NO_STALL, stalled } from "./playbackStallModel";
+import { t } from "./i18n";
 import {
   createSourceSwitcher,
   reconcileAction,
@@ -114,6 +116,20 @@ function PlaybackEngine() {
     audio.currentTime = seekTo;
     dispatch({ type: "seekConsumed" });
   }, [seekNonce, seekTo]);
+
+  useEffect(() => {
+    if (!playing || item == null) return;
+    let stall = NO_STALL;
+    const timer = window.setInterval(() => {
+      const audio = audioRef.current;
+      if (!audio || switcher.current?.installedKey() == null) return;
+      stall = nextStall(stall, audio.currentTime);
+      if (stalled(stall)) {
+        dispatch({ type: "engineError", message: t("player.noSoundOutput") });
+      }
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [playing, item]);
 
   useEffect(() => {
     const audio = audioRef.current;

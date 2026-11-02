@@ -29,6 +29,7 @@ import {
   type VoiceSample,
 } from "./cloneVoiceModel";
 import { useI18n } from "./i18n";
+import { commandErrorText } from "./commandError";
 
 interface RawSample {
   sampleId: string;
@@ -100,7 +101,7 @@ export default function CloneVoiceModal({
     invoke<AudioInput[]>("list_audio_inputs")
       .then((inputs) => setState((prev) => selectInput(prev, inputs)))
       .catch((err: unknown) =>
-        setState((prev) => inputsUnavailable(prev, String(err))),
+        setState((prev) => inputsUnavailable(prev, commandErrorText(err))),
       );
   }, [isOpen, cloningReady]);
 
@@ -133,7 +134,7 @@ export default function CloneVoiceModal({
       setRecording(true);
       setState((prev) => ({ ...prev, step: "capturing", busy: false }));
     } catch (err) {
-      setState((prev) => failed(prev, String(err)));
+      setState((prev) => failed(prev, commandErrorText(err)));
     }
   }, [state.selectedInput]);
 
@@ -145,7 +146,7 @@ export default function CloneVoiceModal({
       adopt(raw, "recording");
     } catch (err) {
       setRecording(false);
-      setState((prev) => failed(prev, String(err)));
+      setState((prev) => failed(prev, commandErrorText(err)));
     }
   }, [adopt]);
 
@@ -164,7 +165,7 @@ export default function CloneVoiceModal({
       });
       adopt(raw, "import");
     } catch (err) {
-      setState((prev) => failed(prev, String(err)));
+      setState((prev) => failed(prev, commandErrorText(err)));
     }
   }, [adopt]);
 
@@ -193,7 +194,7 @@ export default function CloneVoiceModal({
         openEngineSetup(need);
         return;
       }
-      setState((prev) => failed(prev, String(err)));
+      setState((prev) => failed(prev, commandErrorText(err)));
     }
   }, [state.sample, selectedEngine, targetLanguage]);
 
@@ -226,7 +227,7 @@ export default function CloneVoiceModal({
       onSaved(profile);
       onClose();
     } catch (err) {
-      setState((prev) => failed(prev, String(err)));
+      setState((prev) => failed(prev, commandErrorText(err)));
     }
   }, [state.sample, state.name, selectedEngine, onSaved, onClose]);
 

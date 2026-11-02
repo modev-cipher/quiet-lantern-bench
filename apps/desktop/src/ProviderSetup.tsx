@@ -9,6 +9,7 @@ import type {
   ProviderDefinition,
   Recommendations,
 } from "./providerSetupModel";
+import { commandErrorText } from "./commandError";
 
 const ERROR_KEYS: Record<string, MessageKey> = {
   PROVIDER_INVALID_KEY: "providers.error.key",
@@ -102,7 +103,7 @@ export function ProviderSetup({
       await action();
     } catch (raw) {
       if (mounted.current && request === generation.current)
-        setError(String(raw));
+        setError(commandErrorText(raw));
     } finally {
       if (mounted.current && request === generation.current) setBusy(false);
     }

@@ -88,6 +88,7 @@ import SendToPhoneModal from "./SendToPhoneModal";
 import ShelfContinue from "./ShelfContinue";
 import type { SetupChecklist } from "./setupChecklist";
 import { GlideGroup } from "./GlideThumb";
+import { commandErrorText } from "./commandError";
 
 type Segment = "books" | "audios";
 
@@ -891,7 +892,7 @@ function Library({
   const refresh = useCallback(() => {
     invoke<BookSummary[]>("list_books")
       .then(setBooks)
-      .catch((err) => setError(String(err)));
+      .catch((err) => setError(commandErrorText(err)));
   }, []);
 
   const refreshExports = useCallback(() => {
@@ -902,7 +903,7 @@ function Library({
         }
         setExports(rows);
       })
-      .catch((err) => setError(String(err)));
+      .catch((err) => setError(commandErrorText(err)));
   }, []);
 
   useEffect(() => {
@@ -1209,7 +1210,7 @@ function Library({
       invoke("delete_export", { exportId })
         .then(refreshExports)
         .catch((raw) =>
-          setError(t("library.audioDeleteFailed", { reason: String(raw) })),
+          setError(t("library.audioDeleteFailed", { reason: commandErrorText(raw) })),
         );
     },
     [refreshExports, t],
@@ -1224,7 +1225,7 @@ function Library({
         refreshExports();
       })
       .catch((raw) =>
-        setError(t("library.deleteAllFailed", { reason: String(raw) })),
+        setError(t("library.deleteAllFailed", { reason: commandErrorText(raw) })),
       );
   }, [refreshExports, t]);
 
@@ -1576,7 +1577,7 @@ function Library({
                     setError(t("library.stopNotYet"));
                   }
                 })
-                .catch((raw) => setError(String(raw)));
+                .catch((raw) => setError(commandErrorText(raw)));
             }}
             className="shrink-0 rounded-lg border border-ember-500/40 px-3.5 py-2 text-secondary font-semibold text-ember-200 transition-colors duration-200 hover:bg-ember-500/10"
           >

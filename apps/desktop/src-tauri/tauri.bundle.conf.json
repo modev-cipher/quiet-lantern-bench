@@ -9,6 +9,11 @@
     "resources": {
       "../../../NOTICE": "NOTICE"
     },
+    "windows": {
+      "nsis": {
+        "installerHooks": "windows-installer-hooks.nsh"
+      }
+    },
     "linux": {
       "appimage": {
         "bundleMediaFramework": true
@@ -18,7 +23,7 @@
           "gstreamer1.0-plugins-base",
           "gstreamer1.0-plugins-good",
           "gstreamer1.0-pulseaudio | gstreamer1.0-pipewire | gstreamer1.0-alsa",
-          "libasound2 | libasound2t64"
+          "libasound2t64 | libasound2"
         ]
       },
       "rpm": {

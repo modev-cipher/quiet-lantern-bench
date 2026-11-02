@@ -16,6 +16,7 @@
   "player.nowPlaying": "يُشغَّل الآن: {title|bdi}",
   "player.close": "إغلاق",
   "player.playbackFailed": "تعذّر التشغيل. حاول مجددًا.",
+  "player.noSoundOutput": "توقف التشغيل لأن مخرج الصوت لا يستجيب. تحقّق من مكبّرات الصوت أو إعدادات الصوت، ثم اضغط تشغيل.",
   "player.prevChapter": "الفصل السابق",
   "player.nextChapter": "الفصل التالي",
   "player.volume": "مستوى الصوت",

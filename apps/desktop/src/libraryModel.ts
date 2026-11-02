@@ -1,4 +1,5 @@
 import { t } from "./i18n";
+import { commandErrorText } from "./commandError";
 
 export interface BookSummary {
   format?: string;
@@ -45,7 +46,9 @@ function isPlaceholder(value: string, field: "title" | "author"): boolean {
 }
 
 export function bookDisplayTitle(book: BookSummary): string {
-  return isPlaceholder(book.title, "title") ? t("library.untitled") : book.title;
+  return isPlaceholder(book.title, "title")
+    ? t("library.untitled")
+    : book.title;
 }
 
 export function bookDisplayAuthor(book: BookSummary): string | null {
@@ -61,7 +64,9 @@ export function bookMeta(book: BookSummary): string {
   if (book.chapterCount > 0) {
     parts.push(
       t(
-        book.hasPseudoChapters ? "library.sectionCount" : "library.chapterCount",
+        book.hasPseudoChapters
+          ? "library.sectionCount"
+          : "library.chapterCount",
         { count: book.chapterCount },
       ),
     );
@@ -104,13 +109,9 @@ export function presentImportWarnings(warnings: string[]): string[] {
   const notices: string[] = [];
   for (const warning of warnings) {
     if (warning.startsWith("scanned_pdf_ocr")) {
-      notices.push(
-        t("library.notice.scannedOcr"),
-      );
+      notices.push(t("library.notice.scannedOcr"));
     } else if (warning.startsWith("multi_column_upgraded")) {
-      notices.push(
-        t("library.notice.multiColumn"),
-      );
+      notices.push(t("library.notice.multiColumn"));
     } else if (warning.startsWith("scanned_pages_unread")) {
       const scope = scopeLabel(warning);
       // The engine appends "; install the … model … to read them with OCR"
@@ -144,7 +145,7 @@ export function presentImportError(raw: string): string {
   if (raw.startsWith("ERR_OPEN")) {
     return t("library.importError.open");
   }
-  return t("library.importError.generic", { reason: raw });
+  return t("library.importError.generic", { reason: commandErrorText(raw) });
 }
 
 export function coverInitials(title: string): string {
@@ -222,10 +223,13 @@ export function layoutPrompt(
     eta: approximateDuration(plan.layoutSeconds),
     cpuEta: approximateDuration(plan.cpuSeconds ?? 0),
     consequence: t(
-      reason === "stale" ? "library.staleConsequence" : "library.layoutConsequence",
+      reason === "stale"
+        ? "library.staleConsequence"
+        : "library.layoutConsequence",
     ),
     heavy: !plan.recommendLayout,
-    offerBoth: plan.offerBoth ?? (!plan.onGpu && plan.layoutAvailable && !plan.reflowed),
+    offerBoth:
+      plan.offerBoth ?? (!plan.onGpu && plan.layoutAvailable && !plan.reflowed),
   };
 }
 
@@ -339,9 +343,7 @@ export function extractionOutcomeNotice(
     const mismatch = outcome.warnings.find((warning) =>
       warning.startsWith("layout_geometry_mismatch"),
     );
-    return mismatch
-      ? t("library.rereadOutcome.mismatch")
-      : null;
+    return mismatch ? t("library.rereadOutcome.mismatch") : null;
   }
   const degraded = outcome.warnings.find((warning) =>
     warning.startsWith("layout_"),

@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 
 import type { FullCatalog, InstalledModel } from "./modelCatalogModel";
 import { notifySetupChanged } from "./views";
+import { commandErrorText } from "./commandError";
 
 export type ModelAction =
   | { kind: "remove"; modelId: string }
@@ -36,7 +37,7 @@ function useModelRead<T>(command: string) {
         setState((current) => ({
           ...current,
           loading: false,
-          error: String(cause),
+          error: commandErrorText(cause),
         }));
     }
   }, [command]);
@@ -100,7 +101,7 @@ export function useModelManagement() {
           });
         if (action.kind !== "cancel") notifySetupChanged();
       } catch (cause) {
-        if (active.current) setActionError({ action, detail: String(cause) });
+        if (active.current) setActionError({ action, detail: commandErrorText(cause) });
       } finally {
         if (active.current) {
           await refreshInstalls();

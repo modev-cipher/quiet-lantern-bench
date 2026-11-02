@@ -115,6 +115,11 @@ impl StorageDirs {
 pub const LEGACY_IDENTIFIER: &str = "io.github.meedoomostafa.txtcaster";
 pub const CANONICAL_APP_NAME: &str = "txtcaster";
 
+/// Local AppData on Windows: engines and models must not sync with a roaming profile, and
+/// `%LOCALAPPDATA%\\txtCaster` is the install folder. The asset scope and installer hooks name these too.
+pub const WINDOWS_DATA_DIR_NAME: &str = "txtcaster-data";
+pub const WINDOWS_CACHE_DIR_NAME: &str = "txtcaster-cache";
+
 pub fn defaults(data_dir: &Path) -> StorageDirs {
     StorageDirs {
         models: ResolvedDir::default_at(data_dir.join(MODELS_DIR_NAME)),
@@ -737,6 +742,9 @@ pub fn ensure_private_dir(path: &std::path::Path) -> std::io::Result<()> {
 }
 
 pub fn resolve_app_data_dir(app: &tauri::AppHandle) -> Result<PathBuf, String> {
+    if cfg!(windows) {
+        return windows_local_dir(app, WINDOWS_DATA_DIR_NAME);
+    }
     let base = app
         .path()
         .data_dir()
@@ -748,7 +756,18 @@ pub fn resolve_app_data_dir(app: &tauri::AppHandle) -> Result<PathBuf, String> {
     ))
 }
 
+fn windows_local_dir(app: &tauri::AppHandle, name: &str) -> Result<PathBuf, String> {
+    let base = app
+        .path()
+        .local_data_dir()
+        .map_err(|e| format!("failed to determine local data directory: {e}"))?;
+    Ok(base.join(name))
+}
+
 pub fn resolve_app_cache_dir(app: &tauri::AppHandle) -> Result<PathBuf, String> {
+    if cfg!(windows) {
+        return windows_local_dir(app, WINDOWS_CACHE_DIR_NAME);
+    }
     let base = app
         .path()
         .cache_dir()
@@ -983,6 +1002,14 @@ mod tests {
 
     fn abs(segment: &str) -> PathBuf {
         std::env::temp_dir().join(segment)
+    }
+
+    #[test]
+    fn windows_roots_are_not_the_install_folder() {
+        for name in [WINDOWS_DATA_DIR_NAME, WINDOWS_CACHE_DIR_NAME] {
+            assert!(!name.eq_ignore_ascii_case("txtCaster"), "{name}");
+        }
+        assert_ne!(WINDOWS_DATA_DIR_NAME, WINDOWS_CACHE_DIR_NAME);
     }
 
     #[test]

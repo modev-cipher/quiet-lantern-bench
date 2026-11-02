@@ -16,6 +16,7 @@ import {
   werLabel,
   type SegmentSummary,
 } from "./verifyModel";
+import { commandErrorText } from "./commandError";
 
 function BandChip({
   label,
@@ -97,7 +98,7 @@ function ReviewPanel({
       .catch((err) => {
         if (request !== latestLoad.current) return;
         setLoadState("error");
-        setError({ key: "review.loadFailed", params: { reason: String(err) } });
+        setError({ key: "review.loadFailed", params: { reason: commandErrorText(err) } });
       });
   }, [job.id]);
 
@@ -120,7 +121,7 @@ function ReviewPanel({
         .catch((cause: unknown) =>
           setError({
             key: "review.rerecordFailed",
-            params: { reason: String(cause) },
+            params: { reason: commandErrorText(cause) },
           }),
         )
         .finally(() => {

@@ -39,6 +39,7 @@ import { useI18n } from "./i18n";
 import { modelDisplayName } from "./i18n/modelNames";
 import { GlideGroup } from "./GlideThumb";
 import { downloadErrorView } from "./downloadErrorView";
+import { commandErrorText } from "./commandError";
 
 type DownloadFinished =
   | { state: "installed"; modelId: string }
@@ -713,7 +714,7 @@ function ModelsPanel() {
         return next;
       });
       invoke("download_model", { modelId }).catch((error: unknown) => {
-        setErrors((current) => ({ ...current, [modelId]: String(error) }));
+        setErrors((current) => ({ ...current, [modelId]: commandErrorText(error) }));
       });
     },
     [management.ready, management.pending],

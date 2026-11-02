@@ -1,4 +1,5 @@
 import { t, type MessageKey } from "./i18n";
+import { storeTextForReader } from "./i18n/storeText";
 import type { Scope } from "./jobFormModel";
 import { reportAdvisoryNotice } from "./languageAdvisoryModel";
 
@@ -260,11 +261,7 @@ export function sanitizeAndRouteErrorMessage(raw: string): string {
     return t("job.provider.error");
   }
 
-  if (raw.includes("ERR_")) {
-    return raw.replace(/ERR_[A-Z0-9_]+:\s*/g, "").trim();
-  }
-
-  return raw;
+  return storeTextForReader(raw);
 }
 
 export function failureMessage(reportJson: string | null): string {

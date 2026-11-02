@@ -113,7 +113,10 @@
   "settings.cacheStorageHint": "Temporary audio segments and synthesis files.",
   "settings.purgeCache": "Purge cache",
   "settings.purgingCache": "Purging…",
-  "settings.activeLocksNote": "({count|ltr} jobs active)",
+  "settings.activeLocksNote": {
+    "one": "({count|ltr} job active)",
+    "other": "({count|ltr} jobs active)"
+  },
   "settings.installedModels": "Installed models",
   "settings.noModelsInstalled": "No models installed",
   "settings.deleteModel": "Delete",

@@ -113,7 +113,14 @@
   "settings.cacheStorageHint": "مقاطع الصوت المؤقتة وملفات التوليد التشغيلية.",
   "settings.purgeCache": "تفريغ الـ Cache",
   "settings.purgingCache": "جارٍ التفريغ…",
-  "settings.activeLocksNote": "({count|ltr} مهام نشطة)",
+  "settings.activeLocksNote": {
+    "zero": "(لا مهام نشطة)",
+    "one": "(مهمة واحدة نشطة)",
+    "two": "(مهمتان نشطتان)",
+    "few": "({count|ltr} مهام نشطة)",
+    "many": "({count|ltr} مهمة نشطة)",
+    "other": "({count|ltr} مهمة نشطة)"
+  },
   "settings.installedModels": "الـ Models المثبّتة",
   "settings.noModelsInstalled": "لا توجد Models مثبّتة",
   "settings.deleteModel": "حذف",

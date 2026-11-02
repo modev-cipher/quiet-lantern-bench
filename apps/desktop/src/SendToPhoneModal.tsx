@@ -36,6 +36,7 @@ import {
   type LanSendStartResult,
   type LanSendState,
 } from "./lanSendModel";
+import { commandErrorText } from "./commandError";
 
 export default function SendToPhoneModal({
   open: isOpen,
@@ -114,7 +115,7 @@ export default function SendToPhoneModal({
           : serving(prev, result, Date.now()),
       );
     } catch (err) {
-      setState((prev) => failed(prev, String(err)));
+      setState((prev) => failed(prev, commandErrorText(err)));
     }
   }, []);
 

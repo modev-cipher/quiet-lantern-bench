@@ -35,6 +35,7 @@ import {
   type ProviderConnectionView,
   type ProviderFamilyView,
 } from "./providersModel";
+import { commandErrorText } from "./commandError";
 
 // Settings → Providers (S-5, Hermes IA ruling): the top level is one calm
 // compact card per provider family — provider identification, capability
@@ -307,7 +308,7 @@ function PoolSection({
       setReceipt(providerText("providers.copy.43"));
       onMutated();
     } catch (raw) {
-      setReceipt(String(raw));
+      setReceipt(commandErrorText(raw));
     }
   };
 
@@ -333,7 +334,7 @@ function PoolSection({
       );
       onMutated();
     } catch (raw) {
-      setReceipt(String(raw));
+      setReceipt(commandErrorText(raw));
     }
   };
 
@@ -355,7 +356,7 @@ function PoolSection({
       }
       return action === "add" ? performAdd() : performBulk();
     } catch (raw) {
-      setReceipt(String(raw));
+      setReceipt(commandErrorText(raw));
     }
   };
 
@@ -418,7 +419,7 @@ function PoolSection({
                 void invoke("provider_pool_test", {
                   provider: family.custodyId ?? family.id,
                   baseUrl: pool.baseUrl,
-                }).catch((raw) => onError(String(raw)))
+                }).catch((raw) => onError(commandErrorText(raw)))
               }
               className="rounded-lg border border-ink-700 px-3 py-1.5 text-label font-medium text-ink-200 transition-colors hover:border-ink-600 disabled:opacity-60"
             >
@@ -434,7 +435,7 @@ function PoolSection({
                   void invoke("provider_pool_test_cancel", {
                     provider: family.custodyId ?? family.id,
                     baseUrl: pool.baseUrl,
-                  }).catch((raw) => onError(String(raw)))
+                  }).catch((raw) => onError(commandErrorText(raw)))
                 }
                 className="rounded-lg border border-ink-700 px-3 py-1.5 text-label font-medium text-ink-400 transition-colors hover:border-ink-600 hover:text-ink-200"
               >
@@ -467,7 +468,7 @@ function PoolSection({
                 .then(() =>
                   pending.action === "add" ? performAdd() : performBulk(),
                 )
-                .catch((raw) => onError(String(raw)));
+                .catch((raw) => onError(commandErrorText(raw)));
             }}
             className="font-semibold underline underline-offset-2"
           >
@@ -496,14 +497,14 @@ function PoolSection({
                   disabled: slot.health !== "disabled",
                 })
                   .then(onMutated)
-                  .catch((raw) => onError(String(raw)))
+                  .catch((raw) => onError(commandErrorText(raw)))
               }
               onRefresh={() =>
                 void invoke("refresh_voice_key", {
                   baseUrl: slot.account,
                 })
                   .then(onMutated)
-                  .catch((raw) => onError(String(raw)))
+                  .catch((raw) => onError(commandErrorText(raw)))
               }
               onRemove={() => setConfirmRemove(slot.account)}
             />
@@ -538,7 +539,7 @@ function PoolSection({
               setConfirmRemove(null);
               void invoke("remove_voice_key", { baseUrl: account })
                 .then(onMutated)
-                .catch((raw) => onError(String(raw)));
+                .catch((raw) => onError(commandErrorText(raw)));
             }}
             className="font-semibold underline underline-offset-2"
           >
@@ -686,7 +687,7 @@ function ConnectionRow({
       setError(null);
       onMutated();
     } catch (raw) {
-      setError(String(raw));
+      setError(commandErrorText(raw));
     }
   };
 
@@ -699,7 +700,7 @@ function ConnectionRow({
         }),
       );
     } catch (raw) {
-      setImpact({ kind: "blocked", reason: String(raw) });
+      setImpact({ kind: "blocked", reason: commandErrorText(raw) });
       return;
     }
     if (report == null) {
@@ -830,7 +831,7 @@ function ConnectionRow({
                     .catch((raw) =>
                       setError(
                         providerText("providers.deleteFailed", {
-                          reason: String(raw),
+                          reason: commandErrorText(raw),
                         }),
                       ),
                     )
@@ -974,7 +975,7 @@ function ModelsSection({
         }),
       );
     } catch (raw) {
-      setError(String(raw));
+      setError(commandErrorText(raw));
     } finally {
       setBusy(false);
     }
@@ -1131,7 +1132,7 @@ function CloudVoiceForm({
       setVoiceId("");
       setNotice(providerText("providers.copy.54"));
     } catch (raw) {
-      setNotice(String(raw));
+      setNotice(commandErrorText(raw));
     }
   };
 
@@ -1285,7 +1286,7 @@ function ConsentSection({
                   .catch((raw) =>
                     onError(
                       providerText("providers.revokeFailed", {
-                        reason: String(raw),
+                        reason: commandErrorText(raw),
                       }),
                     ),
                   )
@@ -1556,7 +1557,7 @@ function VaultRecovery({ onMutated }: { onMutated: () => void }) {
       setError(null);
       onMutated();
     } catch (raw) {
-      setError(String(raw));
+      setError(commandErrorText(raw));
     }
   };
   const sessionOnly = async () => {
@@ -1565,7 +1566,7 @@ function VaultRecovery({ onMutated }: { onMutated: () => void }) {
       setError(null);
       onMutated();
     } catch (raw) {
-      setError(String(raw));
+      setError(commandErrorText(raw));
     }
   };
 

@@ -13,7 +13,8 @@ use crate::updater::signing::PublicKey;
 pub const REQUIRED_ENGINE_API: u32 = 1;
 pub const ENGINE_DIR: &str = "engine";
 pub const MARKER_FILE: &str = "install.json";
-const SPACE_MARGIN: u64 = 512 * 1024 * 1024;
+const MIN_SPACE_MARGIN: u64 = 64 * 1024 * 1024;
+const MAX_SPACE_MARGIN: u64 = 512 * 1024 * 1024;
 const UNPACK_SLACK: u64 = 64 * 1024 * 1024;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -237,7 +238,8 @@ pub fn staged_bytes(dir: &Path) -> u64 {
 }
 
 pub fn space_needed(archive: &EngineArchive, already: u64) -> u64 {
-    archive.size.saturating_sub(already) + archive.unpacked_size + SPACE_MARGIN
+    let margin = (archive.unpacked_size / 4).clamp(MIN_SPACE_MARGIN, MAX_SPACE_MARGIN);
+    archive.size.saturating_sub(already) + archive.unpacked_size + margin
 }
 
 pub fn pick<'a>(
@@ -470,7 +472,7 @@ pub async fn install(
         Ok(()) => {
             layout.end_swap()?;
             let _ = remove_if_exists(&layout.previous());
-            let _ = remove_if_exists(&staging);
+            let _ = remove_if_exists(&layout.staging_root());
             Ok(installed)
         }
         Err(why) => {
@@ -621,6 +623,27 @@ mod tests {
         .await
     }
 
+    fn archive_sized(size: u64, unpacked_size: u64) -> EngineArchive {
+        EngineArchive {
+            size,
+            sha256: String::new(),
+            signature: String::new(),
+            unpacked_size,
+            parts: Vec::new(),
+        }
+    }
+
+    #[test]
+    fn the_space_margin_scales_with_the_package() {
+        const MIB: u64 = 1024 * 1024;
+        let reader = archive_sized(34 * MIB, 92 * MIB);
+        assert_eq!(space_needed(&reader, 0), (34 + 92 + 64) * MIB);
+        let cpu = archive_sized(519 * MIB, 1700 * MIB);
+        assert_eq!(space_needed(&cpu, 0), (519 + 1700 + 425) * MIB);
+        let graphics = archive_sized(2150 * MIB, 6000 * MIB);
+        assert_eq!(space_needed(&graphics, 0), (2150 + 6000 + 512) * MIB);
+    }
+
     #[tokio::test]
     async fn a_first_install_lands_in_the_engine_folder_with_its_marker() {
         let rel = release(REQUIRED_ENGINE_API, b"new engine").await;
@@ -640,14 +663,7 @@ mod tests {
         );
         assert!(!layout.previous().exists());
         assert!(!layout.fresh().exists());
-        assert!(!data
-            .path()
-            .join("engine.partial")
-            .join(format!(
-                "cpu-{}",
-                &rel.manifest.platforms["linux-x86_64"][CPU_VARIANT].sha256[..16]
-            ))
-            .exists());
+        assert!(!layout.staging_root().exists());
         assert_eq!(
             *host.log.lock().expect("log"),
             vec![

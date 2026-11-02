@@ -163,5 +163,9 @@
   "startup.body.unknown": "Try opening it again. If it keeps happening, report the details below.",
   "startup.details": "Details",
   "startup.openFolder": "Open data folder",
-  "startup.quit": "Close txtCaster"
+  "startup.quit": "Close txtCaster",
+  "error.unexplained": "Something went wrong. Please try again.",
+  "error.jobActive": "An audio job is queued, running or paused for this book. Cancel it first.",
+  "error.extractionActive": "This book's text is being re-extracted. Stop that first.",
+  "error.noBook": "This book is no longer in your library."
 }

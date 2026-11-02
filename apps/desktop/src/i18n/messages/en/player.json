@@ -16,6 +16,7 @@
   "player.nowPlaying": "Now playing: {title|bdi}",
   "player.close": "Close",
   "player.playbackFailed": "Playback failed. Try again.",
+  "player.noSoundOutput": "Playback stopped because no sound output is responding. Check your speakers or sound settings, then press play.",
   "player.prevChapter": "Previous chapter",
   "player.nextChapter": "Next chapter",
   "player.volume": "Volume",

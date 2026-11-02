@@ -76,6 +76,7 @@ import {
   type JobSummary,
   type StageNotices,
 } from "./jobModel";
+import { commandErrorText } from "./commandError";
 
 function StageRail({
   job,
@@ -180,7 +181,7 @@ export function RateLimitPauseCard({
     try {
       await onControl(command, job.id);
     } catch (raw) {
-      setControlError(String(raw));
+      setControlError(commandErrorText(raw));
     }
   };
 
@@ -376,7 +377,7 @@ export function JobRow({
     try {
       await onControl(command, job.id);
     } catch (raw) {
-      setControlError(String(raw));
+      setControlError(commandErrorText(raw));
     }
   };
   const showRail = !isTerminal(job.state) && job.state !== "QUEUED";
@@ -425,7 +426,7 @@ export function JobRow({
         openEngineSetup(need, () => void retryJob(switchToLocal));
         return;
       }
-      setRecoveryError(String(raw));
+      setRecoveryError(commandErrorText(raw));
     }
   };
   const staleNotice =
@@ -446,7 +447,7 @@ export function JobRow({
         if (active) setDeletePreview(preview);
       })
       .catch((raw) => {
-        if (active) setControlError(String(raw));
+        if (active) setControlError(commandErrorText(raw));
       });
     return () => {
       active = false;
@@ -1009,7 +1010,7 @@ function JobsPanel({ studio }: JobsPanelProps) {
     setLoadError(null);
     invoke<JobSummary[]>("list_jobs")
       .then(setJobs)
-      .catch((err) => setLoadError(String(err)));
+      .catch((err) => setLoadError(commandErrorText(err)));
     invoke<BookSummary[]>("list_books").then(setBooks).catch(console.error);
     invoke<ExportSummary[]>("list_exports")
       .then((rows) => {

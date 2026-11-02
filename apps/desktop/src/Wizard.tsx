@@ -47,6 +47,7 @@ import { setLocalePreference } from "./i18n";
 import { useI18n, type MessageKey } from "./i18n";
 import { modelDisplayName } from "./i18n/modelNames";
 import { requestImport } from "./views";
+import { commandErrorText } from "./commandError";
 
 type DownloadFinished =
   | { state: "installed"; modelId: string }
@@ -828,7 +829,7 @@ function Wizard({ onDone }: { onDone: () => void }) {
     for (const model of pending) {
       invoke("download_model", { modelId: model.id }).catch(
         (error: unknown) => {
-          setFailed((current) => ({ ...current, [model.id]: String(error) }));
+          setFailed((current) => ({ ...current, [model.id]: commandErrorText(error) }));
         },
       );
     }
@@ -849,7 +850,7 @@ function Wizard({ onDone }: { onDone: () => void }) {
       completed = true;
     } catch (error) {
       console.error(error);
-      setFinishError(String(error));
+      setFinishError(commandErrorText(error));
     } finally {
       finishingRef.current = false;
       setFinishing(false);

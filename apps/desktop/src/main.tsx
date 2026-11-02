@@ -8,9 +8,18 @@ import V2Concepts, { v2ConceptFromSearch } from "./V2Concepts";
 import V2R2, { v2r2FromSearch } from "./V2R2";
 import { initLocale } from "./i18n";
 import "./index.css";
+import { reportUiCrash } from "./uiCrashDiagnostics";
 
 // I18N-1: locale (host OS → persisted preference) and the root dir/lang.
 initLocale();
+
+document.addEventListener("securitypolicyviolation", (event) => {
+  void reportUiCrash(
+    new Error(
+      `CSP violation: ${event.effectiveDirective} ${event.blockedURI}`,
+    ),
+  );
+});
 
 // RIG-ONLY (never ship): F9 stutter drill, dev builds behind an env gate.
 if (import.meta.env.DEV && import.meta.env.VITE_STUTTER_DRILL === "1") {

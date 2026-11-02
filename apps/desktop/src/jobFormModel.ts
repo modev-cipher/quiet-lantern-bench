@@ -1,6 +1,7 @@
 import { t } from "./i18n";
 import { modelDisplayName } from "./i18n/modelNames";
 import type { DeviceInventory } from "./deviceModel";
+import { commandErrorText } from "./commandError";
 
 export interface ChapterSummary {
   id: string;
@@ -391,5 +392,5 @@ export function castStartErrorMessage(raw: string): string {
   if (raw.includes("ERR_FFMPEG_MISSING")) {
     return t("cast.ffmpegMissing");
   }
-  return t("cast.startFailed", { reason: raw });
+  return t("cast.startFailed", { reason: commandErrorText(raw) });
 }

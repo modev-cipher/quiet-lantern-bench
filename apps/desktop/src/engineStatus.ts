@@ -1,9 +1,15 @@
 import { t } from "./i18n";
+import { storeTextForReader } from "./i18n/storeText";
 
 export type EngineStatus =
   | { state: "notInstalled" }
   | { state: "needsUpdate"; installedApi: number | null; requiredApi: number }
-  | { state: "downloading"; bytesDone: number; bytesTotal: number; speedBps: number }
+  | {
+      state: "downloading";
+      bytesDone: number;
+      bytesTotal: number;
+      speedBps: number;
+    }
   | { state: "extracting"; filesDone: number; filesTotal: number }
   | { state: "starting" }
   | { state: "ready"; port: number }
@@ -32,21 +38,38 @@ export function presentStatus(status: EngineStatus | null): BadgePresentation {
         status.bytesTotal > 0
           ? Math.round((status.bytesDone / status.bytesTotal) * 100)
           : 0;
-      return { label: t("engine.status.downloading", { percent: pct }), dotClass: "bg-amber-500" };
+      return {
+        label: t("engine.status.downloading", { percent: pct }),
+        dotClass: "bg-amber-500",
+      };
     }
     case "extracting": {
       const pct =
         status.filesTotal > 0
           ? Math.round((status.filesDone / status.filesTotal) * 100)
           : 0;
-      return { label: t("engine.status.extracting", { percent: pct }), dotClass: "bg-amber-500" };
+      return {
+        label: t("engine.status.extracting", { percent: pct }),
+        dotClass: "bg-amber-500",
+      };
     }
     case "needsUpdate":
-      return { label: t("engine.status.needsUpdate"), dotClass: "bg-amber-500" };
+      return {
+        label: t("engine.status.needsUpdate"),
+        dotClass: "bg-amber-500",
+      };
     case "notInstalled":
-      return { label: t("engine.status.notInstalled"), dotClass: "bg-neutral-500" };
+      return {
+        label: t("engine.status.notInstalled"),
+        dotClass: "bg-neutral-500",
+      };
     case "failed":
-      return { label: t("engine.status.failed", { message: status.message }), dotClass: "bg-red-500" };
+      return {
+        label: t("engine.status.failed", {
+          message: storeTextForReader(status.message),
+        }),
+        dotClass: "bg-red-500",
+      };
     case "down":
       return { label: t("engine.status.down"), dotClass: "bg-red-500" };
     default:

@@ -85,6 +85,7 @@ import {
 } from "./storageSettingsModel";
 import { GlideGroup } from "./GlideThumb";
 import Switch from "./Switch";
+import { commandErrorText } from "./commandError";
 
 function SettingRow({
   label,
@@ -171,7 +172,7 @@ function CacheLimitRow({
       capBytes: capRequest(mode, gb),
     })
       .then(onSaved)
-      .catch((reason) => setError(String(reason)))
+      .catch((reason) => setError(commandErrorText(reason)))
       .finally(() => setSaving(false));
   }, [gbInput, mode, onSaved]);
 
@@ -846,10 +847,10 @@ function Settings({
 
   const loadSettings = useCallback(() => {
     setLoadError(null);
-    invoke<string>("app_version").then(setVersion).catch((err) => setLoadError(String(err)));
+    invoke<string>("app_version").then(setVersion).catch((err) => setLoadError(commandErrorText(err)));
     invoke<StorageSettings>("get_storage_settings")
       .then(setStorage)
-      .catch((err) => setLoadError(String(err)));
+      .catch((err) => setLoadError(commandErrorText(err)));
     invoke<StorageBreakdown>("get_storage_breakdown")
       .then(setBreakdown)
       .catch((err) => console.error("Failed to load storage breakdown", err));
@@ -1085,7 +1086,7 @@ function Settings({
                   <p className="text-secondary text-ink-500">
                     {formatBytes(breakdown.cache.diskBytes)}
                     {breakdown.cache.activeJobLocks > 0 && (
-                      <span> {t("settings.activeLocksNote", { count: String(breakdown.cache.activeJobLocks) })}</span>
+                      <span> {t("settings.activeLocksNote", { count: breakdown.cache.activeJobLocks })}</span>
                     )}
                   </p>
                 </div>
@@ -1376,7 +1377,7 @@ function UninstallConfirmModal({
     try {
       await invoke("danger_self_purge", { confirmation: confirmText.trim() });
     } catch (err) {
-      setPurgeError(String(err));
+      setPurgeError(commandErrorText(err));
       setIsPurging(false);
     }
   };
