@@ -24,7 +24,7 @@ jobs:
           sudo apt-get install -y -q ./pkg/deb/*.deb xvfb xdotool gdb >/dev/null 2>&1
           env | grep -E 'DBUS|XDG_RUNTIME' || true
           ls -la "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}" 2>&1 | head -8
-          ls /usr/bin/dbus-launch 2>&1
+          ls /usr/bin/dbus-launch 2>&1 || true
           RUST_LOG=info timeout 45 xvfb-run -a txtcaster > run.log 2>&1 &
           sleep 30
           A=$(pgrep -x txtcaster | head -1)
