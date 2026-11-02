@@ -1394,8 +1394,18 @@ async fn cancel_mid_script_settles_cancelled_even_when_unload_fails() {
         receiver,
         progress,
     );
+    let streamed = reported.clone();
     let canceller = tokio::spawn(async move {
-        tokio::time::sleep(std::time::Duration::from_millis(250)).await;
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(20);
+        while std::time::Instant::now() < deadline
+            && !streamed
+                .lock()
+                .unwrap()
+                .iter()
+                .any(|event| event.current_item == "chunk 1/10")
+        {
+            tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+        }
         handle.cancel();
     });
 
