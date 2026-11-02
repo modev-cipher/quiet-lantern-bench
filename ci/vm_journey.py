@@ -177,12 +177,14 @@ else:
     guest(f"mv /home/tester/{os.path.basename(PACKAGE)} /home/tester/txtCaster.AppImage; chmod +x /home/tester/txtCaster.AppImage; dpkg -l libfuse2t64 fuse3 2>/dev/null | tail -n 2 | cut -c1-60", 30)
 A = "/home/tester/.local/share/txtcaster"
 guest(f"mkdir -p {A}/engine {A}/models/tts", 20, quiet=True)
-unpack = subprocess.run(
-    "cat engine-pack/*.tar.zst.* | " + " ".join(f"'{w}'" for w in SSH) + f" 'tar --zstd -x -C {A}/engine --strip-components=$(cat engine-pack.strip 2>/dev/null || echo STRIP)'".replace("$(cat engine-pack.strip 2>/dev/null || echo STRIP)", open("engine-pack/.strip").read().strip()),
-    shell=True,
-)
+strip = open("engine-pack/.strip").read().strip()
+ssh_words = " ".join(f"'{w}'" for w in SSH)
+unpack = subprocess.run(f"cat engine-pack/*.tar.zst.* | {ssh_words} 'tar --zstd -x -C {A}/engine --strip-components={strip}'", shell=True)
 check(unpack.returncode == 0, "engine unpacked")
-guest(f"printf '{{\\"engineVersion\\":\\"0.1.0\\",\\"engineApi\\":1,\\"variant\\":\\"cpu\\",\\"platform\\":\\"linux-x86_64\\"}}' > {A}/engine/install.json; ls {A}/engine | head -4; cat {A}/engine/install.json", 30)
+with open("install.json", "w", encoding="utf-8") as f:
+    json.dump({"engineVersion": "0.1.0", "engineApi": 1, "variant": "cpu", "platform": "linux-x86_64"}, f)
+subprocess.run(SCP + ["install.json", f"tester@127.0.0.1:{A}/engine/install.json"], check=True)
+guest(f"ls {A}/engine | head -4", 30)
 subprocess.run(SCP + ["-r", "models", f"tester@127.0.0.1:{A}/models/tts/kokoro-82m"], check=True)
 
 # --- first launch
