@@ -24,7 +24,7 @@ def uninstaller():
     while time.time() < end:
         for w in Desktop(backend="uia").windows():
             if "Uninstall" in (w.window_text() or ""):
-                return w
+                return Desktop(backend="uia").window(handle=w.handle)
         time.sleep(1)
     shot("missing")
     raise SystemExit("uninstaller window not found")
