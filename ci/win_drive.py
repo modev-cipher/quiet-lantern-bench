@@ -5,7 +5,7 @@ from pywinauto import Desktop, keyboard
 
 OUT, BOOK = sys.argv[1:3]
 PHASE = sys.argv[3] if len(sys.argv) > 3 else "full"
-DATA = os.path.join(os.environ["APPDATA"], "txtcaster")
+DATA = os.path.join(os.environ["LOCALAPPDATA"], "txtcaster-data")
 DB = os.path.join(DATA, "db.sqlite")
 os.makedirs(OUT, exist_ok=True)
 step_no = 0

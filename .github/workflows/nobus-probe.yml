@@ -21,21 +21,20 @@ jobs:
       - name: Probe the runner host the way the release check does
         run: |
           sudo apt-get update -qq >/dev/null
-          sudo apt-get install -y -q ./pkg/deb/*.deb xvfb xdotool gdb >/dev/null 2>&1
+          sudo apt-get install -y -q ./pkg/deb/*.deb xvfb xdotool gdb dbus-x11 >/dev/null 2>&1 || true
           env | grep -E 'DBUS|XDG_RUNTIME' || true
-          ls -la "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}" 2>&1 | head -8
-          ls /usr/bin/dbus-launch 2>&1 || true
+          dpkg -l xdg-desktop-portal 2>/dev/null | tail -n 1 | cut -c1-60
+          busctl --user list --no-pager 2>&1 | head -8 | cut -c1-90
+          (timeout 50 dbus-monitor --session > mon.log 2>&1 &)
+          sleep 1
+          S=$(date +%s)
           RUST_LOG=info timeout 45 xvfb-run -a txtcaster > run.log 2>&1 &
-          sleep 30
-          A=$(pgrep -x txtcaster | head -1)
-          echo "pid ${A:-none}"
-          echo "--- log"; tail -n 8 run.log | cut -c1-180
-          if [ -n "$A" ]; then
-            sudo gdb -p "$A" -batch -ex 'thread apply all bt 16' 2>/dev/null | grep -E '^(Thread|#)' | grep -vE 'syscall_cancel|futex_wait' | cut -c1-110 | head -50
-          fi
+          for at in 8 18; do
+            while [ $(( $(date +%s) - S )) -lt $at ]; do sleep 1; done
+            A=$(pgrep -x txtcaster | head -1)
+            echo "=== main thread at ${at}s pid ${A:-none}"
+            [ -n "$A" ] && sudo gdb -p "$A" -batch -ex 'thread 1' -ex 'bt 30' 2>/dev/null | grep -E '^#' | cut -c1-120
+          done
           wait || true
-          echo "--- final log"; wc -l run.log; tail -n 4 run.log | cut -c1-160
-      - name: Same with a private bus
-        run: |
-          RUST_LOG=info dbus-run-session -- timeout 25 xvfb-run -a txtcaster > run2.log 2>&1 || true
-          wc -l run2.log; head -n 3 run2.log | cut -c1-140
+          echo "--- log"; grep -vE '^$' run.log | cut -c1-130 | head -8
+          echo "--- bus calls"; grep -E 'member=|error' mon.log | grep -vE 'NameOwnerChanged|NameAcquired|NameLost|interface=org.freedesktop.DBus; member=(Hello|AddMatch|RemoveMatch)' | cut -c1-170 | head -40

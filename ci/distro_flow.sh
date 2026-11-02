@@ -104,4 +104,16 @@ rm -f "$OUT/rec.raw"
 pass "playback reaches the audio server (rms=$rms)"
 alive || fail "app alive at the end"
 pass "app alive at the end"
+if grep -q 'CSP violation' "$OUT/app.log"; then
+  grep 'CSP violation' "$OUT/app.log" | cut -c1-200 | sort -u | head -8
+  fail "content-security violations"
+fi
+pass "no content-security violations"
+pkill -x txtcaster; for _ in $(seq 15); do alive || break; sleep 1; done
+pkill -x wireplumber; pkill -x pipewire-pulse; pkill -x pipewire; sleep 2
+start || fail "launch with no audio server"
+sleep 8
+c 360 438; pause 28; shot 14-no-sound
+alive || fail "no audio server keeps the app alive"
+pass "no audio server keeps the app alive"
 finish 0

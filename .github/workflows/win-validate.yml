@@ -61,7 +61,8 @@ jobs:
           New-Item -ItemType Directory -Force hostile\engine\txtcaster_engine | Out-Null
           Set-Content hostile\engine\pyproject.toml ''
           Set-Content hostile\engine\txtcaster_engine\__main__.py "open(r'$PWD\hostile\RAN','w')"
-          Start-Process "$env:LOCALAPPDATA\txtCaster\txtCaster.exe" -WorkingDirectory "$PWD\hostile"
+          $env:RUST_LOG = 'info'
+          Start-Process "$env:LOCALAPPDATA\txtCaster\txtCaster.exe" -WorkingDirectory "$PWD\hostile" -RedirectStandardError "$PWD\app-stderr.log" -RedirectStandardOutput "$PWD\app-stdout.log"
       - name: Diagnose launch
         shell: pwsh
         run: |
@@ -105,7 +106,12 @@ jobs:
           Get-Process txtCaster | Stop-Process -Force
           Get-Process txtcaster-engine -ErrorAction SilentlyContinue | Stop-Process -Force
           Start-Sleep 3
-          $db = Get-ChildItem "$env:LOCALAPPDATA","$env:APPDATA" -Recurse -Filter db.sqlite -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ((Get-Item app-stderr.log).Length -eq 0) { throw "the app log capture is empty" }
+          $csp = Select-String -Path app-stderr.log -Pattern 'CSP violation'
+          if ($csp) { $csp | Select-Object -First 8 | Out-String -Width 200; throw "content-security violations" }
+          "no content-security violations in $((Get-Item app-stderr.log).Length) bytes of log"
+          if (Test-Path "$env:APPDATA\txtcaster") { throw "data in the roaming profile" }
+          $db = Get-Item "$env:LOCALAPPDATA\txtcaster-data\db.sqlite"
           "db at $($db.FullName)"
           Remove-Item "$($db.FullName)-wal","$($db.FullName)-shm" -ErrorAction SilentlyContinue
           Set-Content $db.FullName 'this is not a database'
@@ -116,9 +122,14 @@ jobs:
       - name: Uninstall
         shell: pwsh
         run: |
+          New-Item -ItemType Directory -Force "$env:LOCALAPPDATA\txtcaster-cache\audio" | Out-Null
+          Set-Content "$env:LOCALAPPDATA\txtcaster-cache\audio\probe.bin" 'cached audio'
           Start-Process "$env:LOCALAPPDATA\txtCaster\uninstall.exe" -ArgumentList '/S' -Wait
           Start-Sleep 10
-          Get-ChildItem "$env:LOCALAPPDATA\txtCaster" -ErrorAction SilentlyContinue | Select-Object Name
+          if (Test-Path "$env:LOCALAPPDATA\txtCaster") { Get-ChildItem -Recurse "$env:LOCALAPPDATA\txtCaster" | Select-Object FullName | Out-String -Width 160; throw "install folder left behind" }
+          if (Test-Path "$env:LOCALAPPDATA\txtcaster-cache") { throw "cache left behind" }
+          if (-not (Test-Path "$env:LOCALAPPDATA\txtcaster-data\db.sqlite")) { throw "uninstall removed the user's data without being asked" }
+          "uninstall removed the app and cache and kept the data"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -128,3 +139,4 @@ jobs:
             shots/*
             drive.log
             failure.log
+            app-stderr.log
