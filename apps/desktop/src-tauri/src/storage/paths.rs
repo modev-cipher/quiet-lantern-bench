@@ -535,12 +535,44 @@ pub fn reconcile_database(canonical_dir: &Path, legacy_dir: &Path) -> std::io::R
 
 pub const WEBVIEW_PROFILE_DIR: &str = "EBWebView";
 
+// The webview keeps its profile in the identifier-named folder, which is also the legacy data
+// folder, and holds these open while the app runs.
+const WEBKIT_PROFILE_ENTRIES: [&str; 13] = [
+    "CacheStorage",
+    "WebKitCache",
+    "applications",
+    "databases",
+    "deviceidhashsalts",
+    "hsts-storage.sqlite",
+    "indexeddb",
+    "itp",
+    "localstorage",
+    "mediakeys",
+    "resourceLoadStatistics",
+    "serviceworkers",
+    "storage",
+];
+
+fn is_webview_profile_entry(name: &std::ffi::OsStr) -> bool {
+    name == WEBVIEW_PROFILE_DIR || WEBKIT_PROFILE_ENTRIES.iter().any(|entry| name == *entry)
+}
+
+fn holds_webview_profile(dir: &Path) -> bool {
+    std::fs::read_dir(dir)
+        .map(|entries| {
+            entries
+                .flatten()
+                .any(|entry| is_webview_profile_entry(&entry.file_name()))
+        })
+        .unwrap_or(false)
+}
+
 fn holds_only_webview_profile(dir: &Path) -> bool {
     std::fs::read_dir(dir)
         .map(|entries| {
             entries
                 .flatten()
-                .all(|entry| entry.file_name() == WEBVIEW_PROFILE_DIR)
+                .all(|entry| is_webview_profile_entry(&entry.file_name()))
         })
         .unwrap_or(false)
 }
@@ -553,7 +585,7 @@ pub fn resolve_and_migrate_dir(base: &Path, legacy_name: &str, canonical_name: &
         return canonical;
     }
 
-    let holds_webview_profile = legacy.join(WEBVIEW_PROFILE_DIR).exists();
+    let holds_webview_profile = holds_webview_profile(&legacy);
     if holds_webview_profile && !canonical.exists() {
         if let Err(err) = std::fs::create_dir_all(&canonical) {
             tracing::warn!(
@@ -608,7 +640,7 @@ pub fn resolve_and_migrate_dir(base: &Path, legacy_name: &str, canonical_name: &
         for entry in entries.flatten() {
             let file_name = entry.file_name();
             let name_str = file_name.to_string_lossy();
-            if name_str.starts_with("db.sqlite") || file_name == WEBVIEW_PROFILE_DIR {
+            if name_str.starts_with("db.sqlite") || is_webview_profile_entry(&file_name) {
                 continue;
             }
 
@@ -696,7 +728,7 @@ fn archive_leftovers_beside_profile(legacy: &Path, archive: &Path) {
     };
     for entry in entries.flatten() {
         let file_name = entry.file_name();
-        if file_name == WEBVIEW_PROFILE_DIR {
+        if is_webview_profile_entry(&file_name) {
             continue;
         }
         let mut target = archive.join(&file_name);
@@ -1189,6 +1221,73 @@ mod tests {
         assert_eq!(again, base.join("new_app"));
         assert!(legacy.join(WEBVIEW_PROFILE_DIR).is_dir());
         assert!(!base.join("legacy_app.migrated").exists());
+
+        std::fs::remove_dir_all(&base).ok();
+    }
+
+    #[test]
+    fn a_live_webkit_profile_is_left_alone_on_every_lookup() {
+        let base =
+            std::env::temp_dir().join(format!("txtcaster-mig-wk-{}", super::super::new_id()));
+        let legacy = base.join("legacy_app");
+        let canonical = base.join("new_app");
+        std::fs::create_dir_all(legacy.join("localstorage")).expect("profile");
+        std::fs::write(
+            legacy
+                .join("localstorage")
+                .join("tauri_localhost_0.localstorage"),
+            b"preferences",
+        )
+        .expect("local storage");
+        std::fs::write(legacy.join("hsts-storage.sqlite"), b"hsts").expect("hsts");
+
+        for _ in 0..3 {
+            assert_eq!(
+                resolve_and_migrate_dir(&base, "legacy_app", "new_app"),
+                canonical
+            );
+            std::fs::write(
+                legacy
+                    .join("localstorage")
+                    .join("tauri_localhost_0.localstorage-wal"),
+                b"written while running",
+            )
+            .expect("wal");
+        }
+
+        assert_eq!(
+            std::fs::read(
+                legacy
+                    .join("localstorage")
+                    .join("tauri_localhost_0.localstorage")
+            )
+            .expect("local storage stays"),
+            b"preferences"
+        );
+        assert!(legacy
+            .join("localstorage")
+            .join("tauri_localhost_0.localstorage-wal")
+            .is_file());
+        assert!(legacy.join("hsts-storage.sqlite").is_file());
+        assert!(!canonical.join("localstorage").exists());
+        assert!(!base.join("legacy_app.migrated").exists());
+
+        std::fs::remove_dir_all(&base).ok();
+    }
+
+    #[test]
+    fn app_data_moves_out_from_beside_a_webkit_profile() {
+        let base =
+            std::env::temp_dir().join(format!("txtcaster-mig-wk2-{}", super::super::new_id()));
+        let legacy = base.join("legacy_app");
+        std::fs::create_dir_all(legacy.join("localstorage")).expect("profile");
+        std::fs::create_dir_all(legacy.join("books")).expect("books");
+        std::fs::write(legacy.join("books").join("a.pdf"), b"book").expect("book");
+
+        let resolved = resolve_and_migrate_dir(&base, "legacy_app", "new_app");
+        assert!(resolved.join("books").join("a.pdf").is_file());
+        assert!(legacy.join("localstorage").is_dir());
+        assert!(!legacy.join("books").exists());
 
         std::fs::remove_dir_all(&base).ok();
     }

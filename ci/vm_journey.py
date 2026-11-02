@@ -197,7 +197,10 @@ pid = app_pid()
 guest(f"tr '\\0' '\\n' </proc/{pid}/environ | grep -E '^(WAYLAND_DISPLAY|XDG_SESSION_TYPE|GDK_BACKEND|APPDIR)='; cat /proc/{pid}/mountinfo | grep -c 'mount_txtCas'", 20)
 _, sockets = guest(f"python3 /tmp/guest_ui.py sockets {pid}", 30)
 counts = dict(line.split() for line in sockets.splitlines() if len(line.split()) == 2)
-check(counts.get("wayland-0", "0") != "0" and counts.get("X11-unix/X", "0") == "0", f"native Wayland client, not XWayland ({counts})")
+if KIND == "deb":
+    check(counts.get("wayland-0", "0") != "0" and counts.get("X11-unix/X", "0") == "0", f"native Wayland client, not XWayland ({counts})")
+else:
+    check(counts.get("X11-unix/X", "0") != "0", f"AppImage runs through XWayland as bundled ({counts})")
 guest("python3 /tmp/guest_ui.py dump | cut -c1-90 | head -30", 40)
 quit_app()
 now = int(time.time() * 1000)
@@ -253,6 +256,19 @@ guest("journalctl --user -u txtcaster-test --no-pager | grep -iE 'CSP violation|
 code, csp = guest("journalctl --user -u txtcaster-test --no-pager | grep -c 'CSP violation'", 20, quiet=True)
 check(csp.strip() == "0", f"no content-security violations ({csp.strip()})")
 quit_app()
+PROFILE = f"/home/tester/.local/share/io.github.meedoomostafa.txtcaster/localstorage/tauri_localhost_0.localstorage"
+READ_KEYS = f"sqlite3 '{PROFILE}' 'select key from ItemTable order by key'"
+kept = guest(READ_KEYS, 20, quiet=True)[1].split()
+check(len(kept) > 0, f"preferences are saved in the live profile ({len(kept)} keys)")
+for _ in range(2):
+    check(launch(), "relaunch")
+    time.sleep(8)
+    quit_app()
+    now_keys = guest(READ_KEYS, 20, quiet=True)[1].split()
+    missing = sorted(set(kept) - set(now_keys))
+    check(not missing, f"saved preferences survive a relaunch (missing {missing})")
+moves = guest("journalctl --user -u txtcaster-test --no-pager | grep -c 'granular merge'; ls -d /home/tester/.local/share/*.migrated 2>/dev/null | wc -l", 20, quiet=True)[1].split()
+check(moves[1:2] == ["0"], f"the webview profile was not archived ({moves})")
 guest("journalctl --user -u txtcaster-test --no-pager | cut -c1-240 | tail -n 200 > /tmp/app.log", 20, quiet=True)
 subprocess.run(SCP + ["tester@127.0.0.1:/tmp/app.log", os.path.join(OUT, "app.log")], check=False)
 note("JOURNEY PASS")
