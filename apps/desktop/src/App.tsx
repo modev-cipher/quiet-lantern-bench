@@ -47,6 +47,7 @@ import { initTheme } from "./themeStore";
 import { startVoicePlaybackBridge } from "./voicePlaybackBridge";
 import { useZoom } from "./useZoom";
 import { buildSetupChecklist, type SetupChecklist } from "./setupChecklist";
+import { LITE_VARIANT } from "./engineSetupModel";
 import {
   installedSet,
   type FullCatalog,
@@ -808,8 +809,9 @@ function App() {
       invoke<InstalledModel[]>("list_installed_models"),
       invoke<BookSummary[]>("list_books"),
       invoke<JobSummary[]>("list_jobs"),
+      invoke<string | null>("engine_active_variant").catch(() => null),
     ])
-      .then(([catalog, installs, books, jobs]) => {
+      .then(([catalog, installs, books, jobs, engineVariant]) => {
         if (requestId !== checklistRequestRef.current) return;
         setChecklist(
           buildSetupChecklist({
@@ -817,6 +819,7 @@ function App() {
             installed: installedSet(installs),
             bookCount: books.length,
             jobCount: jobs.length,
+            readerEngine: engineVariant === LITE_VARIANT,
           }),
         );
       })

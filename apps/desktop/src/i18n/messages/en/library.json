@@ -85,8 +85,8 @@
   "library.sendNone": "Finished casts can be sent to your phone — there are none yet",
   "library.loadingShelf": "Loading your shelf…",
   "library.booksReady": {
-    "one": "{count} book ready to cast",
-    "other": "{count} books ready to cast"
+    "one": "{count} book on your shelf",
+    "other": "{count} books on your shelf"
   },
   "library.importToBegin": "Import a book to begin",
   "library.finishedCasts": {

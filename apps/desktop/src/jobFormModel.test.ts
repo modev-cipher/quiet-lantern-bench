@@ -518,7 +518,7 @@ describe("voice-less form state", () => {
     });
     expect(result).toHaveLength(1);
     expect(result[0]!.modelId).toBe("");
-    expect(result[0]!.message).toContain("No narration voice is installed yet");
+    expect(result[0]!.message).toContain("No narration voice yet");
   });
 });
 

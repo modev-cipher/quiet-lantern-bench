@@ -29,10 +29,14 @@ export function buildSetupChecklist(params: {
   installed: Set<string>;
   bookCount: number;
   jobCount: number;
+  readerEngine?: boolean;
 }): SetupChecklist {
   const items: ChecklistItem[] = [];
 
-  for (const capability of setupStatus(params.models, params.installed)) {
+  const capabilities = params.readerEngine
+    ? []
+    : setupStatus(params.models, params.installed);
+  for (const capability of capabilities) {
     const meta = CAPABILITY_ITEMS[capability.task];
     if (!meta) continue;
     items.push({

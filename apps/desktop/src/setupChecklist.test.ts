@@ -92,4 +92,15 @@ describe("buildSetupChecklist", () => {
     expect(ids).toContain("voice");
     expect(ids).not.toContain("llm");
   });
+
+  it("asks a reader engine for no local models", () => {
+    const list = buildSetupChecklist({
+      models: catalog,
+      installed: new Set(),
+      bookCount: 0,
+      jobCount: 0,
+      readerEngine: true,
+    });
+    expect(list.items.map((item) => item.id)).toEqual(["import", "cast"]);
+  });
 });
