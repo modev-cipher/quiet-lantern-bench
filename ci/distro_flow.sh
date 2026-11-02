@@ -128,10 +128,26 @@ check() {
 for p in 20 65 35 80 10 55 25 70 45 15 60 30; do seek $p; pause 1; check $p "seek while playing to"; done
 for p in 40 75 20 60 5 50; do c 668 750; pause 2; seek $p; pause 2; c 668 750; pause 1; check $p "pause, seek, play at"; done
 shot 13b-after-seeks
+# Reopening a book lands paused at the saved place; play must start from there.
+reopened=0
+for i in 1 2 3; do
+  pkill -x txtcaster; for _ in $(seq 15); do alive || break; sleep 1; done
+  start || fail "relaunch $i shows a window"
+  sleep 8
+  c 360 438; pause 4
+  before=$(listen 2)
+  if [ "${before:-0}" -le 100 ]; then c 668 750; pause 1; fi
+  rms=$(listen 4)
+  [ "${before:-0}" -le 100 ] && [ "${rms:-0}" -gt 100 ] && reopened=$((reopened + 1))
+  echo "reopen $i, then play: before $before, rms $rms" >>"$OUT/seeks.txt"
+done
+shot 13c-reopened
 common=$(for p in $(pgrep -x WebKitWebProces); do grep -o '/[^ ]*libpulsecommon-[0-9.]*\.so' "/proc/$p/maps"; done | sort -u | head -n 1)
 [ "$landed" = "$tries" ] || fail "every seek lands where clicked ($landed/$tries, see seeks.txt)"
 [ "$heard" = "$tries" ] || fail "playback resumes after every seek ($heard/$tries, ${common:-no libpulse}, see seeks.txt)"
 pass "playback resumes after every seek ($tries)"
+[ "$reopened" = 3 ] || fail "a reopened book plays from its saved place ($reopened/3, ${common:-no libpulse}, see seeks.txt)"
+pass "a reopened book plays from its saved place (3)"
 version=${common##*libpulsecommon-}; version=${version%.so}
 [ -n "$common" ] && [ "$(printf '%s\n' 17.0 "$version" | sort -V | head -n 1)" = 17.0 ] \
   || fail "the player loads libpulse 17 or later (${common:-none})"
