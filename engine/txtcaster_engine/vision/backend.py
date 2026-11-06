@@ -5,9 +5,10 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from txtcaster_engine.llm import ggml_runtime
 from txtcaster_engine.llm.backend import LLMBackendError, ResourcePlan, resolve_threads
 from txtcaster_engine.llm.loader import build_llama
-from txtcaster_engine.oom import is_oom
+from txtcaster_engine.oom import is_oom, load_failure_code
 
 # Provenance (AGENTS.md §5 third-party integration rule):
 # llama-cpp-python 0.3.33, verified against upstream main on 2026-07-27
@@ -83,6 +84,7 @@ class LlamaVisionBackend(VisionBackend):
             from llama_cpp import Llama
         except ImportError as exc:
             raise LLMBackendError("ERR_VISION_MODEL", "llama-cpp-python is not installed") from exc
+        ggml_runtime.load()
 
         self.plan = plan
         use_gpu = plan.device.is_gpu
@@ -106,7 +108,7 @@ class LlamaVisionBackend(VisionBackend):
             )
         except Exception as exc:
             self.unload()
-            code = "ERR_OOM" if is_oom(exc) else "ERR_VISION_LOAD"
+            code = load_failure_code(exc, use_gpu, "ERR_VISION_LOAD")
             raise LLMBackendError(code, str(exc)) from exc
 
     def describe(

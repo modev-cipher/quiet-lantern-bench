@@ -97,6 +97,7 @@
   "wizard.gpuMemory": "{gb} GB {label}",
   "wizard.memoryUnreadable": "{label} not reportable on this driver",
   "wizard.moreDevices": "(+{n} more)",
+  "wizard.gpuDriverHint": "Local AI can't use {name} yet. Install or update its graphics driver with Vulkan support; until then local AI runs on the CPU.",
   "wizard.ramCpuLine": "{gb} GB · CPU {cores} cores",
   "wizard.diskLine": "{gb} GB free for models",
   "wizard.skipTts": "Skip for now (download later from Settings → Models)",

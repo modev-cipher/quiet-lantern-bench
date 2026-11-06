@@ -385,6 +385,7 @@ pub async fn delete_book_unless_busy(
     now: i64,
 ) -> Result<Result<(), DeleteRefusal>, sqlx::Error> {
     let stale_before = now - LEASE_STALE_MS;
+    let mut tx = pool.begin().await?;
     let deleted = sqlx::query(
         "DELETE FROM book WHERE id = ?
            AND (extracting_since IS NULL OR extracting_since < ?)
@@ -396,11 +397,21 @@ pub async fn delete_book_unless_busy(
     )
     .bind(id)
     .bind(stale_before)
-    .execute(pool)
+    .execute(&mut *tx)
     .await?;
     if deleted.rows_affected() == 1 {
+        sqlx::query(
+            "INSERT INTO app_setting (key, value, updated_at) VALUES (?, '', ?)
+             ON CONFLICT(key) DO NOTHING",
+        )
+        .bind(super::book_files::pending_removal_key(id))
+        .bind(now)
+        .execute(&mut *tx)
+        .await?;
+        tx.commit().await?;
         return Ok(Ok(()));
     }
+    tx.rollback().await?;
 
     let existing: Option<Option<i64>> =
         sqlx::query_scalar("SELECT extracting_since FROM book WHERE id = ?")

@@ -77,6 +77,10 @@ desktop distributions: `libasound`, `libEGL`, `libGLESv2`, `libfontconfig`, `lib
 `libfribidi`, `libwayland` and the X11 client libraries.
 Its WebKit crashes on COLRv1 color fonts, so the AppImage draws emoji as plain glyphs; the deb and rpm use the
 system WebKit and keep color emoji.
+All three carry the PulseAudio 17.0 client library, because releases 15.99 to 16.1 can stall playback after a
+seek. The AppImage always uses it; the deb and rpm use it only where the system library is one of those
+releases (Ubuntu 22.04, Ubuntu 24.04 and Debian 12 among the tested images), by restarting themselves once at launch with
+`/usr/lib/txtCaster/pulse` first on `LD_LIBRARY_PATH`.
 
 On a Linux session where `xdg-desktop-portal` is installed but cannot start, every GTK application waits about
 25 seconds at launch for the session bus to give up on it. txtCaster then opens normally.

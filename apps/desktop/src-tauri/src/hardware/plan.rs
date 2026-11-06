@@ -533,7 +533,7 @@ pub(crate) fn device_plan(device: Option<&crate::hardware::DeviceInfo>) -> Devic
 
 fn runtime_can_use(entry: &CatalogEntry, device: &crate::hardware::DeviceInfo) -> bool {
     match entry.format {
-        ModelFormat::Gguf => device.backend.is_gpu(),
+        ModelFormat::Gguf => device.backend.is_gpu() && device.llm_runtime != Some(false),
         ModelFormat::Ct2 => false,
         _ => device.backend == DeviceBackend::Cuda,
     }
@@ -543,11 +543,19 @@ pub(crate) fn capable_device<'a>(
     entry: &CatalogEntry,
     profile: &'a HardwareProfile,
 ) -> Option<&'a crate::hardware::DeviceInfo> {
+    let usable: Vec<&crate::hardware::DeviceInfo> = profile
+        .devices
+        .iter()
+        .filter(|device| runtime_can_use(entry, device))
+        .collect();
+    // llama.cpp offloads to an integrated GPU only when no discrete GPU is present
+    // (llama_prepare_model_devices), so a GGUF plan must budget the card it will run on.
+    let discrete_only =
+        entry.format == ModelFormat::Gguf && usable.iter().any(|device| device.discrete);
     crate::hardware::select_among(
-        profile
-            .devices
-            .iter()
-            .filter(|device| runtime_can_use(entry, device)),
+        usable
+            .into_iter()
+            .filter(|device| !discrete_only || device.discrete),
         entry.full_gpu_vram_mb.map(required_mb),
         // Selection and budgeting must agree about how much memory a device
         // has. `gguf_fit` computes the chosen device's budget from
@@ -1309,6 +1317,7 @@ mod tests {
         let mut dual_gpu_profile = profile(None, 16_384);
         dual_gpu_profile.devices = vec![
             DeviceInfo {
+                llm_runtime: None,
                 key: "pci:00:02.0".into(),
                 backend: DeviceBackend::Vulkan,
                 ordinal: 0,
@@ -1321,6 +1330,7 @@ mod tests {
                 memory_source: MemorySource::VkBudget,
             },
             DeviceInfo {
+                llm_runtime: None,
                 key: "pci:01:00.0".into(),
                 backend: DeviceBackend::Vulkan,
                 ordinal: 1,
@@ -1980,6 +1990,48 @@ mod tests {
     /// than a 4 GB discrete card, and the discrete card is the correct pick.
     /// Ranking on `ram.free_mb` picks the unified one.
     #[test]
+    fn an_integrated_gpu_carries_a_gguf_model_when_it_is_the_only_gpu() {
+        let mut entry = ctx_capped("m", 4_096);
+        entry.full_gpu_vram_mb = Some(3_000);
+        let mut integrated = crate::hardware::test_device(Some(8_192));
+        integrated.key = "integrated:0".into();
+        integrated.unified = true;
+        integrated.discrete = false;
+        let mut host = cgroup_profile(65_536, 32_768, None, None);
+        host.devices = vec![integrated];
+        assert_eq!(
+            capable_device(&entry, &host).expect("a device").key,
+            "integrated:0",
+            "with no discrete card llama.cpp uses the integrated GPU, and so does the plan"
+        );
+    }
+
+    #[test]
+    fn a_gpu_the_engine_cannot_reach_carries_no_gguf_model() {
+        let mut entry = ctx_capped("m", 4_096);
+        entry.full_gpu_vram_mb = Some(3_000);
+        let mut card = crate::hardware::test_device(Some(8_192));
+        card.llm_runtime = Some(false);
+        let mut host = cgroup_profile(65_536, 32_768, None, None);
+        host.devices = vec![card];
+        assert!(
+            capable_device(&entry, &host).is_none(),
+            "a card llama.cpp did not report would run the model on the CPU anyway"
+        );
+        entry.format = ModelFormat::Pytorch;
+        assert!(
+            capable_device(&entry, &host).is_some(),
+            "torch reaches the card through CUDA whatever llama.cpp reported"
+        );
+        host.devices[0].llm_runtime = None;
+        entry.format = ModelFormat::Gguf;
+        assert!(
+            capable_device(&entry, &host).is_some(),
+            "before any engine has reported, the plan keeps the card"
+        );
+    }
+
+    #[test]
     fn selection_prefers_a_discrete_card_the_cgroup_cannot_shrink() {
         let mut entry = ctx_capped("m", 4_096);
         entry.full_gpu_vram_mb = Some(8_000);
@@ -2004,13 +2056,14 @@ mod tests {
             d
         };
 
-        // Unlimited: the unified device's 16 GB is really available, so it wins.
+        // Unlimited: the unified device has more memory, but llama.cpp runs a GGUF model on
+        // the discrete card whenever one exists, so that card is what the plan must budget.
         let mut host = cgroup_profile(65_536, 32_768, None, None);
         host.devices = vec![unified.clone(), discrete.clone()];
         assert_eq!(
             capable_device(&entry, &host).expect("a device").key,
-            "unified:0",
-            "premise: with no limit the larger unified device is the right pick"
+            "discrete:0",
+            "an integrated GPU beside a discrete card is never where llama.cpp offloads"
         );
 
         // Inside a 4 GB cgroup with 3584 MB of headroom, the unified device can

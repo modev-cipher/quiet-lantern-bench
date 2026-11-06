@@ -223,6 +223,13 @@ pub async fn engine_install_info(
     })
 }
 
+pub async fn hold_job_admission<R: tauri::Runtime>(app: &AppHandle<R>) -> CommitGuard {
+    match app.try_state::<Arc<crate::orchestrator::worker::JobOrchestrator>>() {
+        Some(orchestrator) => Some(orchestrator.lock_mutation_gate_owned().await),
+        None => None,
+    }
+}
+
 fn active_jobs_block(app: &AppHandle) -> impl std::future::Future<Output = Result<(), String>> {
     let pool = app.state::<crate::storage::SqlitePool>().inner().clone();
     async move {
@@ -350,10 +357,7 @@ struct AppEngineHost {
 #[async_trait::async_trait]
 impl EngineHost for AppEngineHost {
     async fn begin_commit(&self) -> Result<CommitGuard, String> {
-        let gate = match self.app.try_state::<crate::orchestrator::JobOrchestrator>() {
-            Some(orchestrator) => Some(orchestrator.lock_mutation_gate_owned().await),
-            None => None,
-        };
+        let gate = hold_job_admission(&self.app).await;
         active_jobs_block(&self.app).await?;
         Ok(gate)
     }
@@ -415,5 +419,44 @@ impl EngineHost for AppEngineHost {
             }
             tokio::time::sleep(Duration::from_millis(500)).await;
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::orchestrator::worker::{JobOrchestrator, StageRegistry, StartOptions};
+
+    #[tokio::test]
+    async fn an_engine_change_holds_job_admission_until_it_ends() {
+        let dir = tempfile::tempdir().expect("dir");
+        let pool = crate::storage::open_pool(&dir.path().join("db.sqlite"))
+            .await
+            .expect("pool");
+        let orchestrator = Arc::new(JobOrchestrator::start_with_options(
+            pool,
+            StageRegistry::default(),
+            Arc::new(|_| {}),
+            Arc::new(|_| {}),
+            Duration::from_millis(10),
+            dir.path().to_path_buf(),
+            StartOptions {
+                consume_queue: false,
+                ..Default::default()
+            },
+        ));
+        let app = tauri::test::mock_app();
+        app.manage(orchestrator.clone());
+
+        let gate = hold_job_admission(app.handle()).await;
+        assert!(gate.is_some());
+        let admission =
+            tokio::time::timeout(Duration::from_millis(50), orchestrator.lock_mutation_gate());
+        assert!(admission.await.is_err());
+        drop(gate);
+        let _admitted =
+            tokio::time::timeout(Duration::from_secs(1), orchestrator.lock_mutation_gate())
+                .await
+                .expect("admission resumes");
     }
 }

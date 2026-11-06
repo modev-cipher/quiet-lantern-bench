@@ -9,10 +9,10 @@ const quiet =
 
 /** Non-modal update notice under the top bar. Renders nothing unless the
  *  updater has something actionable (UPD-1 contract rows f, g, i). */
-export function AppUpdateBanner() {
+export function AppUpdateBanner({ castsActive }: { castsActive: boolean }) {
   const { t } = useI18n();
   const { snapshot, install, cancel, dismiss, openRelease } = useAppUpdate();
-  const banner = bannerFor(snapshot);
+  const banner = bannerFor(snapshot, castsActive);
   if (!banner) return null;
 
   return (
@@ -24,16 +24,36 @@ export function AppUpdateBanner() {
     >
       {banner.kind === "available" && (
         <>
-          <p className="min-w-0 flex-1 truncate">
-            <span className="font-medium text-ink-50">
-              {banner.notes
-                ? t("update.readyWithNotes", {
-                    version: banner.version,
-                    notes: banner.notes,
-                  })
-                : t("update.readyVersion", { version: banner.version })}
-            </span>
-          </p>
+          <div className="min-w-0 flex-1">
+            <p className="truncate">
+              <span className="font-medium text-ink-50">
+                {banner.notes
+                  ? t("update.readyWithNotes", {
+                      version: banner.version,
+                      notes: banner.notes,
+                    })
+                  : t("update.readyVersion", { version: banner.version })}
+              </span>
+            </p>
+            {banner.castsContinue && (
+              <p
+                data-testid="app-update-casts"
+                className="truncate text-secondary text-ink-400"
+              >
+                {t("update.castsContinue")}
+              </p>
+            )}
+          </div>
+          {banner.whatsNew && (
+            <button
+              type="button"
+              data-testid="app-update-whats-new"
+              onClick={openRelease}
+              className={quiet}
+            >
+              {t("update.whatsNew")}
+            </button>
+          )}
           <button
             type="button"
             data-testid="app-update-install"

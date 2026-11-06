@@ -1,5 +1,5 @@
 use std::collections::HashSet;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Instant;
 
@@ -26,7 +26,7 @@ use crate::providers::binding::PhaseBinding;
 use crate::providers::registry::{ProviderKind, ScriptError, ScriptErrorKind};
 use crate::providers::ConnectionStore;
 use crate::sidecar::client::SseEvent;
-use crate::storage::{book, job, models};
+use crate::storage::{book, job, models, SqlitePool};
 use crate::voice::keys::{ApiKey, KeyManager};
 
 pub const REGION_TIMEOUT_S: f64 = 40.0;
@@ -917,6 +917,56 @@ fn compose_crop_path(cache_dir: &std::path::Path, crop_hash: &str) -> PathBuf {
     crate::cache_path::cache_path(cache_dir, crop_hash)
 }
 
+async fn figures_in_scope(
+    pool: &SqlitePool,
+    book_id: &str,
+    scope: &Scope,
+) -> Result<Vec<book::FigureRegion>, OrchestratorError> {
+    let book = book::get_book(pool, book_id)
+        .await?
+        .ok_or_else(|| OrchestratorError::BookNotFound(book_id.to_string()))?;
+    let chapters = book::list_chapters(pool, book_id).await?;
+    let pages: HashSet<i64> = scoped_pages(scope, &chapters, book.page_count)
+        .into_iter()
+        .collect();
+    Ok(book::list_figures_for_book(pool, book_id)
+        .await?
+        .into_iter()
+        .filter(|f| pages.contains(&f.page_no))
+        .collect())
+}
+
+fn awaits_explanation(figure: &book::FigureRegion) -> bool {
+    figure.crop_hash.is_some() && figure.caption.is_none()
+}
+
+pub async fn explains_figures_locally(
+    pool: &SqlitePool,
+    models_root: &Path,
+    book_id: &str,
+    scope: &Scope,
+    model_overrides_json: Option<&str>,
+) -> Result<bool, OrchestratorError> {
+    let VisionRoute::Local { recorded_model } =
+        vision_route(model_overrides_json).map_err(OrchestratorError::InvalidRequest)?
+    else {
+        return Ok(false);
+    };
+    let figures = figures_in_scope(pool, book_id, scope).await?;
+    if !figures.iter().any(awaits_explanation) {
+        return Ok(false);
+    }
+    let installs = models::list_model_installs(pool).await?;
+    let resolved = cast_vision_model(
+        recorded_model.as_deref(),
+        model_overrides_json,
+        bundled_catalog(),
+        &installs,
+        models_root,
+    );
+    Ok(resolved.model_id.is_some())
+}
+
 fn region_timeout(plan: &serde_json::Value) -> Option<f64> {
     match plan.get("badge").and_then(|v| v.as_str()) {
         Some("orange") | Some("red") => Some(REGION_TIMEOUT_S),
@@ -971,26 +1021,11 @@ impl Stage for VisionStage {
             let record = job::get_job(&ctx.pool, &ctx.job_id)
                 .await?
                 .ok_or_else(|| OrchestratorError::JobNotFound(ctx.job_id.clone()))?;
-            let book = book::get_book(&ctx.pool, &record.book_id)
-                .await?
-                .ok_or_else(|| OrchestratorError::BookNotFound(record.book_id.clone()))?;
-            let chapters = book::list_chapters(&ctx.pool, &record.book_id).await?;
             let scope: Scope = serde_json::from_str(&record.scope_json)?;
-            let pages: HashSet<i64> = scoped_pages(&scope, &chapters, book.page_count)
-                .into_iter()
-                .collect();
-
-            let scoped: Vec<book::FigureRegion> =
-                book::list_figures_for_book(&ctx.pool, &record.book_id)
-                    .await?
-                    .into_iter()
-                    .filter(|f| pages.contains(&f.page_no))
-                    .collect();
+            let scoped = figures_in_scope(&ctx.pool, &record.book_id, &scope).await?;
             let already_explained = scoped.iter().filter(|f| f.caption.is_some()).count();
-            let figures: Vec<book::FigureRegion> = scoped
-                .into_iter()
-                .filter(|f| f.crop_hash.is_some() && f.caption.is_none())
-                .collect();
+            let figures: Vec<book::FigureRegion> =
+                scoped.into_iter().filter(awaits_explanation).collect();
             if figures.is_empty() {
                 merge_report(
                     ctx,
@@ -1346,5 +1381,134 @@ mod crop_path_tests {
             compose_crop_path(Path::new("/data/cache"), ""),
             Path::new("/data/cache")
         );
+    }
+}
+
+#[cfg(test)]
+mod local_figure_model_tests {
+    use super::*;
+    use crate::model_manager::install_rel_dir;
+    use crate::storage::models::ModelInstall;
+
+    const MODEL: &str = "gemma4-e2b-q4km";
+
+    struct Library {
+        _dir: tempfile::TempDir,
+        pool: SqlitePool,
+        models_root: PathBuf,
+    }
+
+    async fn library(caption: Option<&str>, model_ready: bool) -> Library {
+        let dir = tempfile::tempdir().expect("dir");
+        let pool = crate::storage::open_pool(&dir.path().join("db.sqlite"))
+            .await
+            .expect("pool");
+        sqlx::query(
+            "INSERT INTO book (id, title, source_path, format, content_hash, created_at, \
+             page_count) VALUES ('b1', 'Book', '/b.pdf', 'pdf', 'h', 0, 10)",
+        )
+        .execute(&pool)
+        .await
+        .expect("book");
+        book::insert_figure_region_ignore_conflict(
+            &pool,
+            &book::FigureRegion {
+                id: "f1".into(),
+                book_id: "b1".into(),
+                page_no: 4,
+                bbox_json: "[0,0,1,1]".into(),
+                kind: "figure".into(),
+                confidence: 0.9,
+                crop_hash: Some("ab12".into()),
+                caption: caption.map(str::to_owned),
+                explanation: None,
+                caption_confidence: None,
+            },
+        )
+        .await
+        .expect("figure");
+        let models_root = dir.path().join("models");
+        if model_ready {
+            let entry = bundled_catalog()
+                .models
+                .iter()
+                .find(|e| e.id == MODEL)
+                .expect("entry");
+            let rel = install_rel_dir(entry);
+            std::fs::create_dir_all(models_root.join(&rel)).expect("model dir");
+            for file in &entry.download.files {
+                std::fs::write(models_root.join(&rel).join(&file.dest_path), b"stub")
+                    .expect("model file");
+            }
+            models::insert_model_install(
+                &pool,
+                &ModelInstall {
+                    model_id: MODEL.into(),
+                    path: rel.clone(),
+                    sha256: "deadbeef".into(),
+                    disk_bytes: 1,
+                    source: "curated".into(),
+                    installed_at: 0,
+                },
+            )
+            .await
+            .expect("install");
+        }
+        Library {
+            _dir: dir,
+            pool,
+            models_root,
+        }
+    }
+
+    fn pages(page_start: i64, page_end: i64) -> Scope {
+        Scope::Pages {
+            page_start,
+            page_end,
+        }
+    }
+
+    async fn local(lib: &Library, scope: Scope, overrides: Option<&str>) -> bool {
+        explains_figures_locally(&lib.pool, &lib.models_root, "b1", &scope, overrides)
+            .await
+            .expect("route")
+    }
+
+    #[tokio::test]
+    async fn a_waiting_figure_and_an_installed_figure_model_run_locally() {
+        let lib = library(None, true).await;
+        assert!(local(&lib, pages(1, 10), None).await);
+        assert!(local(&lib, pages(1, 10), Some(r#"{"explain_figures": true}"#)).await);
+    }
+
+    #[tokio::test]
+    async fn without_a_figure_model_figures_take_generic_cues() {
+        let lib = library(None, false).await;
+        assert!(!local(&lib, pages(1, 10), None).await);
+    }
+
+    #[tokio::test]
+    async fn figures_already_explained_or_outside_the_scope_need_no_model() {
+        let explained = library(Some("A chart"), true).await;
+        assert!(!local(&explained, pages(1, 10), None).await);
+        let elsewhere = library(None, true).await;
+        assert!(!local(&elsewhere, pages(5, 10), None).await);
+    }
+
+    #[tokio::test]
+    async fn figure_explanation_off_or_on_a_provider_needs_no_local_model() {
+        let lib = library(None, true).await;
+        assert!(!local(&lib, pages(1, 10), Some(r#"{"explain_figures": false}"#)).await);
+        let cloud = serde_json::json!({
+            "vision_binding": {
+                "kind": "connection",
+                "connection_id": "c1",
+                "model": "m",
+                "provider": "openai",
+                "endpoint": "https://api.openai.com/v1",
+                "adapter_rev": "1",
+            }
+        });
+        assert!(!local(&lib, pages(1, 10), Some(&cloud.to_string())).await);
     }
 }

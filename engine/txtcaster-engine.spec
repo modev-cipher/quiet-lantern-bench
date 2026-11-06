@@ -1,4 +1,8 @@
 # -*- mode: python ; coding: utf-8 -*-
+import importlib.metadata
+import importlib.util
+from pathlib import Path
+
 from PyInstaller.utils.hooks import (
     collect_data_files,
     collect_dynamic_libs,
@@ -6,10 +10,92 @@ from PyInstaller.utils.hooks import (
     copy_metadata,
 )
 
+NVIDIA_LICENCES = "licenses/nvidia"
+
+
+def _carries_nvidia_libraries():
+    torch = importlib.util.find_spec("torch")
+    locations = list(torch.submodule_search_locations or []) if torch else []
+    on_windows = any((Path(root) / "lib" / "cudart64_13.dll").is_file() for root in locations)
+    try:
+        importlib.metadata.distribution("nvidia-cuda-runtime")
+    except importlib.metadata.PackageNotFoundError:
+        return on_windows
+    return True
+
+
+# The CUDA and cuDNN licences cover the libraries torch carries on Windows; on Linux each
+# NVIDIA wheel also contributes its own licence file.
+def _nvidia_licence_datas():
+    if not _carries_nvidia_libraries():
+        return []
+    entries = [(str(path), NVIDIA_LICENCES) for path in sorted(Path("licenses/nvidia").glob("*.txt"))]
+    for dist in importlib.metadata.distributions():
+        name = dist.metadata["Name"] or ""
+        if not name.lower().startswith("nvidia-"):
+            continue
+        for file in dist.files or []:
+            if "licen" in file.name.lower() and not file.name.endswith(".py"):
+                entries.append((str(file.locate()), f"{NVIDIA_LICENCES}/{name}"))
+    return entries
+
 
 def _short_enough(entry):
     dest = entry[0].replace("\\", "/")
     return ".dist-info/licenses/third_party" not in dest and len(dest) <= 180
+
+
+# GPU drivers belong to the user's system: the Vulkan loader and the NVIDIA driver
+# libraries are never bundled. llama.cpp's CUDA module finds cudart and cuBLAS through
+# the copies torch ships, so other copies PyInstaller resolves from the build toolkit go.
+DRIVER_LIBRARIES = ("libvulkan.so", "vulkan-1.dll", "libcuda.so", "nvcuda.dll", "libnvidia-ml.so")
+# Outside the CUDA EULA's Attachment A redistributable list and linked by nothing the
+# engine loads (profiler metrics and multi-GPU cuSOLVER).
+UNLISTED_NVIDIA = (
+    "libnvperf_host.so",
+    "libnvperf_target.so",
+    "libpcsamplingutil.so",
+    "libcusolvermg.so",
+    "nvperf_host.dll",
+    "nvperf_target.dll",
+    "pcsamplingutil.dll",
+    "cusolvermg64_12.dll",
+)
+CUDA_RUNTIME = {
+    "libcudart.so.13",
+    "libcublas.so.13",
+    "libcublaslt.so.13",
+    "cudart64_13.dll",
+    "cublas64_13.dll",
+    "cublaslt64_13.dll",
+}
+TORCH_RUNTIME_DIRS = ("nvidia/cu13/lib/", "torch/lib/")
+
+
+def _basename(entry):
+    return entry[0].replace("\\", "/").rsplit("/", 1)[-1].lower()
+
+
+def _shippable(entry):
+    name = _basename(entry)
+    return not any(
+        name == lib or name.startswith(lib + ".") for lib in DRIVER_LIBRARIES + UNLISTED_NVIDIA
+    )
+
+
+def _one_cuda_runtime(binaries):
+    owned = {
+        _basename(entry)
+        for entry in binaries
+        if _basename(entry) in CUDA_RUNTIME
+        and entry[0].replace("\\", "/").lower().startswith(TORCH_RUNTIME_DIRS)
+    }
+    return [
+        entry
+        for entry in binaries
+        if _basename(entry) not in owned
+        or entry[0].replace("\\", "/").lower().startswith(TORCH_RUNTIME_DIRS)
+    ]
 
 
 def _not_test_module(name):
@@ -140,6 +226,7 @@ datas = (
     # Arabic face (epub_adapter). Wheel ships it via hatchling packages=; the frozen bundle
     # needs it collected here, else Arabic pages fall back to .notdef boxes.
     + collect_data_files("txtcaster_engine")
+    + _nvidia_licence_datas()
     + [entry for name in METADATA_DISTRIBUTIONS for entry in copy_metadata(name)]
 )
 
@@ -172,7 +259,9 @@ a = Analysis(
 )
 
 a.datas = [entry for entry in a.datas if _short_enough(entry)]
-a.binaries = [entry for entry in a.binaries if _short_enough(entry)]
+a.binaries = _one_cuda_runtime(
+    [entry for entry in a.binaries if _short_enough(entry) and _shippable(entry)]
+)
 
 pyz = PYZ(a.pure)
 

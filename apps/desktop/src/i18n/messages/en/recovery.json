@@ -7,7 +7,7 @@
   "lan.stale": "Re-render needed",
   "lan.staleHint": "Re-render needed means the audio no longer matches the chapters — re-render the cast before sending it.",
   "lan.empty": "No audiobooks are available to send yet. Create an audiobook first.",
-  "lan.scan": "Scan this with the txtCast app on your phone. Keep this window open.",
+  "lan.scan": "Scan this with the txtCaster app on your phone. Keep this window open.",
   "lan.safety": "Safety code {code|ltr} — confirm it on the phone",
   "lan.newQr": "New QR code",
   "lan.consumed": "This code was already used to pair, so it can't be scanned again. Show a new QR code to pair another phone.",

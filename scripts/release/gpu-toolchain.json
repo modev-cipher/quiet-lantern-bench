@@ -1,0 +1,164 @@
+{
+  "cuda": {
+    "version": "13.0.3",
+    "release_date": "2026-04-13",
+    "source": "https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.0.3.json",
+    "base_url": "https://developer.download.nvidia.com/compute/cuda/redist/",
+    "archives": {
+      "linux-x86_64": [
+        {
+          "component": "cuda_crt",
+          "version": "13.0.88",
+          "path": "cuda_crt/linux-x86_64/cuda_crt-linux-x86_64-13.0.88-archive.tar.xz",
+          "sha256": "5a3279a049ffc1cdb951c44cb95206acfdde9e9ae5e87825fc18d7e4a6878bb0",
+          "size": 79800
+        },
+        {
+          "component": "cuda_cudart",
+          "version": "13.0.96",
+          "path": "cuda_cudart/linux-x86_64/cuda_cudart-linux-x86_64-13.0.96-archive.tar.xz",
+          "sha256": "25b8071951baba827be1580b841d363464f6ee6c39f48d33a81646f90cc95ed1",
+          "size": 1487960
+        },
+        {
+          "component": "cuda_nvcc",
+          "version": "13.0.88",
+          "path": "cuda_nvcc/linux-x86_64/cuda_nvcc-linux-x86_64-13.0.88-archive.tar.xz",
+          "sha256": "48e35be3cfbf4b4fbc16828eaec8a7048ee789403049dc409f7b643d6259cf7a",
+          "size": 26657716
+        },
+        {
+          "component": "cuda_nvrtc",
+          "version": "13.0.88",
+          "path": "cuda_nvrtc/linux-x86_64/cuda_nvrtc-linux-x86_64-13.0.88-archive.tar.xz",
+          "sha256": "00038aac08e1dba6f1933237dbfb217ac6452ae24fab970edcac808f103ca64b",
+          "size": 116779532
+        },
+        {
+          "component": "libcublas",
+          "version": "13.1.1.3",
+          "path": "libcublas/linux-x86_64/libcublas-linux-x86_64-13.1.1.3-archive.tar.xz",
+          "sha256": "980cbd746a63566602d1699e2ade005c49408bd95618a57d0888f475e5c721a4",
+          "size": 838976088
+        },
+        {
+          "component": "libnvvm",
+          "version": "13.0.88",
+          "path": "libnvvm/linux-x86_64/libnvvm-linux-x86_64-13.0.88-archive.tar.xz",
+          "sha256": "17ef1665b63670887eeba7d908da5669fa8c66bb73b5b4c1367f49929c086353",
+          "size": 43645408
+        },
+        {
+          "component": "cuda_nvtx",
+          "version": "13.0.85",
+          "path": "cuda_nvtx/linux-x86_64/cuda_nvtx-linux-x86_64-13.0.85-archive.tar.xz",
+          "sha256": "ed150e6fb1b50663ff068cccee3c5e2ca581c3b939b321656afbc9193671137d",
+          "size": 94140
+        },
+        {
+          "component": "cuda_profiler_api",
+          "version": "13.0.85",
+          "path": "cuda_profiler_api/linux-x86_64/cuda_profiler_api-linux-x86_64-13.0.85-archive.tar.xz",
+          "sha256": "dc233d88a5cafa095b197e6246b4c468a4581c128da8f951d67e063cdd6bca4c",
+          "size": 17044
+        },
+        {
+          "component": "cuda_cccl",
+          "version": "13.0.85",
+          "path": "cuda_cccl/linux-x86_64/cuda_cccl-linux-x86_64-13.0.85-archive.tar.xz",
+          "sha256": "ed845eae8c1767706b6ee91e40c608a03f6f633551a849b63f7346d32d73ee60",
+          "size": 991284
+        }
+      ],
+      "windows-x86_64": [
+        {
+          "component": "cuda_crt",
+          "version": "13.0.88",
+          "path": "cuda_crt/windows-x86_64/cuda_crt-windows-x86_64-13.0.88-archive.zip",
+          "sha256": "ff413c89dbd96ed3b3dcfac923437de78acea32fb90309277197c8a127588112",
+          "size": 140187
+        },
+        {
+          "component": "cuda_cudart",
+          "version": "13.0.96",
+          "path": "cuda_cudart/windows-x86_64/cuda_cudart-windows-x86_64-13.0.96-archive.zip",
+          "sha256": "a2ed875f9997aa24904fb70cc9db3acd9308433cde99bc8e63ec1271c9da31b4",
+          "size": 2873447
+        },
+        {
+          "component": "cuda_nvcc",
+          "version": "13.0.88",
+          "path": "cuda_nvcc/windows-x86_64/cuda_nvcc-windows-x86_64-13.0.88-archive.zip",
+          "sha256": "61760e24a44937c6c29a20ddea69067b4d3860ccd6a9a0564573f840d96e6c5f",
+          "size": 29142142
+        },
+        {
+          "component": "cuda_nvrtc",
+          "version": "13.0.88",
+          "path": "cuda_nvrtc/windows-x86_64/cuda_nvrtc-windows-x86_64-13.0.88-archive.zip",
+          "sha256": "8c50a52467826167e0dbe99936140c52d62272bfc5849fe2d6587d050c8c5d29",
+          "size": 318076161
+        },
+        {
+          "component": "libcublas",
+          "version": "13.1.1.3",
+          "path": "libcublas/windows-x86_64/libcublas-windows-x86_64-13.1.1.3-archive.zip",
+          "sha256": "d6dfb0f7ad09730bafa1fd948bc65472e28c8a6dc30b4a2b32191f2380f9282b",
+          "size": 403660026
+        },
+        {
+          "component": "libnvvm",
+          "version": "13.0.88",
+          "path": "libnvvm/windows-x86_64/libnvvm-windows-x86_64-13.0.88-archive.zip",
+          "sha256": "6dda4a82d22a2c173a65c66b4b4c933e3424a56ce845e2864bdca9cc66e6c524",
+          "size": 52909116
+        },
+        {
+          "component": "cuda_nvtx",
+          "version": "13.0.85",
+          "path": "cuda_nvtx/windows-x86_64/cuda_nvtx-windows-x86_64-13.0.85-archive.zip",
+          "sha256": "184f578d7bcce2012edf266c51dfa7834ded41464f62459f4ebcb2398cddc665",
+          "size": 147156
+        },
+        {
+          "component": "cuda_profiler_api",
+          "version": "13.0.85",
+          "path": "cuda_profiler_api/windows-x86_64/cuda_profiler_api-windows-x86_64-13.0.85-archive.zip",
+          "sha256": "38c6c854f325b64e7ca0a8b14e1996dedb5abbb38f3580e5c7744b688abdc56e",
+          "size": 21185
+        },
+        {
+          "component": "visual_studio_integration",
+          "version": "13.0.85",
+          "path": "visual_studio_integration/windows-x86_64/visual_studio_integration-windows-x86_64-13.0.85-archive.zip",
+          "sha256": "babb8113ae3845fff6cac0fd8a14838d384d61960bcc60289b72129e8db08bd9",
+          "size": 887859
+        },
+        {
+          "component": "cuda_cccl",
+          "version": "13.0.85",
+          "path": "cuda_cccl/windows-x86_64/cuda_cccl-windows-x86_64-13.0.85-archive.zip",
+          "sha256": "f4f5187f7976d8057d76e1e04e72c8b7d0a2a22793107a671ad709b1d8d3408d",
+          "size": 3119228
+        }
+      ]
+    }
+  },
+  "vulkan": {
+    "source": "https://vulkan.lunarg.com/sdk/home",
+    "archives": {
+      "linux-x86_64": {
+        "version": "1.4.313.0",
+        "url": "https://sdk.lunarg.com/sdk/download/1.4.313.0/linux/vulkansdk-linux-x86_64-1.4.313.0.tar.xz",
+        "sha256": "4e957b66ade85eeaee95932aa7e3b45aea64db373c58a5eaefc8228cc71445c2",
+        "size": 341756484
+      },
+      "windows-x86_64": {
+        "version": "1.4.313.2",
+        "url": "https://sdk.lunarg.com/sdk/download/1.4.313.2/windows/vulkansdk-windows-X64-1.4.313.2.exe",
+        "sha256": "34a921d951858274ca8e470e9d0a3b7624db41216b3908ccea9f73c8a1b7500e",
+        "size": 250859224
+      }
+    }
+  }
+}

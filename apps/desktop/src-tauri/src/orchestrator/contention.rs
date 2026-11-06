@@ -8,6 +8,7 @@ use crate::storage::job;
 pub const BUSY_CODE: &str = "ERR_BUSY";
 pub const OOM_CODE: &str = "ERR_OOM";
 pub const DEVICE_UNAVAILABLE_CODE: &str = "ERR_DEVICE_UNAVAILABLE";
+pub const GPU_LOAD_CODE: &str = "ERR_GPU_LOAD";
 pub const BUSY_NOTICE: &str = "Engine busy — waiting to retry";
 pub const BUSY_PAUSE_NOTICE: &str = "Paused — the engine stayed busy";
 pub const MAX_CONTENTION_PAUSES: i64 = 3;
@@ -42,7 +43,7 @@ impl StageFailure {
 pub fn classify_code(code: &str) -> StageFailure {
     match code {
         BUSY_CODE => StageFailure::Contention,
-        OOM_CODE => StageFailure::Degradable,
+        OOM_CODE | GPU_LOAD_CODE => StageFailure::Degradable,
         DEVICE_UNAVAILABLE_CODE => StageFailure::DeviceUnusable,
         _ => StageFailure::Terminal,
     }
@@ -418,11 +419,18 @@ mod tests {
     fn every_code_the_classifier_acts_on_is_declared_once() {
         assert_eq!(classify_code(BUSY_CODE), StageFailure::Contention);
         assert_eq!(classify_code(OOM_CODE), StageFailure::Degradable);
+        assert_eq!(
+            classify_code(GPU_LOAD_CODE),
+            StageFailure::Degradable,
+            "a model the GPU could not take must walk the ladder to fewer layers, then the cpu"
+        );
         for terminal in [
             "ERR_PLAN",
             "ERR_RESIDENCY",
             "ERR_INTERNAL",
             "ERR_LLM_UNLOADED",
+            "ERR_LLM_LOAD",
+            "ERR_VISION_LOAD",
             crate::orchestrator::state::MISSING_EVENT_CODE,
             crate::sidecar::client::UNSTRUCTURED_CODE,
             "",

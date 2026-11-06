@@ -25,7 +25,7 @@ env:
 
 jobs:
   windows:
-    runs-on: windows-latest
+    runs-on: windows-2022
     permissions:
       contents: read
     steps:
@@ -54,23 +54,19 @@ jobs:
       - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
         with:
           python-version: "3.11"
-      - name: Build, smoke test and pack the engine packages (unsigned; engine.json is signed on the owner's machine)
+      - name: Build the engine packer
         shell: bash
+        run: (cd apps/desktop/src-tauri && cargo build --release --features release-tools --bin update_sign)
+      - name: Build, smoke test and pack the engine packages (unsigned; engine.json is signed on the owner's machine)
+        shell: cmd
+        env:
+          TXTCASTER_TOOLCHAIN_DIR: ${{ runner.temp }}/toolchains
         run: |
-          mkdir -p out-engine
-          version="$(sed -n 's/^__version__ = "\(.*\)"/\1/p' engine/txtcaster_engine/__init__.py)"
-          (cd apps/desktop/src-tauri && cargo build --release --features release-tools --bin update_sign)
-          signer=apps/desktop/src-tauri/target/release/update_sign
-          for variant in cpu lite cuda13; do
-            dist=engine/dist-$variant; [ "$variant" = cpu ] && dist=engine/dist
-            flag=; [ "$variant" = lite ] && flag=--reader-only
-            ENGINE_VARIANT=$variant ./scripts/build_engine.sh
-            uv run --no-project python scripts/smoke_test.py "$dist/txtcaster-engine/txtcaster-engine.exe" $flag
-            "$signer" engine-pack --dir "$dist/txtcaster-engine" --out-prefix "out-engine/txtcaster-engine-$version-windows-x86_64-$variant"
-            base="out-engine/txtcaster-engine-$version-windows-x86_64-$variant"
-            { sha256sum "$base".tar.zst.* | sed 's#out-engine/##; s/ \*/  /'; echo "whole  $(cat "$base".tar.zst.* | sha256sum | cut -d' ' -f1)"; stat -c '%n %s' "$base".tar.zst.* | sed 's#out-engine/##'; } > "$base.hashes.txt"
-            rm -rf "$dist" engine/build "engine/.venv-build-$variant"
-          done
+          for /f "usebackq tokens=*" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do set "VSINSTALL=%%i"
+          call "%VSINSTALL%\VC\Auxiliary\Build\vcvarsall.bat" x64 || exit /b 1
+          curl -fsSL -o "%RUNNER_TEMP%\stories260K.gguf" https://huggingface.co/ggml-org/models/resolve/main/tinyllamas/stories260K.gguf || exit /b 1
+          "C:\Program Files\Git\bin\bash.exe" -c "echo '270cba1bd5109f42d03350f60406024560464db173c0e387d91f0426d3bd256d *%RUNNER_TEMP:\=/%/stories260K.gguf' | sha256sum -c -" || exit /b 1
+          "C:\Program Files\Git\bin\bash.exe" scripts/release/build_windows_engines.sh out-engine apps/desktop/src-tauri/target/release/update_sign.exe "%RUNNER_TEMP%\stories260K.gguf"
       - name: Fetch the pinned LGPL FFmpeg
         shell: bash
         run: ./scripts/fetch_ffmpeg_windows.sh apps/desktop/src-tauri/ffmpeg

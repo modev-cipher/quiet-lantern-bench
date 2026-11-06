@@ -29,6 +29,7 @@ from txtcaster_engine.ingest.version import (
     geometry_version,
 )
 from txtcaster_engine.layout.endpoint import layout_events
+from txtcaster_engine.llm import ggml_runtime
 from txtcaster_engine.llm.backend import LLMBackendError, ResourcePlan, gpu_offload_supported
 from txtcaster_engine.llm.probe import probe_tok_s
 from txtcaster_engine.llm.registry import LLMRegistry, _default_factory, llm_key
@@ -324,7 +325,6 @@ def create_app(
         factory=app.state.llm_factory, residency=app.state.residency
     )
 
-    gpu_offload = allow_fake_llm or gpu_offload_supported()
     probes: dict[str, Future[bool]] = {}
     probe_lock = threading.Lock()
 
@@ -332,6 +332,7 @@ def create_app(
         with probe_lock:
             if not probes:
                 pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="capability-probe")
+                probes["gpu_offload"] = pool.submit(gpu_offload_supported)
                 probes["torch_cuda"] = pool.submit(torch_cuda_available)
                 probes["ct2_cuda"] = pool.submit(ct2_cuda_available)
                 pool.shutdown(wait=False)
@@ -346,18 +347,26 @@ def create_app(
             return False
 
     @app.get("/health")
-    async def health() -> dict[str, str | int | bool | None]:
+    async def health() -> dict[str, object]:
         pending = capability_probes()
-        return {
+        payload: dict[str, object] = {
             "status": "ok",
             "version": __version__,
             "engine_api": ENGINE_API,
-            "gpu_offload": gpu_offload,
+            "gpu_offload": True if allow_fake_llm else probed(pending["gpu_offload"]),
+            "gpu_devices": None,
             "torch_cuda": probed(pending["torch_cuda"]),
             "ct2_cuda": probed(pending["ct2_cuda"]),
             "geometry_version": geometry_version(),
             "extract_version": extractor_base_version(),
         }
+        if pending["gpu_offload"].done():
+            runtime = ggml_runtime.load()
+            if runtime.error is None:
+                payload["gpu_devices"] = [device.to_json() for device in runtime.devices]
+            else:
+                del payload["gpu_devices"]
+        return payload
 
     @app.post("/cancel")
     async def cancel(body: CancelRequest, request: Request) -> CancelResponse:

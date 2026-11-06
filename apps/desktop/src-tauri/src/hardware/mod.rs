@@ -2,6 +2,7 @@ pub mod benchmark;
 pub mod cgroup;
 pub mod degrade;
 pub mod device;
+pub mod engine_gpus;
 pub mod eta;
 pub mod learned;
 pub mod plan;
@@ -40,6 +41,10 @@ pub struct DeviceInfo {
     pub unified: bool,
     pub discrete: bool,
     pub memory_source: MemorySource,
+    /// Whether the running engine's llama.cpp runtime reported this GPU; `None` until an
+    /// engine has reported.
+    #[serde(skip)]
+    pub llm_runtime: Option<bool>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize)]
@@ -229,6 +234,7 @@ async fn device_inventory() -> Cow<'static, [DeviceInfo]> {
 async fn detect_devices() -> Vec<DeviceInfo> {
     let mut devices = device_inventory().await.into_owned();
     refresh_memory(&mut devices).await;
+    engine_gpus::merge_reported(&mut devices);
     devices
 }
 
@@ -280,6 +286,7 @@ fn parse_drm_entry(name: &str, address: &str, vendor_raw: Option<&str>) -> Optio
         .map(|raw| pci_vendor_name(raw.trim()))
         .unwrap_or("Unknown");
     Some(DeviceInfo {
+        llm_runtime: None,
         key,
         backend: DeviceBackend::Vulkan,
         ordinal: index.parse().unwrap_or(0),
@@ -506,6 +513,7 @@ fn parse_nvidia_smi(out: &str) -> Vec<DeviceInfo> {
             continue;
         }
         devices.push(DeviceInfo {
+            llm_runtime: None,
             key: bus.unwrap_or_else(|| format!("nvidia:{index}")),
             backend: DeviceBackend::Cuda,
             ordinal: index as u32,
@@ -603,6 +611,7 @@ fn parse_rocm_smi(out: &str) -> Vec<DeviceInfo> {
                 .unwrap_or_else(|| format!("rocm:{index}"));
 
             Some(DeviceInfo {
+                llm_runtime: None,
                 key,
                 backend: DeviceBackend::Rocm,
                 ordinal: index,
@@ -769,6 +778,7 @@ fn parse_vulkaninfo_views(out: &str) -> Vec<VulkanView> {
             Some(VulkanView {
                 classified: d.device_type.is_some(),
                 device: DeviceInfo {
+                    llm_runtime: None,
                     key: d.pci_key().unwrap_or_else(|| format!("vulkan:{index}")),
                     backend: DeviceBackend::Vulkan,
                     ordinal: index as u32,
@@ -983,6 +993,7 @@ pub fn reserve_memory(profile: &mut HardwareProfile, reserved_mb: u64) {
 
 pub fn test_device(memory_mb: Option<u64>) -> DeviceInfo {
     DeviceInfo {
+        llm_runtime: None,
         key: "pci:01:00.0".into(),
         backend: DeviceBackend::Cuda,
         ordinal: 0,
@@ -1548,6 +1559,7 @@ memoryHeaps: count = 1
     fn selection_prefers_the_discrete_card_over_a_bigger_shared_igpu() {
         let devices = vec![
             DeviceInfo {
+                llm_runtime: None,
                 key: "pci:00:02.0".into(),
                 backend: DeviceBackend::Vulkan,
                 ordinal: 0,
@@ -1560,6 +1572,7 @@ memoryHeaps: count = 1
                 memory_source: MemorySource::VkBudget,
             },
             DeviceInfo {
+                llm_runtime: None,
                 key: "pci:01:00.0".into(),
                 backend: DeviceBackend::Vulkan,
                 ordinal: 1,

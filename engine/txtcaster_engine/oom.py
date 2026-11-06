@@ -1,5 +1,6 @@
 OOM_CODE = "ERR_OOM"
 DEVICE_UNAVAILABLE_CODE = "ERR_DEVICE_UNAVAILABLE"
+GPU_LOAD_CODE = "ERR_GPU_LOAD"
 
 OOM_MARKERS = (
     "out of memory",
@@ -63,3 +64,10 @@ def is_oom(exc: BaseException) -> bool:
 
 def is_device_unavailable(exc: BaseException) -> bool:
     return classify_resource_failure(exc) == DEVICE_UNAVAILABLE_CODE
+
+
+def load_failure_code(exc: BaseException, on_gpu: bool, fallback: str) -> str:
+    classified = classify_resource_failure(exc)
+    if classified is not None:
+        return classified
+    return GPU_LOAD_CODE if on_gpu else fallback

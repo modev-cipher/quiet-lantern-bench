@@ -370,6 +370,7 @@ async fn rewrite_db_paths(db_path: &Path, legacy_str: &str, canonical_str: &str)
         ("book", "cover_path", false),
         ("book", "ingest_path", false),
         ("render_job", "output_paths_json", true),
+        ("voice_profile", "reference_wav_path", false),
     ];
     for (table, col, json_encoded) in updates {
         let check_query =
@@ -578,8 +579,17 @@ fn holds_only_webview_profile(dir: &Path) -> bool {
 }
 
 pub fn resolve_and_migrate_dir(base: &Path, legacy_name: &str, canonical_name: &str) -> PathBuf {
-    let canonical = base.join(canonical_name);
-    let legacy = base.join(legacy_name);
+    migrate_dir(&base.join(legacy_name), &base.join(canonical_name))
+}
+
+fn migrate_dir(legacy: &Path, canonical: &Path) -> PathBuf {
+    let canonical = canonical.to_path_buf();
+    let legacy = legacy.to_path_buf();
+    let archive = {
+        let mut name = legacy.file_name().unwrap_or_default().to_os_string();
+        name.push(".migrated");
+        legacy.with_file_name(name)
+    };
 
     if !legacy.exists() {
         return canonical;
@@ -601,6 +611,9 @@ pub fn resolve_and_migrate_dir(base: &Path, legacy_name: &str, canonical_name: &
     }
 
     if !canonical.exists() {
+        if let Some(parent) = canonical.parent() {
+            let _ = std::fs::create_dir_all(parent);
+        }
         if let Err(err) = move_path_with_fallback(&legacy, &canonical) {
             tracing::warn!(
                 "failed to migrate legacy dir from {} to {}: {err}; falling back to legacy",
@@ -697,16 +710,15 @@ pub fn resolve_and_migrate_dir(base: &Path, legacy_name: &str, canonical_name: &
         let _ = std::fs::remove_dir(&legacy);
         tracing::info!("removed empty legacy directory {}", legacy.display());
     } else if !holds_webview_profile {
-        let migrated_marker = base.join(format!("{}.migrated", legacy_name));
-        if !migrated_marker.exists() {
-            let _ = move_path_with_fallback(&legacy, &migrated_marker);
+        if !archive.exists() {
+            let _ = move_path_with_fallback(&legacy, &archive);
             tracing::info!(
                 "archived unmerged legacy leftovers to {}",
-                migrated_marker.display()
+                archive.display()
             );
         }
     } else {
-        archive_leftovers_beside_profile(&legacy, &base.join(format!("{legacy_name}.migrated")));
+        archive_leftovers_beside_profile(&legacy, &archive);
     }
 
     canonical
@@ -774,18 +786,28 @@ pub fn ensure_private_dir(path: &std::path::Path) -> std::io::Result<()> {
 }
 
 pub fn resolve_app_data_dir(app: &tauri::AppHandle) -> Result<PathBuf, String> {
-    if cfg!(windows) {
-        return windows_local_dir(app, WINDOWS_DATA_DIR_NAME);
-    }
     let base = app
         .path()
         .data_dir()
         .map_err(|e| format!("failed to determine base data directory: {e}"))?;
+    if cfg!(windows) {
+        let local = app
+            .path()
+            .local_data_dir()
+            .map_err(|e| format!("failed to determine local data directory: {e}"))?;
+        return Ok(windows_data_root(&base, &local));
+    }
     Ok(resolve_and_migrate_dir(
         &base,
         LEGACY_IDENTIFIER,
         CANONICAL_APP_NAME,
     ))
+}
+
+/// Earlier builds kept Windows data in Roaming AppData; it moves to the Local root on first launch.
+fn windows_data_root(roaming: &Path, local: &Path) -> PathBuf {
+    let previous = resolve_and_migrate_dir(roaming, LEGACY_IDENTIFIER, CANONICAL_APP_NAME);
+    migrate_dir(&previous, &local.join(WINDOWS_DATA_DIR_NAME))
 }
 
 fn windows_local_dir(app: &tauri::AppHandle, name: &str) -> Result<PathBuf, String> {
@@ -1879,5 +1901,161 @@ mod tests {
 
         drop(conn);
         std::fs::remove_dir_all(&base).ok();
+    }
+
+    async fn library_db(dir: &Path, root: &Path, rows: bool) {
+        std::fs::create_dir_all(dir).expect("dir");
+        let mut conn = sqlx::SqliteConnection::connect_with(
+            &SqliteConnectOptions::new()
+                .filename(dir.join("db.sqlite"))
+                .create_if_missing(true),
+        )
+        .await
+        .expect("connect");
+        sqlx::raw_sql(
+            "CREATE TABLE book (id TEXT PRIMARY KEY, title TEXT, source_path TEXT, \
+                                 cover_path TEXT, ingest_path TEXT); \
+             CREATE TABLE render_job (id TEXT PRIMARY KEY, book_id TEXT, output_paths_json TEXT); \
+             CREATE TABLE export (id TEXT PRIMARY KEY, book_id TEXT, job_id TEXT, path TEXT); \
+             CREATE TABLE voice_profile (id TEXT PRIMARY KEY, reference_wav_path TEXT);",
+        )
+        .execute(&mut conn)
+        .await
+        .expect("schema");
+        if rows {
+            let root = root.to_string_lossy();
+            sqlx::query("INSERT INTO book (id, title, source_path) VALUES ('b1', 'Book', ?)")
+                .bind(format!("{root}/books/b1/book.pdf"))
+                .execute(&mut conn)
+                .await
+                .expect("book");
+            sqlx::query("INSERT INTO voice_profile (id, reference_wav_path) VALUES ('v1', ?)")
+                .bind(format!("{root}/voices/v1/reference.wav"))
+                .execute(&mut conn)
+                .await
+                .expect("voice");
+        }
+    }
+
+    async fn stored_paths(dir: &Path) -> (String, String) {
+        let mut conn = sqlx::SqliteConnection::connect_with(
+            &SqliteConnectOptions::new()
+                .filename(dir.join("db.sqlite"))
+                .read_only(true),
+        )
+        .await
+        .expect("reopen");
+        let book: String = sqlx::query_scalar("SELECT source_path FROM book WHERE id = 'b1'")
+            .fetch_one(&mut conn)
+            .await
+            .expect("book row");
+        let voice: String =
+            sqlx::query_scalar("SELECT reference_wav_path FROM voice_profile WHERE id = 'v1'")
+                .fetch_one(&mut conn)
+                .await
+                .expect("voice row");
+        (book, voice)
+    }
+
+    fn library_files(dir: &Path) {
+        std::fs::create_dir_all(dir.join("books").join("b1")).expect("books");
+        std::fs::write(dir.join("books").join("b1").join("book.pdf"), b"pdf").expect("pdf");
+        std::fs::create_dir_all(dir.join("voices").join("v1")).expect("voices");
+        std::fs::write(dir.join("voices").join("v1").join("reference.wav"), b"wav").expect("wav");
+    }
+
+    #[tokio::test]
+    async fn a_windows_upgrade_moves_the_roaming_library_to_local_app_data() {
+        let root = std::env::temp_dir().join(format!("txtcaster-win-{}", super::super::new_id()));
+        let roaming = root.join("Roaming");
+        let local = root.join("Local");
+        let previous = roaming.join(CANONICAL_APP_NAME);
+        library_db(&previous, &previous, true).await;
+        library_files(&previous);
+
+        let resolved = windows_data_root(&roaming, &local);
+        let expected = local.join(WINDOWS_DATA_DIR_NAME);
+        assert_eq!(resolved, expected);
+        assert!(expected.join("books").join("b1").join("book.pdf").is_file());
+        assert!(expected
+            .join("voices")
+            .join("v1")
+            .join("reference.wav")
+            .is_file());
+        assert!(!previous.exists());
+        let (book, voice) = stored_paths(&expected).await;
+        let new_root = expected.to_string_lossy();
+        assert_eq!(book, format!("{new_root}/books/b1/book.pdf"));
+        assert_eq!(voice, format!("{new_root}/voices/v1/reference.wav"));
+
+        assert_eq!(windows_data_root(&roaming, &local), expected);
+        std::fs::remove_dir_all(&root).ok();
+    }
+
+    #[tokio::test]
+    async fn a_windows_upgrade_keeps_the_library_over_an_empty_new_root() {
+        let root =
+            std::env::temp_dir().join(format!("txtcaster-win-rc-{}", super::super::new_id()));
+        let roaming = root.join("Roaming");
+        let local = root.join("Local");
+        let previous = roaming.join(CANONICAL_APP_NAME);
+        let current = local.join(WINDOWS_DATA_DIR_NAME);
+        library_db(&previous, &previous, true).await;
+        library_files(&previous);
+        library_db(&current, &current, false).await;
+
+        assert_eq!(windows_data_root(&roaming, &local), current);
+        assert!(current.join("books").join("b1").join("book.pdf").is_file());
+        assert!(
+            current.join("db.sqlite.bak").is_file(),
+            "the empty database is kept aside"
+        );
+        let (book, voice) = stored_paths(&current).await;
+        assert!(book.starts_with(&*current.to_string_lossy()), "{book}");
+        assert!(voice.starts_with(&*current.to_string_lossy()), "{voice}");
+        std::fs::remove_dir_all(&root).ok();
+    }
+
+    #[tokio::test]
+    async fn the_identifier_folder_in_roaming_also_reaches_local_app_data() {
+        let root =
+            std::env::temp_dir().join(format!("txtcaster-win-id-{}", super::super::new_id()));
+        let roaming = root.join("Roaming");
+        let local = root.join("Local");
+        let legacy = roaming.join(LEGACY_IDENTIFIER);
+        library_db(&legacy, &legacy, true).await;
+        library_files(&legacy);
+
+        let expected = local.join(WINDOWS_DATA_DIR_NAME);
+        assert_eq!(windows_data_root(&roaming, &local), expected);
+        let (book, _) = stored_paths(&expected).await;
+        assert_eq!(
+            book,
+            format!("{}/books/b1/book.pdf", expected.to_string_lossy())
+        );
+        assert!(!legacy.exists());
+        assert!(!roaming.join(CANONICAL_APP_NAME).exists());
+        std::fs::remove_dir_all(&root).ok();
+    }
+
+    #[tokio::test]
+    async fn a_populated_local_root_is_left_alone_when_roaming_holds_nothing() {
+        let root =
+            std::env::temp_dir().join(format!("txtcaster-win-new-{}", super::super::new_id()));
+        let roaming = root.join("Roaming");
+        let local = root.join("Local");
+        let current = local.join(WINDOWS_DATA_DIR_NAME);
+        library_db(&current, &current, true).await;
+        library_files(&current);
+
+        assert_eq!(windows_data_root(&roaming, &local), current);
+        assert!(!roaming.exists());
+        assert!(!current.join("db.sqlite.bak").exists());
+        let (book, _) = stored_paths(&current).await;
+        assert_eq!(
+            book,
+            format!("{}/books/b1/book.pdf", current.to_string_lossy())
+        );
+        std::fs::remove_dir_all(&root).ok();
     }
 }

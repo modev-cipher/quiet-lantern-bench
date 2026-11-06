@@ -8,6 +8,7 @@ import { useAppUpdate } from "./useAppUpdate";
 
 import { CustomDropdown } from "./CustomDropdown";
 import { openEngineSetup } from "./engineSetupStore";
+import { SUPPORT_URL } from "./reportIssueModel";
 import { goToView, openReportIssueModal } from "./views";
 import { useDialogFocus } from "./useDialogFocus";
 import {
@@ -443,8 +444,6 @@ function AppearanceCard() {
     </div>
   );
 }
-
-const SUPPORT_URL = "https://www.patreon.com/c/txtcaster/membership";
 
 // The D-2 privacy surface: whether the voice tutor's learning profile
 // persists across sessions. Under never-persist the toggle renders disabled

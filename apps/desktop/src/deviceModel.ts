@@ -16,6 +16,7 @@ export interface DeviceInfo {
 export interface DeviceInventory {
   devices: DeviceInfo[];
   primaryKey: string | null;
+  localAiGpus?: number | null;
 }
 
 export function primaryDevice(

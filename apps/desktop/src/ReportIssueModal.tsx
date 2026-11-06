@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { Fragment, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
@@ -8,6 +8,8 @@ import {
   CloseIcon,
   FileTextIcon,
   GlobeIcon,
+  HeartIcon,
+  MailIcon,
   ShieldIcon,
   SparkIcon,
 } from "./Icons";
@@ -31,9 +33,11 @@ const OPTION_ICONS: Record<
 > = {
   bug: BugIcon,
   feature: SparkIcon,
+  email: MailIcon,
   blank: FileTextIcon,
   website: GlobeIcon,
   security: ShieldIcon,
+  support: HeartIcon,
 };
 
 export default function ReportIssueModal({
@@ -246,31 +250,35 @@ export default function ReportIssueModal({
           {REPORT_ISSUE_OPTIONS.map((option) => {
             const Icon = OPTION_ICONS[option.id];
             return (
-              <button
-                key={option.id}
-                type="button"
-                data-testid={`issue-option-${option.id}`}
-                aria-disabled={pending != null}
-                onClick={() => void handleSelect(option)}
-                className="group flex shrink-0 items-center justify-between gap-4 rounded-xl border border-ink-800/80 bg-ink-950/60 p-3.5 text-start transition-colors duration-150 hover:border-ink-700 hover:bg-ink-850/80 focus-visible:border-ember-500 focus-visible:outline-none aria-disabled:opacity-50"
-              >
-                <div className="flex items-center gap-3.5 min-w-0">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-ink-800 text-ink-300 transition-colors group-hover:bg-ink-700 group-hover:text-ink-100">
-                    <Icon className="h-5 w-5" />
-                  </span>
-                  <div className="min-w-0">
-                    <div className="text-body font-semibold text-ink-100 group-hover:text-ink-50">
-                      {t(option.titleKey)}
-                    </div>
-                    <div className="text-secondary text-ink-400 group-hover:text-ink-300">
-                      {t(option.descKey)}
+              <Fragment key={option.id}>
+                {option.id === "support" && (
+                  <hr className="my-1 shrink-0 border-ink-800" />
+                )}
+                <button
+                  type="button"
+                  data-testid={`issue-option-${option.id}`}
+                  aria-disabled={pending != null}
+                  onClick={() => void handleSelect(option)}
+                  className="group flex shrink-0 items-center justify-between gap-4 rounded-xl border border-ink-800/80 bg-ink-950/60 p-3.5 text-start transition-colors duration-150 hover:border-ink-700 hover:bg-ink-850/80 focus-visible:border-ember-500 focus-visible:outline-none aria-disabled:opacity-50"
+                >
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-ink-800 text-ink-300 transition-colors group-hover:bg-ink-700 group-hover:text-ink-100">
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <div className="min-w-0">
+                      <div className="text-body font-semibold text-ink-100 group-hover:text-ink-50">
+                        {t(option.titleKey)}
+                      </div>
+                      <div className="text-secondary text-ink-400 group-hover:text-ink-300">
+                        {t(option.descKey)}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <span className="shrink-0 text-ink-500 transition-colors group-hover:text-ink-200">
-                  <ChevronIcon className="h-4 w-4" />
-                </span>
-              </button>
+                  <span className="shrink-0 text-ink-500 transition-colors group-hover:text-ink-200">
+                    <ChevronIcon className="h-4 w-4" />
+                  </span>
+                </button>
+              </Fragment>
             );
           })}
         </div>

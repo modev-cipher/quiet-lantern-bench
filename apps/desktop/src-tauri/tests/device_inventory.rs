@@ -15,6 +15,7 @@ fn device(
     unified: bool,
 ) -> DeviceInfo {
     DeviceInfo {
+        llm_runtime: None,
         key: key.into(),
         backend,
         ordinal: 0,

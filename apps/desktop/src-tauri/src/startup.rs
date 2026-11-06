@@ -28,11 +28,6 @@ impl StartupFailure {
         let lower = detail.to_lowercase();
         let code = if lower.contains("another instance") {
             StartupFailureCode::AlreadyRunning
-        } else if lower.contains("not a database")
-            || lower.contains("malformed")
-            || lower.contains("migration")
-        {
-            StartupFailureCode::DatabaseDamaged
         } else if lower.contains("no space")
             || lower.contains("disk is full")
             || lower.contains("disk full")
@@ -44,6 +39,11 @@ impl StartupFailure {
             || lower.contains("read-only")
         {
             StartupFailureCode::NoAccess
+        } else if lower.contains("not a database")
+            || lower.contains("malformed")
+            || lower.contains("migration")
+        {
+            StartupFailureCode::DatabaseDamaged
         } else {
             StartupFailureCode::Unknown
         };
@@ -101,6 +101,18 @@ mod tests {
             (
                 "attempt to write a readonly database",
                 StartupFailureCode::NoAccess,
+            ),
+            (
+                "while executing migration 34: error returned from database: (code: 13) database or disk is full",
+                StartupFailureCode::DiskFull,
+            ),
+            (
+                "while executing migration 34: error returned from database: (code: 8) attempt to write a readonly database",
+                StartupFailureCode::NoAccess,
+            ),
+            (
+                "migration 34 was previously applied but has been modified",
+                StartupFailureCode::DatabaseDamaged,
             ),
             ("failed to bind media server", StartupFailureCode::Unknown),
         ];

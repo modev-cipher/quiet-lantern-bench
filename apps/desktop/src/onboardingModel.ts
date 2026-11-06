@@ -182,6 +182,13 @@ export function gpuLine(hw: WizardHardware): string {
   return `${device.name}${vram}${rest}`;
 }
 
+export function gpuDriverHint(hw: WizardHardware): string | null {
+  if (hw.localAiGpus !== 0) return null;
+  const device = primaryDevice(hw);
+  if (!device) return null;
+  return t("wizard.gpuDriverHint", { name: device.name });
+}
+
 export function ramCpuLine(hw: WizardHardware): string {
   return t("wizard.ramCpuLine", {
     gb: formatGb(hw.ram.totalMb / 1024),

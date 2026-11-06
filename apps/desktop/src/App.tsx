@@ -947,7 +947,7 @@ function App() {
         />
       )}
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <AppUpdateBanner />
+        <AppUpdateBanner castsActive={castingBookIds.size > 0} />
         <div className="flex min-h-0 flex-1">
           <main
             id="main-content"

@@ -4,7 +4,12 @@ import arSettings from "../src/i18n/messages/ar/settings.json" with { type: "jso
 import arShell from "../src/i18n/messages/ar/shell.json" with { type: "json" };
 import enSettings from "../src/i18n/messages/en/settings.json" with { type: "json" };
 import enShell from "../src/i18n/messages/en/shell.json" with { type: "json" };
-import { installTauriMock, type UpdateScenario } from "./tauriMock";
+import {
+  fixtureBook,
+  fixtureChapters,
+  installTauriMock,
+  type UpdateScenario,
+} from "./tauriMock";
 
 // Copy comes from the catalog of the locale under test (I18N_E2E_LOCALE=ar boots
 // Arabic), so the same spec pins EN and AR. `parts` splits a template on its
@@ -83,6 +88,10 @@ test("a ready version shows a non-modal banner; Later hides it but Settings stil
   await expect(page.getByTestId("app-update-install")).toHaveText(
     S["update.install"],
   );
+  await expect(page.getByTestId("app-update-casts")).toHaveCount(0);
+  await page.getByTestId("app-update-whats-new").click();
+  expect(await invoked(page)).toContain("plugin:opener|open_url");
+  await expect(page.getByTestId("app-update-install")).toBeVisible();
   await page.getByTestId("app-update-later").click();
   await expect(banner).toHaveCount(0);
   expect(await invoked(page)).toContain("update_dismiss");
@@ -92,6 +101,43 @@ test("a ready version shows a non-modal banner; Later hides it but Settings stil
     "settings.updateAvailable",
   );
   await expect(page.getByTestId("update-status-detail")).toContainText("0.2.0");
+});
+
+test("with a cast running, the offer says it continues after the restart", async ({
+  page,
+}) => {
+  await installTauriMock(page, {
+    books: [fixtureBook()],
+    updateScenario: AVAILABLE,
+    jobScenario: {
+      chapters: fixtureChapters(),
+      seededJobs: [
+        {
+          id: "running",
+          bookId: "book-fixture",
+          scope: { kind: "chapters", chapter_ids: ["ch-1"] },
+          mode: "narrator",
+          voiceProfileId: "preset-kokoro-af-heart",
+          outputFormat: "mp3",
+          modelOverridesJson: null,
+          state: "SYNTHESIZING",
+          overnight: false,
+          etaSeconds: null,
+          reportJson: null,
+          outputPathsJson: null,
+          createdAt: 1_000,
+          updatedAt: 1_000,
+        },
+      ],
+    },
+  });
+  await page.goto("/");
+  await expect(page.getByTestId("app-update-casts")).toHaveText(
+    S["update.castsContinue"],
+  );
+  await expect(page.getByTestId("app-update-whats-new")).toHaveText(
+    S["update.whatsNew"],
+  );
 });
 
 test("one click: progress with cancel, then verifying, then installing", async ({
@@ -145,6 +191,7 @@ test("an install that cannot self-replace offers the release page instead", asyn
   await expect(page.getByTestId("app-update-install")).toHaveText(
     S["update.get"],
   );
+  await expect(page.getByTestId("app-update-whats-new")).toHaveCount(0);
   await page.getByTestId("app-update-install").click();
   expect(await invoked(page)).toContain("plugin:opener|open_url");
 });

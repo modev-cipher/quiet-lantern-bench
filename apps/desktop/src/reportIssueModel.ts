@@ -1,7 +1,8 @@
 import type { MessageKey } from "./i18n";
 
 export interface ReportIssueOption {
-  id: "bug" | "feature" | "blank" | "website" | "security";
+  id:
+    "bug" | "feature" | "email" | "blank" | "website" | "security" | "support";
   titleKey: MessageKey;
   descKey: MessageKey;
   defaultTitle: string;
@@ -15,10 +16,12 @@ export const FEATURE_REQUEST_URL =
   "https://github.com/torkiv-labs/txtcaster-releases/issues/new?template=feature_request.yml";
 export const BLANK_ISSUE_URL =
   "https://github.com/torkiv-labs/txtcaster-releases/issues/new";
-export const WEBSITE_URL =
-  "https://github.com/torkiv-labs/txtcaster-releases";
+export const WEBSITE_URL = "https://github.com/torkiv-labs/txtcaster-releases";
 export const SECURITY_URL =
   "https://github.com/torkiv-labs/txtcaster-releases/security";
+export const EMAIL_SUPPORT_URL =
+  "mailto:support@txtcaster.torkiv.com?subject=txtCaster%20support";
+export const SUPPORT_URL = "https://www.patreon.com/c/txtcaster/membership";
 
 export const REPORT_ISSUE_OPTIONS: readonly ReportIssueOption[] = [
   {
@@ -36,6 +39,14 @@ export const REPORT_ISSUE_OPTIONS: readonly ReportIssueOption[] = [
     defaultTitle: "Feature request",
     defaultDesc: "Suggest an improvement or a new capability for txtCaster.",
     url: FEATURE_REQUEST_URL,
+  },
+  {
+    id: "email",
+    titleKey: "issue.emailTitle",
+    descKey: "issue.emailDesc",
+    defaultTitle: "Email support",
+    defaultDesc: "No GitHub account? Write to support@txtcaster.torkiv.com.",
+    url: EMAIL_SUPPORT_URL,
   },
   {
     id: "blank",
@@ -60,6 +71,14 @@ export const REPORT_ISSUE_OPTIONS: readonly ReportIssueOption[] = [
     defaultTitle: "Private contact / Security",
     defaultDesc: "Report security vulnerabilities or private inquiries.",
     url: SECURITY_URL,
+  },
+  {
+    id: "support",
+    titleKey: "issue.supportTitle",
+    descKey: "issue.supportDesc",
+    defaultTitle: "Support development",
+    defaultDesc: "Help keep txtCaster going with a Patreon membership.",
+    url: SUPPORT_URL,
   },
 ] as const;
 

@@ -19,6 +19,8 @@ const HEALTH_INTERVAL: Duration = Duration::from_secs(5);
 const HEALTH_TIMEOUT: Duration = Duration::from_secs(5);
 const STABLE_GRACE: Duration = Duration::from_secs(10);
 const MAX_HEALTH_FAILURES: u32 = 6;
+const GPU_REPORT_POLL: Duration = Duration::from_millis(500);
+const GPU_REPORT_DEADLINE: Duration = Duration::from_secs(120);
 
 struct FailureThreshold {
     failures: u32,
@@ -396,6 +398,13 @@ async fn run_loop(app: AppHandle) {
                 }
                 publish(&app, EngineStatus::Ready { port });
                 let ready_at = Instant::now();
+                let gpu_generation = crate::hardware::engine_gpus::begin_engine();
+                let gpu_report = tokio::spawn(learn_engine_gpus(
+                    client.clone(),
+                    health_url.clone(),
+                    token.clone(),
+                    gpu_generation,
+                ));
                 let mut stopped_by_request = false;
                 tokio::select! {
                     _ = shutdown_rx.changed() => {}
@@ -405,6 +414,8 @@ async fn run_loop(app: AppHandle) {
                     }
                     _ = monitor(&client, &mut child, port, &token) => {}
                 }
+                gpu_report.abort();
+                crate::hardware::engine_gpus::end_engine(gpu_generation);
                 if ready_at.elapsed() >= STABLE_GRACE {
                     backoff.reset();
                 }
@@ -592,6 +603,38 @@ async fn read_engine_api(
             Err(()) => tokio::time::sleep(Duration::from_millis(100)).await,
         }
     }
+}
+
+async fn learn_engine_gpus(client: reqwest::Client, url: String, token: String, generation: u64) {
+    use crate::hardware::engine_gpus::{record, report_in, Report};
+    let deadline = Instant::now() + GPU_REPORT_DEADLINE;
+    while Instant::now() < deadline {
+        let body = match client
+            .get(&url)
+            .bearer_auth(&token)
+            .timeout(HEALTH_TIMEOUT)
+            .send()
+            .await
+        {
+            Ok(response) => response.json::<serde_json::Value>().await.ok(),
+            Err(_) => None,
+        };
+        match body.as_ref().map(report_in) {
+            Some(Report::Ready(gpus)) => {
+                let names: Vec<String> = gpus
+                    .iter()
+                    .map(|gpu| format!("{}:{}", gpu.backend, gpu.description))
+                    .collect();
+                tracing::info!("engine reports {} gpu(s): {}", gpus.len(), names.join(", "));
+                record(generation, gpus);
+                return;
+            }
+            Some(Report::Absent) => return,
+            Some(Report::Pending) | None => {}
+        }
+        tokio::time::sleep(GPU_REPORT_POLL).await;
+    }
+    tracing::warn!("engine did not report its gpus within {GPU_REPORT_DEADLINE:?}");
 }
 
 async fn health_ok(client: &reqwest::Client, url: &str, token: &str) -> bool {

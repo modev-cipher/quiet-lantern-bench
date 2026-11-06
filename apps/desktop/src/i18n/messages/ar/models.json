@@ -101,6 +101,7 @@
   "wizard.gpuMemory": "{gb} GB {label}",
   "wizard.memoryUnreadable": "{label} غير قابلة للقراءة على هذا التعريف",
   "wizard.moreDevices": "(+{n} أخرى)",
+  "wizard.gpuDriverHint": "لا يستطيع الذكاء الاصطناعي المحلي استخدام {name} بعد. ثبّت تعريف كرت الشاشة أو حدّثه مع دعم Vulkan؛ وحتى ذلك الحين يعمل الذكاء الاصطناعي المحلي على المعالج المركزي (CPU).",
   "wizard.ramCpuLine": "{gb} GB · CPU بـ {cores} أنوية",
   "wizard.diskLine": "{gb} GB متاحة للـ Models",
   "wizard.skipTts": "تخطَّ الآن (نزّله لاحقًا من الإعدادات → Models)",

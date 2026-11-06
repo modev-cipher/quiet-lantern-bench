@@ -9,10 +9,12 @@ import threading
 import time
 import urllib.error
 import urllib.request
+from pathlib import Path
 from typing import IO
 
 HANDSHAKE_PREFIX = "TXTCASTER_READY"
 HANDSHAKE_TIMEOUT = 30.0
+GPU_PROBE_TIMEOUT = 120.0
 IMPORT_CHECK_TIMEOUT = 300.0
 OFFLINE_ENV_VARS = ("HF_HUB_OFFLINE", "TRANSFORMERS_OFFLINE")
 TOKEN = "smoke-test-token"
@@ -133,6 +135,71 @@ def check_ingest(port: int) -> None:
     print("/ingest: manifest")
 
 
+def get_json(port: int, path: str) -> dict[str, object]:
+    request = urllib.request.Request(f"http://127.0.0.1:{port}{path}")
+    request.add_header("Authorization", f"Bearer {TOKEN}")
+    with urllib.request.urlopen(request, timeout=10) as response:
+        return dict(json.loads(response.read().decode()))
+
+
+def check_backend_module(binary: str, backend: str) -> None:
+    lib = Path(binary).absolute().parent / "_internal" / "llama_cpp" / "lib"
+    modules = sorted(path.name for path in lib.glob(f"*ggml-{backend}.*"))
+    if not modules:
+        fail(f"no {backend} backend module in {lib}")
+    print(f"backend module: {', '.join(modules)}")
+
+
+def gpu_report(port: int) -> dict[str, object]:
+    deadline = time.monotonic() + GPU_PROBE_TIMEOUT
+    while time.monotonic() < deadline:
+        payload = get_json(port, "/health")
+        if isinstance(payload.get("gpu_offload"), bool):
+            return payload
+        time.sleep(0.5)
+    fail("gpu_offload never resolved on /health")
+    raise AssertionError
+
+
+def check_generation(port: int, gguf: str, device: dict[str, object] | None) -> None:
+    backend = str(device["backend"]).lower() if device else "cpu"
+    where = str(device["description"]) if device else "the CPU"
+    plan = {
+        "model_id": "smoke",
+        "device": {"backend": backend, "ordinal": 0} if device else "cpu",
+        "n_gpu_layers": 129 if device else 0,
+        "n_layers_total": 128,
+        "ctx": 512,
+        "batch": 64,
+    }
+    request = urllib.request.Request(
+        f"http://127.0.0.1:{port}/benchmark/llm",
+        data=json.dumps({"model_path": gguf, "resource_plan": plan, "max_tokens": 16}).encode(),
+        headers={"Authorization": f"Bearer {TOKEN}", "Content-Type": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=600) as response:
+            result = json.loads(response.read().decode())
+    except urllib.error.HTTPError as error:
+        fail(f"/benchmark/llm on {where} returned {error.code}: {error.read()!r}")
+        raise AssertionError from error
+    if not result.get("tok_s", 0) > 0:
+        fail(f"/benchmark/llm produced no tokens on {where}: {result}")
+    print(f"generation on {where} ({backend}): {result['tok_s']:.1f} tok/s")
+
+
+def check_gpu(port: int, gguf: str | None, require_gpu: bool) -> None:
+    payload = gpu_report(port)
+    devices = payload.get("gpu_devices") or []
+    assert isinstance(devices, list)
+    names = [f"{d['backend']}:{d['description']}" for d in devices]
+    print(f"gpu_offload={payload['gpu_offload']} devices={names}")
+    if require_gpu and not payload["gpu_offload"]:
+        fail("no GPU device was reported but one was required")
+    if gguf:
+        check_generation(port, gguf, devices[0] if devices else None)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="smoke_test")
     parser.add_argument("binary", help="path to the packaged txtcaster-engine binary")
@@ -141,8 +208,19 @@ def main() -> None:
         action="store_true",
         help="the lite engine: no local AI imports to probe; ingest a document instead",
     )
+    parser.add_argument(
+        "--expect-backend",
+        choices=("vulkan", "cuda"),
+        help="the llama.cpp GPU backend module this engine variant must carry",
+    )
+    parser.add_argument(
+        "--require-gpu", action="store_true", help="fail unless the engine reports a GPU"
+    )
+    parser.add_argument("--gguf", help="a small GGUF model to generate with on the first GPU")
     args = parser.parse_args()
 
+    if args.expect_backend:
+        check_backend_module(args.binary, args.expect_backend)
     if not args.reader_only:
         check_imports(args.binary)
 
@@ -169,6 +247,8 @@ def main() -> None:
 
         if args.reader_only:
             check_ingest(port)
+        if args.expect_backend:
+            check_gpu(port, args.gguf, args.require_gpu)
     finally:
         process.terminate()
         try:

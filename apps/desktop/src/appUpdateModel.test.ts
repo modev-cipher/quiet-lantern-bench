@@ -50,10 +50,28 @@ describe("bannerFor", () => {
       version: "0.2.0",
       notes: "Faster casts",
       action: "restart",
+      whatsNew: false,
+      castsContinue: false,
     });
     expect(bannerFor({ ...ready, install_kind: "open" })).toMatchObject({
       action: "open",
     });
+  });
+
+  it("links the release page beside a restart, not beside a download link", () => {
+    const published = { ...ready, release_url: "https://example.invalid/r" };
+    expect(bannerFor(published)).toMatchObject({ whatsNew: true });
+    expect(
+      bannerFor({ ...published, install_kind: "open" }),
+    ).toMatchObject({ action: "open", whatsNew: false });
+  });
+
+  it("says casts in progress continue only when a restart would interrupt one", () => {
+    expect(bannerFor(ready, true)).toMatchObject({ castsContinue: true });
+    expect(bannerFor(ready, false)).toMatchObject({ castsContinue: false });
+    expect(
+      bannerFor({ ...ready, install_kind: "open" }, true),
+    ).toMatchObject({ castsContinue: false });
   });
 
   it("Later hides the offer", () => {

@@ -43,8 +43,11 @@ condition voice samples; it does not link FFmpeg into its own binary. The build 
 `ffmpeg-n8.1.3-9-g29e619e767-win64-lgpl-shared-8.1` from BtbN/FFmpeg-Builds, pinned
 by SHA-256 in `scripts/fetch_ffmpeg_windows.sh`, which also refuses a build
 configured with `--enable-gpl` or `--enable-nonfree`. BtbN's LGPL variants are
-configured with `--enable-version3`, so the binaries are LGPL version 3. The Linux package does not
-bundle FFmpeg; it declares the distribution's `ffmpeg` package as a dependency.
+configured with `--enable-version3`, so the binaries are LGPL version 3. The Linux packages bundle
+the matching `ffmpeg-n8.1.3-9-g29e619e767-linux64-lgpl-shared-8.1` build, pinned and checked the same
+way by `scripts/fetch_ffmpeg_linux.sh`: the deb and rpm install the executables under
+`/usr/lib/txtCaster/ffmpeg/` and their shared libraries under `/usr/lib/txtCaster/lib/`, and the
+AppImage carries both inside the image.
 
 - Upstream: https://ffmpeg.org/
 - Corresponding source: https://github.com/FFmpeg/FFmpeg/tree/29e619e767 (n8.1.3 plus 9 release-branch commits) and the build
@@ -55,7 +58,45 @@ bundle FFmpeg; it declares the distribution's `ffmpeg` package as a dependency.
 
 Obligations for a distributed binary: this notice, the licence text, access to the
 corresponding source, and the recipient's right to replace the bundled FFmpeg
-executable and DLLs with a modified build, which they can do in place.
+executables and shared libraries with a modified build, which they can do in place.
+
+### PulseAudio client library (libpulse) 17.0 — LGPL-2.1-or-later
+
+The Linux packages bundle the PulseAudio 17.0 client library (`libpulse.so.0` and
+`libpulsecommon-17.0.so`), built unmodified from the upstream release by
+`scripts/release/build_libpulse.sh`; packaging rewrites only the library search path.
+Releases 15.99 to 16.1 can stall playback after a seek. The AppImage uses this copy in
+place of the system library; the deb and rpm install it under `/usr/lib/txtCaster/pulse/`
+and load it only when the system library is one of those releases.
+
+- Upstream: https://www.freedesktop.org/wiki/Software/PulseAudio/
+- Corresponding source: https://freedesktop.org/software/pulseaudio/releases/pulseaudio-17.0.tar.xz
+  (SHA-256 053794d6671a3e397d849e478a80b82a63cb9d8ca296bd35b73317bb5ceb87b5)
+- Licence: LGPL-2.1-or-later. The LGPL text and upstream licence statement ship beside
+  the library as `libpulse-LGPL.txt` and `libpulse-LICENSE.txt`.
+
+Obligations for a distributed binary: this notice, the licence text, access to the
+corresponding source, and the recipient's right to replace the bundled library with a
+modified build, which they can do in place.
+
+## NVIDIA libraries in the NVIDIA build of the full engine
+
+The full engine has an NVIDIA build, a separate download that txtCaster installs on
+computers with a supported NVIDIA GPU. It carries unmodified NVIDIA runtime libraries in
+object code, used only by txtCaster:
+
+- CUDA Runtime, cuBLAS, cuFFT, cuRAND, cuSOLVER, cuSPARSE, NVRTC, nvJitLink, CUPTI, NVTX
+  and cuFile, distributed under the NVIDIA CUDA Toolkit End User License Agreement as
+  files listed in its Attachment A;
+- cuDNN 9, under the NVIDIA Software Development Kit licence that ships with it;
+- on Linux also cuSPARSELt and NVSHMEM under their NVIDIA licences, and NCCL under
+  BSD-3-Clause.
+
+The standard build of the full engine and the reader engine carry no NVIDIA libraries,
+and no engine carries a GPU driver. The licence texts ship inside the NVIDIA build under
+`licenses/nvidia/`. These libraries are licensed for use only as part of txtCaster: they
+may not be extracted, redistributed, modified, reverse engineered or used by other
+software.
 
 ## Copyleft components NOT in the distributed bundle
 

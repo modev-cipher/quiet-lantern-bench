@@ -320,6 +320,7 @@ async fn cached_profile(
         .get_or_try_init(|| detect_profile(app, pool))
         .await
         .cloned()?;
+    hardware::engine_gpus::merge_reported(&mut profile.devices);
     let dirs = storage_dirs(app, pool).await?;
     profile.disk = hardware::detect_disk(dirs.models_dir(), models_origin(&dirs), &dirs.cache_dir);
     Ok(profile)
@@ -791,6 +792,7 @@ struct HardwareProfileView {
     #[serde(flatten)]
     profile: hardware::HardwareProfile,
     primary_key: Option<String>,
+    local_ai_gpus: Option<usize>,
 }
 
 #[tauri::command]
@@ -804,6 +806,7 @@ async fn get_hardware_profile(
     Ok(HardwareProfileView {
         profile,
         primary_key,
+        local_ai_gpus: hardware::engine_gpus::reported_count(),
     })
 }
 
@@ -1167,12 +1170,7 @@ async fn delete_book(
             );
         }
     }
-    let books_root = data_dir.join("books");
-    let removed_id = book_id.clone();
-    let _ = tokio::task::spawn_blocking(move || {
-        storage::book_files::remove_deleted_book_files(&books_root, &removed_id)
-    })
-    .await;
+    storage::book_files::remove_deleted_book_files(&pool, &data_dir.join("books"), &book_id).await;
     storage::export::purge_orphaned_paths(&pool, dirs.exports_dir(), export_paths)
         .await
         .map_err(|e| e.to_string())?;
@@ -2163,6 +2161,26 @@ async fn create_job(
         storage::now_ms() / 1000,
     )
     .await?;
+    if need == engine_install::capability::EngineNeed::Documents
+        && orchestrator::vision::explains_figures_locally(
+            &pool,
+            storage::paths::resolve(&pool, &storage::paths::resolve_app_data_dir(&app)?)
+                .await
+                .map_err(|e| e.to_string())?
+                .models_dir(),
+            &args.book_id,
+            &args.scope,
+            Some(&plan.overrides_json),
+        )
+        .await
+        .map_err(|e| e.to_string())?
+    {
+        engine_gate(
+            &app,
+            &supervisor,
+            engine_install::capability::EngineNeed::LocalAi,
+        )?;
+    }
     if !plan.consent_missing.is_empty() {
         // Structured refusal: the form opens the consent sheet and
         // re-submits after a grant. No cloud request has started.
@@ -3339,10 +3357,7 @@ async fn uninstall_engine(
     supervisor: tauri::State<'_, SupervisorHandle>,
     pool: tauri::State<'_, storage::SqlitePool>,
 ) -> Result<(), String> {
-    let _gate = match app.try_state::<orchestrator::JobOrchestrator>() {
-        Some(orchestrator) => Some(orchestrator.lock_mutation_gate_owned().await),
-        None => None,
-    };
+    let _gate = engine_install::commands::hold_job_admission(&app).await;
     let active_job_count: i64 = sqlx::query_scalar(
         "SELECT COUNT(*) FROM render_job WHERE UPPER(state) NOT IN ('DONE', 'FAILED', 'CANCELLED', 'CANCELED')",
     )
@@ -5554,9 +5569,15 @@ fn setup_app(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
             }
         });
     }
-    let finished = storage::book_files::finish_interrupted_removals(&data_dir.join("books"));
-    if finished > 0 {
-        tracing::info!("finished removing the files of {finished} deleted book(s)");
+    {
+        let pool = pool.clone();
+        let books_root = data_dir.join("books");
+        tauri::async_runtime::spawn(async move {
+            let finished = storage::book_files::finish_pending_removals(&pool, &books_root).await;
+            if finished > 0 {
+                tracing::info!("finished removing the files of {finished} deleted book(s)");
+            }
+        });
     }
     match voice_sample::sweep_staging(&data_dir) {
         0 => {}
@@ -6040,6 +6061,7 @@ mod learned_migration_tests {
 
     fn card(key: &str, backend: hardware::DeviceBackend) -> hardware::DeviceInfo {
         hardware::DeviceInfo {
+            llm_runtime: None,
             key: key.into(),
             backend,
             ordinal: 0,

@@ -8,6 +8,7 @@ import {
   defaultChoices,
   diskLine,
   emptySelection,
+  gpuDriverHint,
   gpuLine,
   pickBookPath,
   pickLlm,
@@ -288,6 +289,30 @@ describe("pickLlm", () => {
       tts: [],
       llm: null,
     });
+  });
+});
+
+describe("the GPU driver hint", () => {
+  it("says nothing until the engine has reported what it can use", () => {
+    expect(gpuDriverHint(hardware())).toBeNull();
+    expect(gpuDriverHint({ ...hardware(), localAiGpus: null })).toBeNull();
+  });
+
+  it("says nothing when local AI can use a GPU", () => {
+    expect(gpuDriverHint({ ...hardware(), localAiGpus: 1 })).toBeNull();
+  });
+
+  it("names the GPU local AI cannot use and the fix", () => {
+    const hint = gpuDriverHint({ ...hardware(), localAiGpus: 0 });
+    expect(hint).toContain("RTX 3060");
+    expect(hint).toMatch(/driver/i);
+    expect(hint).toMatch(/CPU/);
+  });
+
+  it("says nothing on a machine with no GPU at all", () => {
+    expect(
+      gpuDriverHint({ ...hardware(), ...inventory([]), localAiGpus: 0 }),
+    ).toBeNull();
   });
 });
 

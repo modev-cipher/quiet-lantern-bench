@@ -10,10 +10,14 @@ case "$variant" in
   cpu)
     groups=(--no-group gpu --group cpu)
     distpath="dist"
+    llama_backend=vulkan
+    llama_cmake="-DGGML_BACKEND_DL=ON -DGGML_NATIVE=OFF -DGGML_VULKAN=ON"
     ;;
   cuda13)
     groups=(--no-group cpu --group gpu)
     distpath="dist-cuda13"
+    llama_backend=cuda
+    llama_cmake="-DGGML_BACKEND_DL=ON -DGGML_NATIVE=OFF -DGGML_CUDA=ON -DGGML_CUDA_NCCL=OFF"
     ;;
   lite)
     distpath="dist-lite"
@@ -40,8 +44,44 @@ if [ "$variant" = lite ]; then
     fastapi uvicorn numpy pillow pypdfium2 pysbd selectolax pyinstaller
   "$venv_python" -m PyInstaller --noconfirm --clean --distpath "$distpath" txtcaster-engine-lite.spec
 else
-  uv sync "${groups[@]}" --group build
+  # llama.cpp loads its GPU backend as a module (GGML_BACKEND_DL), so a machine without the
+  # Vulkan loader or the NVIDIA driver skips that backend instead of failing to start. The
+  # toolchains are the pinned ones in scripts/release/gpu-toolchain.json on every OS.
+  toolchains="${TXTCASTER_TOOLCHAIN_DIR:-$HOME/.cache/txtcaster-toolchains}"
+  release="$(cd ../scripts/release && pwd)"
+  eval "$(uv run --no-project --python 3.11 python -I "$release/fetch_gpu_toolchain.py" "$llama_backend" "$toolchains")"
+  tools="$UV_PROJECT_ENVIRONMENT-tools"
+  uv venv --python 3.11 --allow-existing "$tools" >/dev/null
+  tools="$(cd "$tools" && pwd)"
+  tools_bin="$tools/bin"; [ -d "$tools_bin" ] || tools_bin="$tools/Scripts"
+  tools_python="$tools_bin/python"; [ -x "$tools_python" ] || tools_python="$tools_bin/python.exe"
+  uv pip install --python "$tools_python" --require-hashes -r "$release/build-tools.txt"
+  export PATH="$tools_bin:$PATH" CMAKE_GENERATOR=Ninja CMAKE_ARGS="$llama_cmake"
+  case "$(uname -s)" in
+    MINGW*|MSYS*|CYGWIN*)
+      command -v cl.exe >/dev/null || { echo "run from an MSVC x64 developer environment (vcvarsall.bat x64)" >&2; exit 1; } ;;
+  esac
+  # uv reuses a wheel it built earlier whatever CMAKE_ARGS says, and --refresh-package does
+  # not invalidate it: a CUDA build after a Vulkan one would get the Vulkan wheel.
+  uv cache clean llama-cpp-python
+  uv sync "${groups[@]}" --group build --reinstall-package llama-cpp-python
+  find "$UV_PROJECT_ENVIRONMENT" -path "*llama_cpp/lib/*ggml-$llama_backend.*" | grep -q . \
+    || { echo "llama-cpp-python was built without its $llama_backend backend" >&2; exit 1; }
+  if [ "$(uname -s)" = Linux ]; then
+    # llama-cpp-python adds the toolkit's link directories to every library's RUNPATH;
+    # the shipped libraries resolve only beside themselves and from the system.
+    find "$UV_PROJECT_ENVIRONMENT" -path '*llama_cpp/lib/*.so*' -type f -exec patchelf --set-rpath '$ORIGIN' {} +
+  fi
   uv run --no-sync --group build pyinstaller --noconfirm --clean --distpath "$distpath" txtcaster-engine.spec
+  bundle="$distpath/txtcaster-engine/_internal"
+  find "$bundle/llama_cpp/lib" -name "*ggml-$llama_backend.*" | grep -q . \
+    || { echo "the onedir lacks the $llama_backend backend module" >&2; exit 1; }
+  if [ "$(uname -s)" = Linux ]; then
+    leaked="$(find "$bundle/llama_cpp/lib" -name '*.so*' -type f -exec readelf -d {} + | grep -E 'R(UN)?PATH' | grep -v '\[\$ORIGIN\]' || true)"
+    [ -z "$leaked" ] || { echo "a llama.cpp library searches a build-host path: $leaked" >&2; exit 1; }
+  fi
+  driver="$(find "$bundle" \( -iname 'libvulkan.so*' -o -iname 'vulkan-1.dll' -o -iname 'libcuda.so*' -o -iname 'nvcuda.dll' \) | head -n 1)"
+  [ -z "$driver" ] || { echo "the onedir must not carry a GPU driver library: $driver" >&2; exit 1; }
 fi
 echo "onedir build at engine/$distpath/txtcaster-engine/ (variant: $variant, venv: $UV_PROJECT_ENVIRONMENT)"
 # Bundled assets must land in the onedir tree (PyInstaller 6 puts datas under _internal/).

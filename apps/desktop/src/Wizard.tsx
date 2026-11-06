@@ -27,6 +27,7 @@ import {
   defaultChoices,
   diskLine,
   emptySelection,
+  gpuDriverHint,
   gpuLine,
   pickBookPath,
   pickLlm,
@@ -197,6 +198,11 @@ function ScanCard({
           </span>
           <span className="font-mono">{gpuLine(hw)}</span>
         </p>
+        {gpuDriverHint(hw) && (
+          <p data-testid="scan-gpu-hint" className="ps-13 text-secondary text-ink-400">
+            {gpuDriverHint(hw)}
+          </p>
+        )}
         <p data-testid="scan-ram" className="flex items-baseline gap-3">
           <span className="w-10 shrink-0 text-label font-semibold tracking-[0.12em] text-ink-500 uppercase">
             RAM

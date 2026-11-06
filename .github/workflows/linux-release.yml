@@ -76,7 +76,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        variant: [cpu, cuda13]
+        include:
+          - variant: cpu
+            backend: vulkan
+          - variant: cuda13
+            backend: cuda
     steps:
       - uses: actions/checkout@v4
         with:
@@ -93,9 +97,32 @@ jobs:
         run: |
           dist=engine/dist-${{ matrix.variant }}; [ -d "$dist" ] || dist=engine/dist
           du -sh "$dist/txtcaster-engine"
-          python3 scripts/smoke_test.py "$dist/txtcaster-engine/txtcaster-engine"
+          python3 scripts/smoke_test.py "$dist/txtcaster-engine/txtcaster-engine" --expect-backend ${{ matrix.backend }}
           ldd "$dist/txtcaster-engine/txtcaster-engine" | head -5
           df -h / | tail -1
+      - name: Test model
+        run: |
+          curl -fsSL -o "${{ runner.temp }}/stories260K.gguf" https://huggingface.co/ggml-org/models/resolve/main/tinyllamas/stories260K.gguf
+          echo "270cba1bd5109f42d03350f60406024560464db173c0e387d91f0426d3bd256d  ${{ runner.temp }}/stories260K.gguf" | sha256sum -c -
+      - name: Generation on a Vulkan GPU (lavapipe)
+        if: ${{ matrix.variant == 'cpu' }}
+        env:
+          GGML_VK_VISIBLE_DEVICES: "0"
+          GGML_VK_DISABLE_F16: "1"
+          GGML_VK_DISABLE_COOPMAT: "1"
+        run: |
+          sudo apt-get update && sudo apt-get install -y mesa-vulkan-drivers libvulkan1
+          python3 scripts/smoke_test.py engine/dist/txtcaster-engine/txtcaster-engine --expect-backend vulkan --require-gpu --gguf "${{ runner.temp }}/stories260K.gguf" | tee gpu.log
+          grep -E "generation on .*\(vulkan\)" gpu.log
+      - name: Generation on the CPU without a GPU driver
+        env:
+          VK_DRIVER_FILES: /nonexistent.json
+          VK_ICD_FILENAMES: /nonexistent.json
+        run: |
+          dist=engine/dist-${{ matrix.variant }}; [ -d "$dist" ] || dist=engine/dist
+          python3 scripts/smoke_test.py "$dist/txtcaster-engine/txtcaster-engine" --expect-backend ${{ matrix.backend }} --gguf "${{ runner.temp }}/stories260K.gguf" | tee cpu.log
+          grep -F "gpu_offload=False devices=[]" cpu.log
+          grep -F "generation on the CPU (cpu)" cpu.log
       - name: Pack
         env:
           RELEASE_BUILD_ROOT: ${{ runner.temp }}/rb
@@ -104,9 +131,15 @@ jobs:
           signer=$(find "$RELEASE_BUILD_ROOT" -type f -name update_sign -perm -u+x | head -1)
           dist=engine/dist-${{ matrix.variant }}; [ -d "$dist" ] || dist=engine/dist
           mkdir -p out-engine
-          "$signer" engine-pack --dir "$dist/txtcaster-engine" --out-prefix "out-engine/txtcaster-engine-0.1.0-linux-x86_64-${{ matrix.variant }}"
+          version="$(sed -n 's/^__version__ = "\(.*\)"/\1/p' engine/txtcaster_engine/__init__.py)"
+          base="out-engine/txtcaster-engine-$version-linux-x86_64-${{ matrix.variant }}"
+          "$signer" engine-pack --dir "$dist/txtcaster-engine" --out-prefix "$base"
           ls -la out-engine | cut -c1-110
-          sha256sum out-engine/*.tar.zst.* > "out-engine/${{ matrix.variant }}.hashes.txt"
+          {
+            sha256sum "$base".tar.zst.* | sed 's#out-engine/##; s/ \*/  /'
+            echo "whole  $(cat "$base".tar.zst.* | sha256sum | cut -d' ' -f1)"
+            stat -c '%n %s' "$base".tar.zst.* | sed 's#out-engine/##'
+          } > "$base.hashes.txt"
       - uses: actions/upload-artifact@v4
         with:
           name: linux-engine-${{ matrix.variant }}

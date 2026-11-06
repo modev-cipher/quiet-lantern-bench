@@ -6,19 +6,29 @@ import ReportIssueModal from "./ReportIssueModal";
 import {
   BLANK_ISSUE_URL,
   BUG_REPORT_URL,
+  EMAIL_SUPPORT_URL,
   FEATURE_REQUEST_URL,
   getOptionUrl,
   REPORT_ISSUE_OPTIONS,
   SECURITY_URL,
+  SUPPORT_URL,
   WEBSITE_URL,
 } from "./reportIssueModel";
 import { CATALOGS } from "./i18n/catalog";
 
 describe("reportIssueModel options and URLs", () => {
-  it("defines the 5 required issue and feedback destinations", () => {
-    expect(REPORT_ISSUE_OPTIONS).toHaveLength(5);
+  it("defines the issue, contact and support destinations", () => {
+    expect(REPORT_ISSUE_OPTIONS).toHaveLength(7);
     const ids = REPORT_ISSUE_OPTIONS.map((o) => o.id);
-    expect(ids).toEqual(["bug", "feature", "blank", "website", "security"]);
+    expect(ids).toEqual([
+      "bug",
+      "feature",
+      "email",
+      "blank",
+      "website",
+      "security",
+      "support",
+    ]);
   });
 
   it("points each option to the correct official destination URL", () => {
@@ -46,6 +56,14 @@ describe("reportIssueModel options and URLs", () => {
     expect(SECURITY_URL).toBe(
       "https://github.com/torkiv-labs/txtcaster-releases/security",
     );
+
+    expect(getOptionUrl("email")).toBe(EMAIL_SUPPORT_URL);
+    expect(EMAIL_SUPPORT_URL).toBe(
+      "mailto:support@txtcaster.torkiv.com?subject=txtCaster%20support",
+    );
+
+    expect(getOptionUrl("support")).toBe(SUPPORT_URL);
+    expect(SUPPORT_URL).toBe("https://www.patreon.com/c/txtcaster/membership");
   });
 });
 
@@ -60,7 +78,7 @@ describe("ReportIssueModal markup and accessibility", () => {
     expect(html).toBe("");
   });
 
-  it("renders dialog surface with accessible attributes and 5 options when open", () => {
+  it("renders dialog surface with accessible attributes and every option when open", () => {
     const html = renderToStaticMarkup(
       createElement(ReportIssueModal, {
         open: true,
@@ -73,12 +91,13 @@ describe("ReportIssueModal markup and accessibility", () => {
     expect(html).toContain('aria-modal="true"');
     expect(html).toContain('data-testid="report-issue-close"');
 
-    // All 5 options rendered with their test IDs
     expect(html).toContain('data-testid="issue-option-bug"');
     expect(html).toContain('data-testid="issue-option-feature"');
     expect(html).toContain('data-testid="issue-option-blank"');
     expect(html).toContain('data-testid="issue-option-website"');
     expect(html).toContain('data-testid="issue-option-security"');
+    expect(html).toContain('data-testid="issue-option-email"');
+    expect(html).toContain('data-testid="issue-option-support"');
 
     // English copy rendered
     expect(html).toContain("Report an Issue / Feedback");
@@ -87,6 +106,9 @@ describe("ReportIssueModal markup and accessibility", () => {
     expect(html).toContain("Blank issue");
     expect(html).toContain("Website &amp; product info");
     expect(html).toContain("Private contact / Security");
+    expect(html).toContain("Email support");
+    expect(html).toContain("support@txtcaster.torkiv.com");
+    expect(html).toContain("Support development");
   });
 });
 
@@ -109,6 +131,10 @@ describe("i18n catalog parity for issue reporting", () => {
       "issue.websiteDesc",
       "issue.securityTitle",
       "issue.securityDesc",
+      "issue.emailTitle",
+      "issue.emailDesc",
+      "issue.supportTitle",
+      "issue.supportDesc",
       "settings.reportIssue",
       "settings.reportIssueHint",
       "settings.openReportIssue",

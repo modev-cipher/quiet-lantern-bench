@@ -3,6 +3,7 @@ import os
 from dataclasses import dataclass
 
 from txtcaster_engine.device import DevicePlan, PlanError, parse_device
+from txtcaster_engine.llm import ggml_runtime
 
 
 def available_cpus() -> int:
@@ -21,6 +22,8 @@ def resolve_threads(threads: int | None) -> tuple[int, int]:
 
 @functools.cache
 def gpu_offload_supported() -> bool:
+    if ggml_runtime.load().error is not None:
+        return False
     try:
         from llama_cpp import llama_supports_gpu_offload
     except Exception:

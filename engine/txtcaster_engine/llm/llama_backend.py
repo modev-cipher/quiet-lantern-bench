@@ -10,6 +10,7 @@ import math
 from pathlib import Path
 from typing import Any
 
+from txtcaster_engine.llm import ggml_runtime
 from txtcaster_engine.llm.backend import (
     LLMBackend,
     LLMBackendError,
@@ -17,7 +18,7 @@ from txtcaster_engine.llm.backend import (
     resolve_threads,
 )
 from txtcaster_engine.llm.loader import build_llama
-from txtcaster_engine.oom import is_oom
+from txtcaster_engine.oom import is_oom, load_failure_code
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,7 @@ class LlamaBackend(LLMBackend):
             from llama_cpp import Llama
         except ImportError as exc:
             raise LLMBackendError("ERR_LLM_MODEL", "llama-cpp-python is not installed") from exc
+        ggml_runtime.load()
 
         self.plan = plan
         self.threads = threads
@@ -53,7 +55,7 @@ class LlamaBackend(LLMBackend):
                 verbose=False,
             )
         except Exception as exc:
-            code = "ERR_OOM" if is_oom(exc) else "ERR_LLM_LOAD"
+            code = load_failure_code(exc, n_gpu_layers > 0, "ERR_LLM_LOAD")
             raise LLMBackendError(code, str(exc)) from exc
 
     def generate(

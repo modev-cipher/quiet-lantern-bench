@@ -37,6 +37,8 @@ export type UpdateBanner =
       version: string;
       notes: string | null;
       action: "restart" | "open";
+      whatsNew: boolean;
+      castsContinue: boolean;
     }
   | {
       kind: "progress";
@@ -51,18 +53,26 @@ export function percentOf(received: number, total: number): number | null {
 }
 
 /** Non-modal banner content, or null when nothing should be shown (idle,
- *  checking, up to date, paused, disabled, or "Later" was clicked). */
-export function bannerFor(s: UpdateSnapshot | null): UpdateBanner | null {
+ *  checking, up to date, paused, disabled, or "Later" was clicked). Casts
+ *  interrupted by the restart resume on launch from their checkpoints. */
+export function bannerFor(
+  s: UpdateSnapshot | null,
+  castsActive = false,
+): UpdateBanner | null {
   if (!s || !s.enabled) return null;
   switch (s.phase) {
-    case "available":
+    case "available": {
       if (s.dismissed || !s.available_version) return null;
+      const action = s.install_kind === "open" ? "open" : "restart";
       return {
         kind: "available",
         version: s.available_version,
         notes: s.notes,
-        action: s.install_kind === "open" ? "open" : "restart",
+        action,
+        whatsNew: action === "restart" && s.release_url !== null,
+        castsContinue: action === "restart" && castsActive,
       };
+    }
     case "downloading":
       return {
         kind: "progress",
