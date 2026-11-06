@@ -178,6 +178,7 @@ def fetch_vulkan(spec: dict[str, Any], key: str, dest: Path) -> tuple[dict[str, 
                     "install",
                 ],
                 check=True,
+                stdout=sys.stderr,
             )
             write_stamp(root, stamp)
         binaries = sdk / "Bin"
