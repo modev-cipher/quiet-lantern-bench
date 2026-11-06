@@ -49,7 +49,8 @@ else
   # toolchains are the pinned ones in scripts/release/gpu-toolchain.json on every OS.
   toolchains="${TXTCASTER_TOOLCHAIN_DIR:-$HOME/.cache/txtcaster-toolchains}"
   release="$(cd ../scripts/release && pwd)"
-  eval "$(uv run --no-project --python 3.11 python -I "$release/fetch_gpu_toolchain.py" "$llama_backend" "$toolchains")"
+  toolchain_env="$(uv run --no-project --python 3.11 python -I "$release/fetch_gpu_toolchain.py" "$llama_backend" "$toolchains")"
+  eval "$toolchain_env"
   tools="$UV_PROJECT_ENVIRONMENT-tools"
   uv venv --python 3.11 --allow-existing "$tools" >/dev/null
   tools="$(cd "$tools" && pwd)"
@@ -76,7 +77,8 @@ else
     # torch requires libnvshmem_host.so.3 (via libtorch_nvshmem.so). It ships from NVIDIA's
     # Apache-2.0 3.8.0 redist archive, not the 3.4.5 wheel torch pins; the fetch refuses any
     # other licence. The bootstrap and transport plugins serve multi-node jobs and stay out.
-    eval "$(uv run --no-project --python 3.11 python -I "$release/fetch_gpu_toolchain.py" nvshmem "$toolchains")"
+    nvshmem_env="$(uv run --no-project --python 3.11 python -I "$release/fetch_gpu_toolchain.py" nvshmem "$toolchains")"
+    eval "$nvshmem_env"
     nvshmem_lib="$(find "$UV_PROJECT_ENVIRONMENT" -path '*nvidia/nvshmem/lib' -type d)"
     [ -d "$nvshmem_lib" ] || { echo "torch's NVSHMEM directory is missing" >&2; exit 1; }
     rm -f "$nvshmem_lib"/*

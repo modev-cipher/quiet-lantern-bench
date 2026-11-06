@@ -10,6 +10,8 @@
 //!                           [--threads N]        write PREFIX.tar.zst.NNN + PREFIX.pack.json
 //!   update_sign engine-manifest --engine-version V --engine-api N --out FILE [--key KEYFILE]
 //!                           --archive PLATFORM=VARIANT=PACKJSON=BASEURL ...
+//!                           (parts missing beside PACKJSON are taken from the PREFIX.hashes.txt
+//!                           a release build writes, so a signer need not download them)
 //!   update_sign engine-verify --pubkey B64 --manifest FILE [--archive PLATFORM=VARIANT=PACKJSON ...]
 //!
 //! Without --key the private key is read from TXTCASTER_UPDATE_SIGNING_KEY (base64
@@ -116,6 +118,60 @@ fn read_summary(path: &str) -> (PackSummary, std::path::PathBuf) {
         .map(std::path::Path::to_path_buf)
         .unwrap_or_default();
     (summary, dir)
+}
+
+struct PartHashes {
+    parts: HashMap<String, ([u8; 32], u64)>,
+    whole: [u8; 32],
+}
+
+fn hex_digest(text: &str, path: &std::path::Path) -> [u8; 32] {
+    hex::decode(text)
+        .ok()
+        .and_then(|bytes| <[u8; 32]>::try_from(bytes).ok())
+        .unwrap_or_else(|| die(&format!("{}: {text} is not a sha256", path.display())))
+}
+
+fn read_hashes(path: &std::path::Path) -> PartHashes {
+    let text = std::fs::read_to_string(path)
+        .unwrap_or_else(|e| die(&format!("read {}: {e}", path.display())));
+    let mut digests = HashMap::new();
+    let mut sizes = HashMap::new();
+    let mut whole = None;
+    for line in text.lines().filter(|line| !line.trim().is_empty()) {
+        if let Some((left, right)) = line.split_once("  ") {
+            if left == "whole" {
+                whole = Some(hex_digest(right.trim(), path));
+            } else {
+                digests.insert(right.trim().to_string(), hex_digest(left.trim(), path));
+            }
+        } else if let Some((name, size)) = line.rsplit_once(' ') {
+            let size = size
+                .parse::<u64>()
+                .unwrap_or_else(|_| die(&format!("{}: bad size line {line}", path.display())));
+            sizes.insert(name.to_string(), size);
+        }
+    }
+    let parts = digests
+        .into_iter()
+        .map(|(name, digest)| {
+            let size = *sizes
+                .get(&name)
+                .unwrap_or_else(|| die(&format!("{}: no size for {name}", path.display())));
+            (name, (digest, size))
+        })
+        .collect();
+    PartHashes {
+        parts,
+        whole: whole.unwrap_or_else(|| die(&format!("{}: no whole line", path.display()))),
+    }
+}
+
+fn hashes_beside(summary_path: &str) -> std::path::PathBuf {
+    let prefix = summary_path
+        .strip_suffix(".pack.json")
+        .unwrap_or_else(|| die(&format!("{summary_path} does not end in .pack.json")));
+    std::path::PathBuf::from(format!("{prefix}.hashes.txt"))
 }
 
 fn parse_u64(opts: &HashMap<String, String>, name: &str, default: u64) -> u64 {
@@ -300,17 +356,26 @@ fn main() {
                     ))
                 };
                 let (summary, dir) = read_summary(summary_path);
+                let local = summary.parts.iter().all(|name| dir.join(name).is_file());
+                let recorded = (!local).then(|| read_hashes(&hashes_beside(summary_path)));
                 let mut whole = Sha256::new();
                 let mut parts = Vec::new();
                 let mut size = 0u64;
                 for name in &summary.parts {
-                    let path = dir.join(name);
-                    let bytes_digest = digest_stream(&path);
-                    let file = std::fs::File::open(&path)
-                        .unwrap_or_else(|e| die(&format!("read {}: {e}", path.display())));
-                    let mut reader = std::io::BufReader::new(file);
-                    std::io::copy(&mut reader, &mut HashWriter(&mut whole))
-                        .unwrap_or_else(|e| die(&format!("read {}: {e}", path.display())));
+                    let bytes_digest = match &recorded {
+                        Some(hashes) => *hashes.parts.get(name).unwrap_or_else(|| {
+                            die(&format!("{summary_path}: no recorded hash for {name}"))
+                        }),
+                        None => {
+                            let path = dir.join(name);
+                            let file = std::fs::File::open(&path)
+                                .unwrap_or_else(|e| die(&format!("read {}: {e}", path.display())));
+                            let mut reader = std::io::BufReader::new(file);
+                            std::io::copy(&mut reader, &mut HashWriter(&mut whole))
+                                .unwrap_or_else(|e| die(&format!("read {}: {e}", path.display())));
+                            digest_stream(&path)
+                        }
+                    };
                     size += bytes_digest.1;
                     parts.push(EnginePart {
                         url: format!("{}/{name}", base_url.trim_end_matches('/')),
@@ -318,7 +383,10 @@ fn main() {
                         sha256: hex::encode(bytes_digest.0),
                     });
                 }
-                let digest: [u8; 32] = whole.finalize().into();
+                let digest: [u8; 32] = match &recorded {
+                    Some(hashes) => hashes.whole,
+                    None => whole.finalize().into(),
+                };
                 platforms.entry(platform.to_string()).or_default().insert(
                     variant.to_string(),
                     EngineArchive {

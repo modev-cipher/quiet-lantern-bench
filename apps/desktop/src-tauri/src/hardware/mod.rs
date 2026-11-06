@@ -117,7 +117,8 @@ pub async fn detect(
 }
 
 pub async fn probe_device_free(planned: Option<&str>) -> Option<(String, u64)> {
-    let inventory = device_inventory().await;
+    let mut inventory = device_inventory().await.into_owned();
+    engine_gpus::merge_reported(&mut inventory);
     let device = match planned {
         Some(key) => inventory.iter().find(|device| device.key == key)?,
         None => select_primary(&inventory)?,

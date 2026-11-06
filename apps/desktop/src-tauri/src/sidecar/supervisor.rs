@@ -21,6 +21,7 @@ const STABLE_GRACE: Duration = Duration::from_secs(10);
 const MAX_HEALTH_FAILURES: u32 = 6;
 const GPU_REPORT_POLL: Duration = Duration::from_millis(500);
 const GPU_REPORT_DEADLINE: Duration = Duration::from_secs(120);
+const GPU_REPORT_REFRESH: Duration = HEALTH_INTERVAL;
 
 struct FailureThreshold {
     failures: u32,
@@ -606,35 +607,62 @@ async fn read_engine_api(
 }
 
 async fn learn_engine_gpus(client: reqwest::Client, url: String, token: String, generation: u64) {
-    use crate::hardware::engine_gpus::{record, report_in, Report};
-    let deadline = Instant::now() + GPU_REPORT_DEADLINE;
-    while Instant::now() < deadline {
-        let body = match client
-            .get(&url)
-            .bearer_auth(&token)
-            .timeout(HEALTH_TIMEOUT)
-            .send()
-            .await
-        {
-            Ok(response) => response.json::<serde_json::Value>().await.ok(),
-            Err(_) => None,
-        };
-        match body.as_ref().map(report_in) {
+    follow_engine_gpus(
+        || {
+            let request = client.get(&url).bearer_auth(&token).timeout(HEALTH_TIMEOUT);
+            async move {
+                match request.send().await {
+                    Ok(response) => response.json::<serde_json::Value>().await.ok(),
+                    Err(_) => None,
+                }
+            }
+        },
+        |gpus| crate::hardware::engine_gpus::record(generation, gpus),
+        GPU_REPORT_DEADLINE,
+    )
+    .await;
+}
+
+async fn follow_engine_gpus<F, Fut>(
+    mut fetch: F,
+    mut record: impl FnMut(Vec<crate::hardware::engine_gpus::EngineGpu>) -> bool,
+    first_report_within: Duration,
+) where
+    F: FnMut() -> Fut,
+    Fut: std::future::Future<Output = Option<serde_json::Value>>,
+{
+    use crate::hardware::engine_gpus::{report_in, Report};
+    let deadline = tokio::time::Instant::now() + first_report_within;
+    let mut learned = false;
+    loop {
+        match fetch().await.as_ref().map(report_in) {
             Some(Report::Ready(gpus)) => {
-                let names: Vec<String> = gpus
-                    .iter()
-                    .map(|gpu| format!("{}:{}", gpu.backend, gpu.description))
-                    .collect();
-                tracing::info!("engine reports {} gpu(s): {}", gpus.len(), names.join(", "));
-                record(generation, gpus);
+                if !learned {
+                    let names: Vec<String> = gpus
+                        .iter()
+                        .map(|gpu| format!("{}:{}", gpu.backend, gpu.description))
+                        .collect();
+                    tracing::info!("engine reports {} gpu(s): {}", gpus.len(), names.join(", "));
+                }
+                if !record(gpus) {
+                    return;
+                }
+                learned = true;
+            }
+            Some(Report::Absent) if !learned => return,
+            _ if !learned && tokio::time::Instant::now() >= deadline => {
+                tracing::warn!("engine did not report its gpus within {first_report_within:?}");
                 return;
             }
-            Some(Report::Absent) => return,
-            Some(Report::Pending) | None => {}
+            _ => {}
         }
-        tokio::time::sleep(GPU_REPORT_POLL).await;
+        tokio::time::sleep(if learned {
+            GPU_REPORT_REFRESH
+        } else {
+            GPU_REPORT_POLL
+        })
+        .await;
     }
-    tracing::warn!("engine did not report its gpus within {GPU_REPORT_DEADLINE:?}");
 }
 
 async fn health_ok(client: &reqwest::Client, url: &str, token: &str) -> bool {
@@ -655,6 +683,94 @@ pub fn new_handle() -> SupervisorHandle {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn gpu_report(free_mib: u64) -> serde_json::Value {
+        serde_json::json!({"gpu_devices": [{
+            "backend": "Vulkan", "name": "Vulkan0", "description": "Test GPU",
+            "integrated": false, "memory_total": 8u64 << 30,
+            "memory_free": free_mib << 20, "pci": "0000:03:00.0"
+        }]})
+    }
+
+    async fn followed(
+        replies: Vec<Option<serde_json::Value>>,
+        stop_after: usize,
+    ) -> (Vec<u64>, usize) {
+        use std::sync::{Arc, Mutex};
+        let replies = Arc::new(Mutex::new(replies.into_iter()));
+        let asked = Arc::new(Mutex::new(0usize));
+        let mut recorded = Vec::new();
+        follow_engine_gpus(
+            || {
+                let replies = replies.clone();
+                let asked = asked.clone();
+                async move {
+                    *asked.lock().expect("lock") += 1;
+                    replies.lock().expect("lock").next().flatten()
+                }
+            },
+            |gpus: Vec<crate::hardware::engine_gpus::EngineGpu>| {
+                recorded.push(gpus[0].memory_free >> 20);
+                recorded.len() < stop_after
+            },
+            Duration::from_secs(120),
+        )
+        .await;
+        let asked = *asked.lock().expect("lock");
+        (recorded, asked)
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn gpu_free_memory_keeps_following_the_engine_after_its_first_report() {
+        let (recorded, _) = followed(
+            vec![
+                Some(serde_json::json!({"gpu_devices": null})),
+                Some(gpu_report(6144)),
+                Some(gpu_report(1024)),
+                Some(gpu_report(3000)),
+            ],
+            3,
+        )
+        .await;
+        assert_eq!(recorded, vec![6144, 1024, 3000]);
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn a_failed_poll_after_the_first_report_keeps_following() {
+        let (recorded, _) = followed(
+            vec![
+                Some(gpu_report(6144)),
+                None,
+                Some(serde_json::json!({"status": "ok"})),
+                Some(gpu_report(2048)),
+            ],
+            2,
+        )
+        .await;
+        assert_eq!(recorded, vec![6144, 2048]);
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn an_engine_without_a_gpu_report_is_asked_once() {
+        let (recorded, asked) = followed(
+            vec![
+                Some(serde_json::json!({"status": "ok"})),
+                Some(gpu_report(1)),
+            ],
+            9,
+        )
+        .await;
+        assert!(recorded.is_empty());
+        assert_eq!(asked, 1);
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn a_report_that_never_arrives_stops_at_the_deadline() {
+        let pending = vec![Some(serde_json::json!({"gpu_devices": null})); 1000];
+        let (recorded, asked) = followed(pending, 9).await;
+        assert!(recorded.is_empty());
+        assert!(asked < 1000, "{asked}");
+    }
 
     #[tokio::test]
     async fn a_missing_engine_api_differs_from_a_probe_that_failed() {

@@ -361,7 +361,7 @@ def create_app(
             "extract_version": extractor_base_version(),
         }
         if pending["gpu_offload"].done():
-            runtime = ggml_runtime.load()
+            runtime = ggml_runtime.load().with_current_memory()
             if runtime.error is None:
                 payload["gpu_devices"] = [device.to_json() for device in runtime.devices]
             else:

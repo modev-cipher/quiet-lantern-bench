@@ -16,8 +16,8 @@ import ctypes
 import logging
 import sys
 import threading
-from collections.abc import Iterable, Sequence
-from dataclasses import dataclass
+from collections.abc import Callable, Iterable, Sequence
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -66,6 +66,25 @@ class GgmlRuntime:
     backends: tuple[str, ...]
     devices: tuple[GpuDevice, ...]
     error: str | None = None
+    memory: Callable[[], Sequence[int | None]] | None = field(
+        default=None, compare=False, repr=False
+    )
+
+    def with_current_memory(self) -> "GgmlRuntime":
+        if self.memory is None or not self.devices:
+            return self
+        try:
+            readings = list(self.memory())
+        except Exception as exc:
+            logger.warning("gpu memory could not be read: %s", exc)
+            return self
+        devices = tuple(
+            replace(device, memory_free=free)
+            if index < len(readings) and (free := readings[index]) is not None
+            else device
+            for index, device in enumerate(self.devices)
+        )
+        return replace(self, devices=devices)
 
 
 class _DeviceCaps(ctypes.Structure):
@@ -155,6 +174,12 @@ def _bind(lib_dir: Path) -> tuple[ctypes.CDLL, ctypes.CDLL]:
     base.ggml_backend_dev_backend_reg.restype = ctypes.c_void_p
     base.ggml_backend_dev_get_props.argtypes = [ctypes.c_void_p, ctypes.POINTER(_DeviceProps)]
     base.ggml_backend_dev_get_props.restype = None
+    base.ggml_backend_dev_memory.argtypes = [
+        ctypes.c_void_p,
+        ctypes.POINTER(ctypes.c_size_t),
+        ctypes.POINTER(ctypes.c_size_t),
+    ]
+    base.ggml_backend_dev_memory.restype = None
     return ggml, base
 
 
@@ -164,6 +189,7 @@ def _enumerate(ggml: ctypes.CDLL, base: ctypes.CDLL) -> GgmlRuntime:
         for index in range(ggml.ggml_backend_reg_count())
     )
     devices = []
+    handles = []
     for index in range(ggml.ggml_backend_dev_count()):
         device = ggml.ggml_backend_dev_get(index)
         props = _DeviceProps()
@@ -182,7 +208,17 @@ def _enumerate(ggml: ctypes.CDLL, base: ctypes.CDLL) -> GgmlRuntime:
                 pci=_text(props.device_id).lower() or None,
             )
         )
-    return GgmlRuntime(backends=backends, devices=tuple(devices))
+        handles.append(device)
+
+    def memory() -> list[int | None]:
+        readings: list[int | None] = []
+        for handle in handles:
+            free, total = ctypes.c_size_t(0), ctypes.c_size_t(0)
+            base.ggml_backend_dev_memory(handle, ctypes.byref(free), ctypes.byref(total))
+            readings.append(int(free.value) if total.value else None)
+        return readings
+
+    return GgmlRuntime(backends=backends, devices=tuple(devices), memory=memory)
 
 
 def _load_uncached() -> GgmlRuntime:
