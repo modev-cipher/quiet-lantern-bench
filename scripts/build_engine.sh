@@ -72,6 +72,18 @@ else
     # the shipped libraries resolve only beside themselves and from the system.
     find "$UV_PROJECT_ENVIRONMENT" -path '*llama_cpp/lib/*.so*' -type f -exec patchelf --set-rpath '$ORIGIN' {} +
   fi
+  if [ "$variant" = cuda13 ] && [ "$(uname -s)" = Linux ]; then
+    # torch requires libnvshmem_host.so.3 (via libtorch_nvshmem.so). It ships from NVIDIA's
+    # Apache-2.0 3.8.0 redist archive, not the 3.4.5 wheel torch pins; the fetch refuses any
+    # other licence. The bootstrap and transport plugins serve multi-node jobs and stay out.
+    eval "$(uv run --no-project --python 3.11 python -I "$release/fetch_gpu_toolchain.py" nvshmem "$toolchains")"
+    nvshmem_lib="$(find "$UV_PROJECT_ENVIRONMENT" -path '*nvidia/nvshmem/lib' -type d)"
+    [ -d "$nvshmem_lib" ] || { echo "torch's NVSHMEM directory is missing" >&2; exit 1; }
+    rm -f "$nvshmem_lib"/*
+    install -m 0755 "$NVSHMEM_HOST_LIB" "$nvshmem_lib/libnvshmem_host.so.3"
+    install -m 0644 "$NVSHMEM_LICENSE" "$tools/NVSHMEM-3.8.0-LICENSE.txt"
+    export NVSHMEM_LICENSE="$tools/NVSHMEM-3.8.0-LICENSE.txt"
+  fi
   uv run --no-sync --group build pyinstaller --noconfirm --clean --distpath "$distpath" txtcaster-engine.spec
   bundle="$distpath/txtcaster-engine/_internal"
   find "$bundle/llama_cpp/lib" -name "*ggml-$llama_backend.*" | grep -q . \
@@ -79,6 +91,14 @@ else
   if [ "$(uname -s)" = Linux ]; then
     leaked="$(find "$bundle/llama_cpp/lib" -name '*.so*' -type f -exec readelf -d {} + | grep -E 'R(UN)?PATH' | grep -v '\[\$ORIGIN\]' || true)"
     [ -z "$leaked" ] || { echo "a llama.cpp library searches a build-host path: $leaked" >&2; exit 1; }
+  fi
+  if [ "$variant" = cuda13 ] && [ "$(uname -s)" = Linux ]; then
+    shipped="$(find "$bundle" -name 'libnvshmem_host.so*' -type f)"
+    [ "$(sha256sum < "$shipped")" = "$(sha256sum < "$NVSHMEM_HOST_LIB")" ] \
+      || { echo "the onedir's libnvshmem_host is not the pinned Apache-2.0 build: $shipped" >&2; exit 1; }
+    ! find "$bundle" -name 'nvshmem_*.so*' | grep -q . || { echo "NVSHMEM plugins reached the onedir" >&2; exit 1; }
+    test -s "$bundle/licenses/nvidia/NVSHMEM-3.8.0-LICENSE.txt" || { echo "the NVSHMEM licence is missing" >&2; exit 1; }
+    echo "NVSHMEM: $(sha256sum < "$shipped" | cut -c1-16) from the 3.8.0 redist archive"
   fi
   driver="$(find "$bundle" \( -iname 'libvulkan.so*' -o -iname 'vulkan-1.dll' -o -iname 'libcuda.so*' -o -iname 'nvcuda.dll' \) | head -n 1)"
   [ -z "$driver" ] || { echo "the onedir must not carry a GPU driver library: $driver" >&2; exit 1; }

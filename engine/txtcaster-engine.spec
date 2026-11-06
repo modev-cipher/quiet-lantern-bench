@@ -1,6 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 import importlib.metadata
 import importlib.util
+import os
 from pathlib import Path
 
 from PyInstaller.utils.hooks import (
@@ -30,9 +31,12 @@ def _nvidia_licence_datas():
     if not _carries_nvidia_libraries():
         return []
     entries = [(str(path), NVIDIA_LICENCES) for path in sorted(Path("licenses/nvidia").glob("*.txt"))]
+    nvshmem_licence = os.environ.get("NVSHMEM_LICENSE")
+    if nvshmem_licence:
+        entries.append((nvshmem_licence, NVIDIA_LICENCES))
     for dist in importlib.metadata.distributions():
         name = dist.metadata["Name"] or ""
-        if not name.lower().startswith("nvidia-"):
+        if not name.lower().startswith("nvidia-") or name.lower() == "nvidia-nvshmem-cu13":
             continue
         for file in dist.files or []:
             if "licen" in file.name.lower() and not file.name.endswith(".py"):
@@ -262,6 +266,10 @@ a.datas = [entry for entry in a.datas if _short_enough(entry)]
 a.binaries = _one_cuda_runtime(
     [entry for entry in a.binaries if _short_enough(entry) and _shippable(entry)]
 )
+if any(_basename(entry).startswith("libnvshmem_host") for entry in a.binaries) and not os.environ.get(
+    "NVSHMEM_LICENSE"
+):
+    raise SystemExit("libnvshmem_host is bundled without NVSHMEM_LICENSE; build through scripts/build_engine.sh")
 
 pyz = PYZ(a.pure)
 

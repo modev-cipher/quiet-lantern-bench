@@ -7,6 +7,8 @@ mod agent_smoke;
 pub mod cache_gc;
 pub mod cache_path;
 pub mod catalog;
+#[cfg(target_os = "linux")]
+pub mod desktop_entry;
 pub mod diagnostics;
 pub mod engine_install;
 pub mod hardware;
@@ -3558,6 +3560,8 @@ async fn danger_self_purge(app: tauri::AppHandle, confirmation: String) -> Resul
     }
 
     // 6. AppImage Self-Unlink
+    #[cfg(target_os = "linux")]
+    desktop_entry::remove_running_appimage_entry();
     if let Ok(appimage_path) = std::env::var("APPIMAGE") {
         let path = std::path::Path::new(&appimage_path);
         if path.is_file() {
@@ -5504,6 +5508,8 @@ fn setup_app(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         return Err("another instance of txtcaster is already running".into());
     }
     app.manage(SingleInstanceLock::new(lock_file));
+    #[cfg(target_os = "linux")]
+    desktop_entry::integrate_running_appimage(&data_dir);
 
     let db_path = data_dir.join("db.sqlite");
     let pool = tauri::async_runtime::block_on(storage::open_pool(&db_path))?;

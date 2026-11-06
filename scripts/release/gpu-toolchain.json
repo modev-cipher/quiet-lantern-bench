@@ -160,5 +160,18 @@
         "size": 250859224
       }
     }
+  },
+  "nvshmem": {
+    "version": "3.8.0",
+    "source": "https://developer.download.nvidia.com/compute/nvshmem/redist/redistrib_3.8.0.json",
+    "licence": "Apache-2.0",
+    "archives": {
+      "linux-x86_64": {
+        "version": "3.8.0",
+        "url": "https://developer.download.nvidia.com/compute/nvshmem/redist/libnvshmem/linux-x86_64/libnvshmem-linux-x86_64-3.8.0_cuda13-archive.tar.xz",
+        "sha256": "254f6df1e9860d44b0d8a88f0a779f3881213031547cf28d71bb6d40e821e6ae",
+        "size": 484957044
+      }
+    }
   }
 }

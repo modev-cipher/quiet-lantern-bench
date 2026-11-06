@@ -89,8 +89,8 @@ object code, used only by txtCaster:
   and cuFile, distributed under the NVIDIA CUDA Toolkit End User License Agreement as
   files listed in its Attachment A;
 - cuDNN 9, under the NVIDIA Software Development Kit licence that ships with it;
-- on Linux also cuSPARSELt and NVSHMEM under their NVIDIA licences, and NCCL under
-  BSD-3-Clause.
+- on Linux also cuSPARSELt under its NVIDIA licence, NCCL under BSD-3-Clause, and the
+  NVSHMEM 3.8.0 host library from NVIDIA's redistribution archive under Apache-2.0.
 
 The standard build of the full engine and the reader engine carry no NVIDIA libraries,
 and no engine carries a GPU driver. The licence texts ship inside the NVIDIA build under

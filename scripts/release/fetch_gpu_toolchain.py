@@ -1,7 +1,7 @@
 """Fetches a pinned GPU build toolchain from scripts/release/gpu-toolchain.json.
 
-  fetch_gpu_toolchain.py cuda|vulkan DEST              prints `export NAME=value` lines
-  fetch_gpu_toolchain.py cuda|vulkan DEST --github     appends to $GITHUB_ENV and $GITHUB_PATH
+  fetch_gpu_toolchain.py cuda|vulkan|nvshmem DEST      prints `export NAME=value` lines
+  fetch_gpu_toolchain.py cuda|vulkan|nvshmem DEST --github  appends to $GITHUB_ENV and $GITHUB_PATH
 
 Every archive is checked against the size and sha256 its publisher lists (NVIDIA's
 redistrib JSON, LunarG's sha endpoint) before it is unpacked; a finished toolchain is reused.
@@ -196,6 +196,49 @@ def fetch_vulkan(spec: dict[str, Any], key: str, dest: Path) -> tuple[dict[str, 
     return {"VULKAN_SDK": str(sdk)}, [binaries]
 
 
+APACHE_MARKERS = ("Apache License", "Version 2.0, January 2004")
+PROPRIETARY_MARKERS = ("LICENSE AGREEMENT FOR NVIDIA", "End User License Agreement")
+
+
+def fetch_nvshmem(spec: dict[str, Any], key: str, dest: Path) -> tuple[dict[str, str], list[Path]]:
+    if not key.startswith("linux"):
+        fail("NVSHMEM ships only in the Linux NVIDIA engine")
+    entry = spec["archives"][key]
+    root = dest / f"nvshmem-{entry['version']}"
+    stamp = json.dumps(entry, sort_keys=True)
+    if not stamp_matches(root, stamp):
+        archive = download(entry["url"], entry["sha256"], entry["size"], dest / "downloads")
+        shutil.rmtree(root, ignore_errors=True)
+        root.mkdir(parents=True)
+        with tarfile.open(archive, "r:xz") as bundle:
+            wanted = [
+                member
+                for member in bundle.getmembers()
+                if "libnvshmem_host.so" in member.name.rsplit("/", 1)[-1]
+                or "licen" in member.name.rsplit("/", 1)[-1].lower()
+            ]
+            bundle.extractall(root, members=wanted, filter="data")
+        write_stamp(root, stamp)
+    licences = sorted(
+        (path for path in root.rglob("*") if path.is_file() and "licen" in path.name.lower()),
+        key=lambda path: (len(path.relative_to(root).parts), str(path)),
+    )
+    if not licences:
+        fail(f"{entry['url']} carries no licence file")
+    text = licences[0].read_text(errors="replace")
+    if not all(marker in text for marker in APACHE_MARKERS) or any(
+        marker in text for marker in PROPRIETARY_MARKERS
+    ):
+        fail(f"{licences[0].relative_to(root)} is not the Apache-2.0 licence; refusing to bundle")
+    hosts = [path for path in root.rglob("libnvshmem_host.so.3") if path.exists()]
+    if len(hosts) != 1:
+        fail(f"expected one libnvshmem_host.so.3 in {entry['url']}, found {len(hosts)}")
+    found = licences[0].relative_to(root)
+    print(f"NVSHMEM {entry['version']} licence: {found} (Apache-2.0)", file=sys.stderr)
+    env = {"NVSHMEM_HOST_LIB": str(hosts[0].resolve()), "NVSHMEM_LICENSE": str(licences[0])}
+    return env, []
+
+
 def shell_path(path: Path) -> str:
     if sys.platform != "win32":
         return str(path)
@@ -205,7 +248,7 @@ def shell_path(path: Path) -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser(prog="fetch_gpu_toolchain")
-    parser.add_argument("toolchain", choices=("cuda", "vulkan"))
+    parser.add_argument("toolchain", choices=("cuda", "vulkan", "nvshmem"))
     parser.add_argument("dest", type=Path)
     parser.add_argument("--github", action="store_true")
     args = parser.parse_args()
@@ -213,7 +256,7 @@ def main() -> None:
     spec = json.loads(MANIFEST.read_text())[args.toolchain]
     key = platform_key()
     dest = args.dest.absolute()
-    fetch = fetch_cuda if args.toolchain == "cuda" else fetch_vulkan
+    fetch = {"cuda": fetch_cuda, "vulkan": fetch_vulkan, "nvshmem": fetch_nvshmem}[args.toolchain]
     env, paths = fetch(spec, key, dest)
 
     if args.github:
@@ -226,8 +269,9 @@ def main() -> None:
         return
     for name, value in env.items():
         print(f"export {name}={shlex.quote(value)}")
-    joined = ":".join(shell_path(path) for path in paths)
-    print(f'export PATH={shlex.quote(joined)}:"$PATH"')
+    if paths:
+        joined = ":".join(shell_path(path) for path in paths)
+        print(f'export PATH={shlex.quote(joined)}:"$PATH"')
 
 
 if __name__ == "__main__":

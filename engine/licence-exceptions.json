@@ -27,7 +27,7 @@
     "nvidia-cusparselt-cu13": {"licence": "NVIDIA Proprietary", "note": "GPU build only (Linux; the Windows torch wheel carries none); its licence lists the Linux shared library as distributable"},
     "nvidia-nccl-cu13": {"licence": "NVIDIA Proprietary", "note": "GPU build only; its shipped License.txt is BSD-3-Clause"},
     "nvidia-nvjitlink": {"licence": "NVIDIA Proprietary", "note": "GPU build only"},
-    "nvidia-nvshmem-cu13": {"licence": "NVIDIA Proprietary", "note": "GPU build only (Linux, pinned 3.4.5 by torch); NVSHMEM v3.4.5 SDK licence supplement clause 2 makes any portion distributable, for systems with NVIDIA GPUs"}
+    "nvidia-nvshmem-cu13": {"licence": "NVIDIA Proprietary", "note": "GPU build only (Linux); the wheel torch pins (3.4.5) is replaced in the bundle by libnvshmem_host.so.3 from NVIDIA's Apache-2.0 3.8.0 redist archive (scripts/build_engine.sh)"}
   },
   "reviewed": {
     "addict": {"licence": "MIT", "version": "2.4.0", "source": "addict-2.4.0.dist-info/LICENSE"},
