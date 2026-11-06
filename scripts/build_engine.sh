@@ -54,7 +54,7 @@ else
   uv venv --python 3.11 --allow-existing "$tools" >/dev/null
   tools="$(cd "$tools" && pwd)"
   tools_bin="$tools/bin"; [ -d "$tools_bin" ] || tools_bin="$tools/Scripts"
-  tools_python="$tools_bin/python"; [ -x "$tools_python" ] || tools_python="$tools_bin/python.exe"
+  tools_python="$tools_bin/python.exe"; [ -f "$tools_python" ] || tools_python="$tools_bin/python"
   uv pip install --python "$tools_python" --require-hashes -r "$release/build-tools.txt"
   export PATH="$tools_bin:$PATH" CMAKE_GENERATOR=Ninja CMAKE_ARGS="$llama_cmake"
   case "$(uname -s)" in
