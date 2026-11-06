@@ -1,5 +1,4 @@
 # -*- mode: python ; coding: utf-8 -*-
-import filecmp
 import importlib.metadata
 import importlib.util
 import os
@@ -77,7 +76,6 @@ CUDA_RUNTIME = {
     "cublaslt64_13.dll",
 }
 TORCH_RUNTIME_DIRS = ("nvidia/cu13/lib/", "torch/lib/")
-SHARED_RUNTIME_DIRS = ("nvidia/", "torch/lib/")
 
 
 def _basename(entry):
@@ -105,26 +103,6 @@ def _one_cuda_runtime(binaries):
         if _basename(entry) not in owned
         or entry[0].replace("\\", "/").lower().startswith(TORCH_RUNTIME_DIRS)
     ]
-
-
-def _shared_dest(entry):
-    return entry[0].replace("\\", "/").lower().startswith(SHARED_RUNTIME_DIRS)
-
-
-# PyInstaller also copies a library torch loads from nvidia/ or torch/lib to the bundle
-# root when another module links it; torch's RPATH never reaches that copy.
-def _one_copy(binaries):
-    shared = {}
-    for entry in binaries:
-        if _shared_dest(entry):
-            shared.setdefault(_basename(entry), []).append(entry[1])
-
-    def duplicate(entry):
-        return not _shared_dest(entry) and any(
-            filecmp.cmp(entry[1], kept, shallow=False) for kept in shared.get(_basename(entry), ())
-        )
-
-    return [entry for entry in binaries if not duplicate(entry)]
 
 
 # NVRTC opens its builtins library at runtime, so dependency analysis never sees it;
@@ -301,8 +279,8 @@ a = Analysis(
 )
 
 a.datas = [entry for entry in a.datas if _short_enough(entry)]
-a.binaries = _one_copy(
-    _one_cuda_runtime([entry for entry in a.binaries if _short_enough(entry) and _shippable(entry)])
+a.binaries = _one_cuda_runtime(
+    [entry for entry in a.binaries if _short_enough(entry) and _shippable(entry)]
 )
 a.binaries += _nvrtc_builtins(a.binaries)
 if any(_basename(entry).startswith("libnvshmem_host") for entry in a.binaries) and not os.environ.get(

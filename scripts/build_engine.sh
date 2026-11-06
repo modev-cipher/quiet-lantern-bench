@@ -88,6 +88,14 @@ else
   fi
   uv run --no-sync --group build pyinstaller --noconfirm --clean --distpath "$distpath" txtcaster-engine.spec
   bundle="$distpath/txtcaster-engine/_internal"
+  if [ "$(uname -s)" = Linux ]; then
+    # PyInstaller also links each library it collects under nvidia/ into _internal/. Engine
+    # packages store links as files, so each would ship twice; torch reaches its own copies
+    # through its RPATH, and llama.cpp preloads them by path.
+    find "$bundle" -maxdepth 1 -type l -name '*.so*' | while read -r link; do
+      case "$(readlink "$link")" in nvidia/*) rm "$link" ;; esac
+    done
+  fi
   find "$bundle/llama_cpp/lib" -name "*ggml-$llama_backend.*" | grep -q . \
     || { echo "the onedir lacks the $llama_backend backend module" >&2; exit 1; }
   if [ "$(uname -s)" = Linux ]; then
@@ -107,6 +115,8 @@ else
       || { echo "the onedir lacks NVRTC's builtins library" >&2; exit 1; }
     ! find "$bundle" \( -name 'libtriton.so' -o -path '*/triton/*' \) | grep -q . \
       || { echo "triton reached the onedir" >&2; exit 1; }
+    ! find "$bundle" -maxdepth 1 -type l -lname 'nvidia/*' | grep -q . \
+      || { echo "top-level links to NVIDIA libraries would ship twice" >&2; exit 1; }
   fi
   driver="$(find "$bundle" \( -iname 'libvulkan.so*' -o -iname 'vulkan-1.dll' -o -iname 'libcuda.so*' -o -iname 'nvcuda.dll' \) | head -n 1)"
   [ -z "$driver" ] || { echo "the onedir must not carry a GPU driver library: $driver" >&2; exit 1; }
