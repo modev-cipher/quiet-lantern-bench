@@ -81,6 +81,8 @@ jobs:
             backend: vulkan
           - variant: cuda13
             backend: cuda
+          - variant: lite
+            backend: none
     steps:
       - uses: actions/checkout@v4
         with:
@@ -97,10 +99,15 @@ jobs:
         run: |
           dist=engine/dist-${{ matrix.variant }}; [ -d "$dist" ] || dist=engine/dist
           du -sh "$dist/txtcaster-engine"
-          python3 scripts/smoke_test.py "$dist/txtcaster-engine/txtcaster-engine" --expect-backend ${{ matrix.backend }}
+          if [ "${{ matrix.variant }}" = lite ]; then
+            python3 scripts/smoke_test.py "$dist/txtcaster-engine/txtcaster-engine" --reader-only
+          else
+            python3 scripts/smoke_test.py "$dist/txtcaster-engine/txtcaster-engine" --expect-backend ${{ matrix.backend }}
+          fi
           ldd "$dist/txtcaster-engine/txtcaster-engine" | head -5
           df -h / | tail -1
       - name: Test model
+        if: ${{ matrix.variant != 'lite' }}
         run: |
           curl -fsSL -o "${{ runner.temp }}/stories260K.gguf" https://huggingface.co/ggml-org/models/resolve/main/tinyllamas/stories260K.gguf
           echo "270cba1bd5109f42d03350f60406024560464db173c0e387d91f0426d3bd256d  ${{ runner.temp }}/stories260K.gguf" | sha256sum -c -
@@ -115,6 +122,7 @@ jobs:
           python3 scripts/smoke_test.py engine/dist/txtcaster-engine/txtcaster-engine --expect-backend vulkan --require-gpu --gguf "${{ runner.temp }}/stories260K.gguf" | tee gpu.log
           grep -E "generation on .*\(vulkan\)" gpu.log
       - name: Generation on the CPU without a GPU driver
+        if: ${{ matrix.variant != 'lite' }}
         env:
           VK_DRIVER_FILES: /nonexistent.json
           VK_ICD_FILENAMES: /nonexistent.json
