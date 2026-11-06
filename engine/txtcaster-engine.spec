@@ -1,4 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
+import filecmp
 import importlib.metadata
 import importlib.util
 import os
@@ -65,6 +66,8 @@ UNLISTED_NVIDIA = (
     "pcsamplingutil.dll",
     "cusolvermg64_12.dll",
 )
+# torch's kernel compiler; the engine turns torch.compile off, so nothing imports it.
+UNUSED_LIBRARIES = ("libtriton.so",)
 CUDA_RUNTIME = {
     "libcudart.so.13",
     "libcublas.so.13",
@@ -74,6 +77,7 @@ CUDA_RUNTIME = {
     "cublaslt64_13.dll",
 }
 TORCH_RUNTIME_DIRS = ("nvidia/cu13/lib/", "torch/lib/")
+SHARED_RUNTIME_DIRS = ("nvidia/", "torch/lib/")
 
 
 def _basename(entry):
@@ -83,7 +87,8 @@ def _basename(entry):
 def _shippable(entry):
     name = _basename(entry)
     return not any(
-        name == lib or name.startswith(lib + ".") for lib in DRIVER_LIBRARIES + UNLISTED_NVIDIA
+        name == lib or name.startswith(lib + ".")
+        for lib in DRIVER_LIBRARIES + UNLISTED_NVIDIA + UNUSED_LIBRARIES
     )
 
 
@@ -100,6 +105,39 @@ def _one_cuda_runtime(binaries):
         if _basename(entry) not in owned
         or entry[0].replace("\\", "/").lower().startswith(TORCH_RUNTIME_DIRS)
     ]
+
+
+def _shared_dest(entry):
+    return entry[0].replace("\\", "/").lower().startswith(SHARED_RUNTIME_DIRS)
+
+
+# PyInstaller also copies a library torch loads from nvidia/ or torch/lib to the bundle
+# root when another module links it; torch's RPATH never reaches that copy.
+def _one_copy(binaries):
+    shared = {}
+    for entry in binaries:
+        if _shared_dest(entry):
+            shared.setdefault(_basename(entry), []).append(entry[1])
+
+    def duplicate(entry):
+        return not _shared_dest(entry) and any(
+            filecmp.cmp(entry[1], kept, shallow=False) for kept in shared.get(_basename(entry), ())
+        )
+
+    return [entry for entry in binaries if not duplicate(entry)]
+
+
+# NVRTC opens its builtins library at runtime, so dependency analysis never sees it;
+# without it torch cannot compile the kernels some CUDA operations need.
+def _nvrtc_builtins(binaries):
+    extra = []
+    for entry in binaries:
+        if not _basename(entry).startswith("libnvrtc.so"):
+            continue
+        dest = entry[0].replace("\\", "/").rpartition("/")[0]
+        for builtins in sorted(Path(entry[1]).parent.glob("libnvrtc-builtins.so.*")):
+            extra.append((f"{dest}/{builtins.name}" if dest else builtins.name, str(builtins), "BINARY"))
+    return extra
 
 
 def _not_test_module(name):
@@ -256,16 +294,17 @@ a = Analysis(
     hiddenimports=hiddenimports,
     hookspath=[],
     runtime_hooks=[],
-    excludes=["tkinter", "test"],
+    excludes=["tkinter", "test", "triton"],
     # inflect decorates its engine with typeguard, which reads the source at import time.
     module_collection_mode={"inflect": "pyz+py"},
     noarchive=False,
 )
 
 a.datas = [entry for entry in a.datas if _short_enough(entry)]
-a.binaries = _one_cuda_runtime(
-    [entry for entry in a.binaries if _short_enough(entry) and _shippable(entry)]
+a.binaries = _one_copy(
+    _one_cuda_runtime([entry for entry in a.binaries if _short_enough(entry) and _shippable(entry)])
 )
+a.binaries += _nvrtc_builtins(a.binaries)
 if any(_basename(entry).startswith("libnvshmem_host") for entry in a.binaries) and not os.environ.get(
     "NVSHMEM_LICENSE"
 ):

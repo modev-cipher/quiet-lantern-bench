@@ -102,6 +102,12 @@ else
     test -s "$bundle/licenses/nvidia/NVSHMEM-3.8.0-LICENSE.txt" || { echo "the NVSHMEM licence is missing" >&2; exit 1; }
     echo "NVSHMEM: $(sha256sum < "$shipped" | cut -c1-16) from the 3.8.0 redist archive"
   fi
+  if [ "$variant" = cuda13 ]; then
+    find "$bundle" \( -name 'libnvrtc-builtins.so.*' -o -iname 'nvrtc-builtins64_*.dll' \) | grep -q . \
+      || { echo "the onedir lacks NVRTC's builtins library" >&2; exit 1; }
+    ! find "$bundle" \( -name 'libtriton.so' -o -path '*/triton/*' \) | grep -q . \
+      || { echo "triton reached the onedir" >&2; exit 1; }
+  fi
   driver="$(find "$bundle" \( -iname 'libvulkan.so*' -o -iname 'vulkan-1.dll' -o -iname 'libcuda.so*' -o -iname 'nvcuda.dll' \) | head -n 1)"
   [ -z "$driver" ] || { echo "the onedir must not carry a GPU driver library: $driver" >&2; exit 1; }
 fi
